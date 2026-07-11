@@ -1,0 +1,28 @@
+/* 존 3분할: HUD ~8% / 필드 ~50%(grow) / 하단 패널 ~40% (SPEC §4.1) */
+.root {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+#zone-top {
+    flex-basis: 8%;
+    flex-shrink: 0;
+}
+
+.zone-field {
+    flex-grow: 1;
+}
+
+#field-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#zone-bottom {
+    flex-basis: 40%;
+    flex-shrink: 0;
+}

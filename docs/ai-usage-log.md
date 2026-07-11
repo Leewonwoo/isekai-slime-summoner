@@ -9,6 +9,8 @@
 |---|---|---|---|
 | 07-11 | Android APK 빌드 파이프라인 자동 세팅 (플랫폼 전환, Player Settings, 프로브 씬, 빌드) | "APK 기준 모바일 빌드로 파이프라인 검증" — Claude Code가 Unity 에디터를 MCP로 직접 제어 | 커밋 `ee2bf1f`, Builds/CrossDefense-dev.apk |
 | 07-11 | 프로젝트 문서 체계 수립 (SPEC/CLAUDE.md/에셋 대장/UI 지침) | 스펙 전문 전달 → 기준 문서·작업 규칙·디자인 토큰 문서화 | 커밋 `7503eb9`, `8c34853` |
+| 07-11 | 테마·유닛 로스터·상성 시스템 기획 확정 (소환사/고블린/슬라임, 3속성 상성 고리, 3뷰 시트 생성 전략) | "인간 소환사 + 고블린 유닛 + 슬라임 적, 상성 포함 기획" → Claude가 기존 스펙(4레인 딜레마·틴트 규칙·에셋 예산)과 정합성 맞춰 설계 | SPEC.md §1·2.3·2.7·2.8·5.1·5.3 |
+| 07-11 | UI Toolkit 스캐폴딩 전체 구축 (UXML 10개·USS 7개·컨트롤러 6개, PanelSettings, 씬 연결) | "ui-guidelines.md 규격대로 UI/UX 구성·구축" — Claude Code가 파일 생성부터 플레이 모드 스크린샷 검증까지 수행 | Assets/UI/, Assets/Scripts/UI/ |
 
 ## 에셋 (이미지 — ChatGPT 이미지 생성)
 

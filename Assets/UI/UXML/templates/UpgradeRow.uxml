@@ -1,0 +1,11 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/UpgradeRow.uss" />
+    <VisualElement name="row" class="row">
+        <VisualElement name="row-icon" class="row__icon" />
+        <VisualElement class="row__info">
+            <Label name="row-name" class="row__name" text="스탯 Lv.1" />
+            <Label name="row-values" class="row__values" text="0 → 0" />
+        </VisualElement>
+        <Button name="row-action" class="btn row__button" text="0 G" />
+    </VisualElement>
+</UXML>

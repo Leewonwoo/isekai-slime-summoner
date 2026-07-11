@@ -1,0 +1,98 @@
+.field-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* 방향 예고 배지 — 최중요 UI (SPEC §4.2) */
+.badge {
+    position: absolute;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-width: 3px;
+    border-color: var(--color-muted);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    padding-top: var(--gap-xs);
+    padding-bottom: var(--gap-xs);
+}
+
+.badge__label {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.badge--danger {
+    border-color: var(--color-danger);
+}
+
+.badge--danger .badge__label {
+    color: var(--color-danger);
+}
+
+.badge--warning {
+    border-color: var(--color-warning);
+}
+
+.badge--warning .badge__label {
+    color: var(--color-warning);
+}
+
+.badge--muted {
+    border-color: var(--color-muted);
+}
+
+.badge--muted .badge__label {
+    color: var(--color-text-disabled);
+}
+
+/* 임시 고정 위치 — 스파이크 B에서 월드 앵커 동기화로 대체 */
+#badge-north {
+    top: var(--gap-md);
+    left: 50%;
+    translate: -50% 0;
+}
+
+#badge-south {
+    bottom: var(--gap-md);
+    left: 50%;
+    translate: -50% 0;
+}
+
+#badge-east {
+    right: var(--gap-md);
+    top: 50%;
+    translate: 0 -50%;
+}
+
+#badge-west {
+    left: var(--gap-md);
+    top: 50%;
+    translate: 0 -50%;
+}
+
+/* 스킬 플로팅 버튼 (우하단, 쿨다운 표시 예정) */
+.skill-button {
+    position: absolute;
+    right: var(--gap-lg);
+    bottom: var(--gap-lg);
+    width: 128px;
+    height: 128px;
+    border-radius: 64px;
+    background-color: var(--color-surface);
+    border-width: 3px;
+    border-color: var(--color-border);
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.skill-button:active {
+    background-color: var(--color-border);
+}

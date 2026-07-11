@@ -1,0 +1,168 @@
+.bottom-panel {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--color-panel);
+    border-top-width: 2px;
+    border-top-color: var(--color-border);
+}
+
+/* ── 탭바 ───────────────────────────── */
+.tab-bar {
+    flex-direction: row;
+    height: var(--tab-height);
+    flex-shrink: 0;
+}
+
+.tab-bar__button {
+    flex-grow: 1;
+    background-color: var(--color-panel);
+    color: var(--color-text-dim);
+    font-size: var(--font-body);
+    border-width: 0;
+    border-radius: 0;
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+    margin: 0;
+}
+
+.tab-bar__button:active {
+    background-color: var(--color-surface);
+}
+
+.tab-bar__button--active {
+    color: var(--color-gold);
+    border-bottom-color: var(--color-gold);
+    -unity-font-style: bold;
+}
+
+/* ── 탭 콘텐츠 ─────────────────────── */
+.tab-content {
+    flex-grow: 1;
+}
+
+.tab-page {
+    flex-grow: 1;
+}
+
+.row-list {
+    flex-grow: 1;
+}
+
+/* ── 소환 탭 ───────────────────────── */
+.summon-tab {
+    flex-grow: 1;
+    flex-direction: row;
+    padding-top: var(--gap-md);
+    padding-bottom: var(--gap-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.bench {
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.bench-slot {
+    width: 120px;
+    height: 120px;
+    margin-top: var(--gap-sm);
+    margin-bottom: var(--gap-sm);
+    margin-left: var(--gap-sm);
+    margin-right: var(--gap-sm);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-md);
+    border-width: 2px;
+    border-color: var(--color-border);
+}
+
+.bench-slot--mergeable {
+    border-color: var(--color-positive);
+}
+
+.summon-tab__right {
+    width: 320px;
+    justify-content: flex-end;
+    margin-left: var(--gap-md);
+}
+
+.summon-tab__prob {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--gap-sm);
+    white-space: normal;
+}
+
+.summon-tab__button {
+    min-height: 128px;
+}
+
+/* ── 장비 탭 ───────────────────────── */
+.gear-tab {
+    flex-grow: 1;
+    padding-top: var(--gap-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.gear-tab__hint {
+    color: var(--color-text-disabled);
+    font-size: var(--font-caption);
+    margin-bottom: var(--gap-sm);
+}
+
+/* ── 소환사 탭 ─────────────────────── */
+.summoner-tab {
+    flex-grow: 1;
+}
+
+.summoner-tab__meta-button {
+    margin-top: var(--gap-sm);
+    margin-bottom: var(--gap-md);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
+}
+
+/* ── 소환사 스트립 (상시 노출) ─────── */
+.summoner-strip {
+    height: var(--strip-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-bg);
+    border-top-width: 2px;
+    border-top-color: var(--color-border);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.summoner-strip__portrait {
+    width: 104px;
+    height: 104px;
+    border-radius: 52px;
+    background-color: var(--color-surface);
+    border-width: 3px;
+    border-color: var(--color-rarity-hero);
+    margin-right: var(--gap-md);
+}
+
+.summoner-strip__info {
+    flex-grow: 1;
+}
+
+.summoner-strip__name {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.summoner-strip__exp {
+    margin-top: var(--gap-sm);
+}
+
+.summoner-strip__button {
+    margin-left: var(--gap-md);
+}

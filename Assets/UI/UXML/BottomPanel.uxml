@@ -1,0 +1,38 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/BottomPanel.uss" />
+    <Template name="SummonTab" src="/Assets/UI/UXML/tabs/SummonTab.uxml" />
+    <Template name="UpgradeTab" src="/Assets/UI/UXML/tabs/UpgradeTab.uxml" />
+    <Template name="SkillTab" src="/Assets/UI/UXML/tabs/SkillTab.uxml" />
+    <Template name="GearTab" src="/Assets/UI/UXML/tabs/GearTab.uxml" />
+    <Template name="SummonerTab" src="/Assets/UI/UXML/tabs/SummonerTab.uxml" />
+    <VisualElement name="bottom-panel" class="bottom-panel">
+        <VisualElement name="tab-bar" class="tab-bar">
+            <Button name="tab-summon" class="tab-bar__button tab-bar__button--active" text="소환" />
+            <Button name="tab-upgrade" class="tab-bar__button" text="강화">
+                <VisualElement name="reddot-upgrade" class="reddot hidden" picking-mode="Ignore" />
+            </Button>
+            <Button name="tab-skill" class="tab-bar__button" text="스킬" />
+            <Button name="tab-gear" class="tab-bar__button" text="장비">
+                <VisualElement name="reddot-gear" class="reddot hidden" picking-mode="Ignore" />
+            </Button>
+            <Button name="tab-summoner" class="tab-bar__button" text="소환사" />
+        </VisualElement>
+        <VisualElement name="tab-content" class="tab-content">
+            <Instance template="SummonTab" name="page-summon" class="tab-page" />
+            <Instance template="UpgradeTab" name="page-upgrade" class="tab-page hidden" />
+            <Instance template="SkillTab" name="page-skill" class="tab-page hidden" />
+            <Instance template="GearTab" name="page-gear" class="tab-page hidden" />
+            <Instance template="SummonerTab" name="page-summoner" class="tab-page hidden" />
+        </VisualElement>
+        <VisualElement name="summoner-strip" class="summoner-strip">
+            <VisualElement name="summoner-portrait" class="summoner-strip__portrait" />
+            <VisualElement class="summoner-strip__info">
+                <Label name="summoner-level" class="summoner-strip__name" text="소환사 Lv.1" />
+                <VisualElement class="gauge summoner-strip__exp">
+                    <VisualElement name="summoner-exp-fill" class="gauge__fill gauge__fill--exp" />
+                </VisualElement>
+            </VisualElement>
+            <Button name="summoner-strip-button" class="btn summoner-strip__button" text="강화" />
+        </VisualElement>
+    </VisualElement>
+</UXML>

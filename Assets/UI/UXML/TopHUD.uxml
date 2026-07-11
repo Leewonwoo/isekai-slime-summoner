@@ -1,0 +1,18 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/TopHUD.uss" />
+    <VisualElement name="top-hud" class="top-hud">
+        <Label name="wave-label" class="top-hud__wave" text="Wave 1/20" />
+        <VisualElement name="core-hp" class="gauge top-hud__hp">
+            <VisualElement name="core-hp-fill" class="gauge__fill gauge__fill--hp" />
+        </VisualElement>
+        <VisualElement name="gold-capsule" class="capsule top-hud__capsule">
+            <VisualElement class="capsule__icon capsule__icon--gold" />
+            <Label name="gold-value" class="capsule__value" text="0" />
+        </VisualElement>
+        <VisualElement name="gem-capsule" class="capsule top-hud__capsule">
+            <VisualElement class="capsule__icon capsule__icon--gem" />
+            <Label name="gem-value" class="capsule__value" text="0" />
+        </VisualElement>
+        <Button name="settings-button" class="top-hud__settings" text="설정" />
+    </VisualElement>
+</UXML>

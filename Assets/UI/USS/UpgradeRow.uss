@@ -1,0 +1,42 @@
+/* 공용 리스트 행 — 강화/스킬/소환사 3탭 공용 (SPEC §4.3) */
+.row {
+    height: var(--row-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-md);
+    margin-top: var(--gap-sm);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.row__icon {
+    width: 88px;
+    height: 88px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-panel);
+    margin-right: var(--gap-md);
+}
+
+.row__info {
+    flex-grow: 1;
+}
+
+.row__name {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.row__values {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    margin-top: var(--gap-xs);
+}
+
+.row__button {
+    min-width: 200px;
+}

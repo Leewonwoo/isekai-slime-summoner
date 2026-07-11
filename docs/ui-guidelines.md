@@ -110,7 +110,7 @@ Assets/Scripts/UI/
 
 1. 색상·간격·크기는 **반드시 `var(--토큰)`**. 리터럴 색상이 USS에 보이면 리뷰 반려 대상.
 2. 스타일은 USS에만. **C#에서 `style.*` 직접 조작 금지** — 상태 변화는 USS 클래스 토글(`AddToClassList`/`RemoveFromClassList`/`EnableInClassList`)로.
-   - **예외 2가지만 허용**: ① 월드 앵커 위치 동기화(배지 `style.translate`), ② 세이프 에어리어 패딩.
+   - **예외 3가지만 허용**: ① 월드 앵커 위치 동기화(배지 `style.translate`), ② 세이프 에어리어 패딩, ③ 연속 수치 게이지 fill(`.gauge__fill`의 `style.width` — HP/EXP 등).
 3. 상태 변형은 `--modifier` 클래스: `.badge--danger`, `.buy-button--disabled`, `.tab__button--active`, `.slot--mergeable`.
 4. `:hover` 의존 금지 (모바일). 눌림 피드백은 `:active`로.
 5. 전환 효과는 USS `transition`으로 선언 (예: 탭 콘텐츠 페이드, 패널 확장). DOTween은 월드 오브젝트 전용 — UI 트윈에 쓰지 않는다.

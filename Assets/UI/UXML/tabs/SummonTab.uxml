@@ -1,0 +1,9 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <VisualElement name="summon-tab" class="summon-tab">
+        <VisualElement name="bench" class="bench" />
+        <VisualElement class="summon-tab__right">
+            <Label name="summon-prob" class="summon-tab__prob" text="★1 60% · ★2 30% · ★3 10%" />
+            <Button name="summon-button" class="btn btn--primary summon-tab__button" text="소환 50G" />
+        </VisualElement>
+    </VisualElement>
+</UXML>

@@ -1,0 +1,51 @@
+/* 디자인 토큰 — docs/ui-guidelines.md §4와 1:1. 값 변경은 문서 먼저. */
+:root {
+    /* 배경/표면 */
+    --color-bg: rgb(18, 20, 28);
+    --color-panel: rgb(28, 32, 41);
+    --color-surface: rgb(38, 43, 56);
+    --color-border: rgb(58, 65, 82);
+
+    /* 텍스트 */
+    --color-text: rgb(242, 244, 248);
+    --color-text-dim: rgb(168, 176, 192);
+    --color-text-disabled: rgb(107, 114, 128);
+
+    /* 위협도 (방향 예고 배지) */
+    --color-danger: rgb(255, 82, 82);
+    --color-warning: rgb(255, 193, 7);
+    --color-muted: rgb(107, 114, 128);
+
+    /* 재화 */
+    --color-gold: rgb(255, 192, 47);
+    --color-gem: rgb(79, 195, 247);
+
+    /* 등급 */
+    --color-rarity-normal: rgb(154, 163, 178);
+    --color-rarity-hero: rgb(164, 108, 255);
+    --color-rarity-legend: rgb(255, 179, 0);
+
+    /* 상태 */
+    --color-positive: rgb(76, 217, 100);
+    --color-reddot: rgb(255, 59, 48);
+
+    /* 간격/크기 (1080 기준 px) */
+    --gap-xs: 4px;
+    --gap-sm: 8px;
+    --gap-md: 16px;
+    --gap-lg: 24px;
+    --gap-xl: 32px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --touch-min: 96px;
+    --row-height: 128px;
+    --tab-height: 112px;
+    --strip-height: 140px;
+
+    /* 폰트 */
+    --font-display: 56px;
+    --font-title: 44px;
+    --font-body: 36px;
+    --font-caption: 28px;
+}
