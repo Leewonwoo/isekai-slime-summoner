@@ -34,7 +34,8 @@ NAN 2026 (NHN Game × AI Hackathon) 사전 과제. 1인 개발, 마감 **2026-08
 
 - **커밋 메시지에 AI 활용 흔적 남기기** (예: `feat: AI-generated unit sprites integrated`) — 커밋 기록 자체가 제출물 증거
 - AI 생성 에셋을 추가할 때마다 [docs/asset-ledger.csv](docs/asset-ledger.csv)에 기록 (파일명/도구/프롬프트/라이선스)
-- 프롬프트 개선 사례(v1→v2)는 `docs/prompt-cases/`에 보존
+- **의미 있는 AI 작업(코드/에셋/밸런싱/사운드)을 한 날마다 [docs/ai-usage-log.md](docs/ai-usage-log.md)에 한 줄 추가** — 기술 문서 PDF의 직접 재료. Claude Code(나)도 큰 작업 마무리 시 스스로 기록할 것
+- 프롬프트 실패→개선(v1→v2)을 겪으면 그날 바로 `docs/prompt-cases/`에 사례 기록 (양식: [prompt-cases/README.md](docs/prompt-cases/README.md), **사용 기법명 필수**)
 - 스코프 아웃 항목(SPEC §8) 추가 금지 — 특히 런타임 LLM 호출. 고민되면 자르는 쪽으로
 - 4주차(8/4~)는 기능 동결 — 폴리싱/밸런싱/문서만
 
