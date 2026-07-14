@@ -16,9 +16,10 @@ Unity가 임포트하지 않도록 `Assets/` 밖에 둔다. 원본 자체가 AI 
 |---|---|---|
 | 유닛 | `units/` | `unit_frost_archer.png`, `unit_flame_golem.png` |
 | 적 | `enemies/` | `enemy_slime.png`, `boss_dragon.png` (보스도 여기, `boss_` 접두사) |
-| 코어 | `core/` | `core_full.png`, `core_damaged.png`, `core_critical.png` |
+| 중앙(소환사·소환진) | `core/` | `summoner_field.png`(전신), `summoner_portrait.png`, `decal_summon_circle.png` — 소환석 피격 단계 이미지는 폐기 (SPEC §2.1 개정) |
 | 타일/바닥 | `tiles/` | `tile_lane.png`, `tile_slot.png` |
-| UI 아이콘 | `ui-icons/` | `icon_gold.png`, `icon_gem.png`, `icon_atk.png` |
+| UI 아이콘 | `ui-icons/` | `icons_stat_sheet.png`(시트 원본), `icon_gold.png`, `icon_atk.png` |
+| UI 프레임 (9-slice) | `ui-frames/` | `frame_stone_panel.png`, `frame_wood_button.png`, `frame_gold_button.png`, `frame_slot_recess.png`, `frame_ring.png` |
 | 일러스트 | `illustrations/` | `illust_title.png`, `illust_loading.png` |
 
 - 버전이 생기면 `_v2` 접미사 (`unit_frost_archer_v2.png`) — 최종 채택본만 Assets/Art로
@@ -28,5 +29,5 @@ Unity가 임포트하지 않도록 `Assets/` 밖에 둔다. 원본 자체가 AI 
 
 ```
 Assets/Art/
-  Units/  Enemies/  Core/  Tiles/  UIIcons/  Illustrations/
+  Units/  Enemies/  Core/  Tiles/  UIIcons/  UIFrames/  Illustrations/
 ```
