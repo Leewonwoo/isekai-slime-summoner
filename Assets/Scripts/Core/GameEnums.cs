@@ -1,6 +1,6 @@
 namespace CrossDefense
 {
-    /// <summary>레인 방향 (십자 맵 4방향)</summary>
+    /// <summary>Legacy compass labels retained for data migration only.</summary>
     public enum Direction
     {
         North,
@@ -9,11 +9,30 @@ namespace CrossDefense
         West,
     }
 
-    /// <summary>방향 예고 배지 위협도 (SPEC §4.2)</summary>
+    /// <summary>화면 외곽 스폰 구역. 레인이 아니라 스폰 위치 분산용이다.</summary>
+    public enum SpawnZone
+    {
+        Top,
+        Right,
+        Bottom,
+        Left,
+    }
+
     public enum ThreatLevel
     {
-        None,    // 회색 — 없음
-        Normal,  // 노랑 — 보통
-        Danger,  // 빨강 — 위험
+        None,
+        Normal,
+        Danger,
+    }
+
+    public enum RunPhase
+    {
+        Prepare,
+        InWave,
+        Intermission,
+        TraitChoice,
+        Merchant,
+        Victory,
+        Defeat,
     }
 }
