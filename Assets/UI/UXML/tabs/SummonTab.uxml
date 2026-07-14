@@ -1,9 +1,20 @@
 <UXML xmlns="UnityEngine.UIElements">
     <VisualElement name="summon-tab" class="summon-tab">
-        <VisualElement name="bench" class="bench" />
+        <VisualElement class="summon-tab__inventory">
+            <VisualElement class="summon-tab__inventory-header">
+                <Label class="summon-tab__inventory-title" text="보유 용병" />
+                <Label name="bench-count" class="summon-tab__inventory-count" text="0 / 12" />
+            </VisualElement>
+            <VisualElement name="bench" class="bench" />
+        </VisualElement>
         <VisualElement class="summon-tab__right">
-            <Label name="summon-prob" class="summon-tab__prob" text="★1 60% · ★2 30% · ★3 10%" />
-            <Button name="summon-button" class="btn btn--primary summon-tab__button" text="소환 50G" />
+            <VisualElement class="summon-tab__contracts">
+                <Label class="summon-tab__contracts-title" text="용병 계약서" />
+                <Label name="summon-contract-count" class="summon-tab__contracts-value" text="0장" />
+            </VisualElement>
+            <Label class="summon-tab__pool" text="해금된 고블린 8종 중 무작위" />
+            <Label name="summon-prob" class="summon-tab__prob" text="★1 직행 잭팟 5.0%" />
+            <Button name="summon-button" class="btn btn--primary summon-tab__button" text="소환 ×1" />
         </VisualElement>
     </VisualElement>
 </UXML>

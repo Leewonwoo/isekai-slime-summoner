@@ -1,23 +1,30 @@
 /* 디자인 토큰 — docs/ui-guidelines.md §4와 1:1. 값 변경은 문서 먼저. */
+/* 스킨: "척박한 숲" 픽셀 (돌 프레임 × 나무 판재, 2026-07-11 v2) */
 :root {
-    /* 배경/표면 */
-    --color-bg: rgb(18, 20, 28);
-    --color-panel: rgb(28, 32, 41);
-    --color-surface: rgb(38, 43, 56);
-    --color-border: rgb(58, 65, 82);
+    /* 배경/표면 — 바랜 돌 + 나무 판재 */
+    --color-bg: rgb(24, 21, 15);
+    --color-transparent: rgba(0, 0, 0, 0);
+    --color-panel: rgb(66, 63, 53);
+    --color-panel-deep: rgb(43, 41, 34);
+    --color-surface: rgb(198, 166, 106);
+    --color-surface-deep: rgb(151, 118, 62);
+    --color-border: rgb(112, 58, 40);
 
-    /* 텍스트 */
-    --color-text: rgb(242, 244, 248);
-    --color-text-dim: rgb(168, 176, 192);
-    --color-text-disabled: rgb(107, 114, 128);
+    /* 텍스트 — 어두운 바탕엔 웜 화이트, 판재 위엔 잉크 */
+    --color-text: rgb(240, 234, 214);
+    --color-text-dim: rgb(178, 170, 144);
+    --color-text-disabled: rgb(124, 118, 99);
+    --color-ink: rgb(59, 42, 23);
+    --color-ink-dim: rgb(110, 86, 50);
 
-    /* 위협도 (방향 예고 배지) */
+    /* 위협도 (필드/전투 상태 확장용) */
     --color-danger: rgb(255, 82, 82);
     --color-warning: rgb(255, 193, 7);
     --color-muted: rgb(107, 114, 128);
 
-    /* 재화 */
+    /* 재화/액션 */
     --color-gold: rgb(255, 192, 47);
+    --color-gold-deep: rgb(184, 128, 26);
     --color-gem: rgb(79, 195, 247);
 
     /* 등급 */
@@ -28,6 +35,12 @@
     /* 상태 */
     --color-positive: rgb(76, 217, 100);
     --color-reddot: rgb(255, 59, 48);
+
+    /* 속성 미니 아이콘 (배지 안 표시 전용) */
+    --color-attr-none: rgb(154, 163, 178);
+    --color-attr-fire: rgb(255, 112, 67);
+    --color-attr-ice: rgb(79, 195, 247);
+    --color-attr-nature: rgb(129, 199, 132);
 
     /* 간격/크기 (1080 기준 px) */
     --gap-xs: 4px;
@@ -40,8 +53,31 @@
     --radius-lg: 20px;
     --touch-min: 96px;
     --row-height: 128px;
+    --row-icon-size: 88px;
     --tab-height: 112px;
-    --strip-height: 140px;
+    --summoner-tab-profile-height: 140px;
+
+    /* TopHUD 구조 (1080 기준) */
+    --top-hud-profile-width: 264px;
+    --top-hud-stage-width: 180px;
+    --wave-status-width: 200px;
+    --top-hud-settings-width: 104px;
+    --top-hud-settings-icon-size: 64px;
+    --currency-icon-size: 44px;
+    --top-hud-portrait-size: 96px;
+    --top-hud-portrait-radius: 48px;
+    --summoner-portrait-size: 104px;
+    --summoner-portrait-radius: 52px;
+    --portrait-ring-inset: 12px;
+    --skill-button-size: 128px;
+    --skill-button-radius: 64px;
+
+    /* BottomPanel 구조 (1080 기준) */
+    --bottom-panel-content-inset: 40px;
+    --bench-slot-state-border: 4px;
+    --bench-slot-size: 120px;
+    --summon-side-width: 320px;
+    --summon-contract-panel-height: 96px;
 
     /* 폰트 */
     --font-display: 56px;

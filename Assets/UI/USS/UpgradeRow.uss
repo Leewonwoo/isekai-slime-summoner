@@ -1,4 +1,5 @@
-/* 공용 리스트 행 — 강화/스킬/소환사 3탭 공용 (SPEC §4.3) */
+/* 공용 리스트 행 — 강화/스킬/소환사 3탭 공용 (SPEC §4.3)
+   나무 판재 플레이트 + 잉크 텍스트 (9-slice 판재 스프라이트 적용 전 플랫 근사) */
 .row {
     height: var(--row-height);
     flex-shrink: 0;
@@ -6,6 +7,10 @@
     align-items: center;
     background-color: var(--color-surface);
     border-radius: var(--radius-md);
+    border-width: 3px;
+    border-color: var(--color-border);
+    border-bottom-width: 5px;
+    border-bottom-color: var(--color-surface-deep);
     margin-top: var(--gap-sm);
     margin-left: var(--gap-md);
     margin-right: var(--gap-md);
@@ -14,11 +19,41 @@
 }
 
 .row__icon {
-    width: 88px;
-    height: 88px;
+    width: var(--row-icon-size);
+    height: var(--row-icon-size);
     border-radius: var(--radius-sm);
-    background-color: var(--color-panel);
+    background-color: var(--color-panel-deep);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-width: 2px;
+    border-color: var(--color-surface-deep);
     margin-right: var(--gap-md);
+}
+
+.row__icon--atk {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_atk.png?fileID=21300000&guid=f6c6a01d7aa16824a8efe9494e8d23d3&type=3");
+}
+
+.row__icon--aspd {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_aspd.png?fileID=21300000&guid=3f19595f8b211bc4f8595449affa5fad&type=3");
+}
+
+.row__icon--crit {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_crit.png?fileID=21300000&guid=e88553d582f4d2348bf3867b86f269fc&type=3");
+}
+
+.row__icon--hp {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_hp.png?fileID=21300000&guid=926f6db76ccda3642b301195c7139d89&type=3");
+}
+
+.row__icon--range {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_range.png?fileID=21300000&guid=eaf32f7a8c228c646809ade264b0179f&type=3");
+}
+
+.row__icon--income {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_income.png?fileID=21300000&guid=61230eb94fd865c43bd49bf5ce85b95d&type=3");
 }
 
 .row__info {
@@ -26,13 +61,13 @@
 }
 
 .row__name {
-    color: var(--color-text);
+    color: var(--color-ink);
     font-size: var(--font-body);
     -unity-font-style: bold;
 }
 
 .row__values {
-    color: var(--color-text-dim);
+    color: var(--color-ink-dim);
     font-size: var(--font-caption);
     margin-top: var(--gap-xs);
 }

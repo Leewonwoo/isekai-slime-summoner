@@ -2,42 +2,58 @@
     flex-grow: 1;
     flex-direction: column;
     background-color: var(--color-panel);
-    border-top-width: 2px;
-    border-top-color: var(--color-border);
+    border-top-width: 3px;
+    border-top-color: var(--color-bg);
 }
 
-/* ── 탭바 ───────────────────────────── */
+/* ── 탭바 — 활성 탭 = "눌려서 켜진 나무 버튼" (스킨 문법 ④) ── */
 .tab-bar {
     flex-direction: row;
     height: var(--tab-height);
     flex-shrink: 0;
+    background-color: var(--color-bg);
 }
 
 .tab-bar__button {
     flex-grow: 1;
-    background-color: var(--color-panel);
+    background-color: var(--color-bg);
     color: var(--color-text-dim);
     font-size: var(--font-body);
+    -unity-font-style: bold;
     border-width: 0;
     border-radius: 0;
-    border-bottom-width: 4px;
-    border-bottom-color: rgba(0, 0, 0, 0);
     margin: 0;
 }
 
 .tab-bar__button:active {
-    background-color: var(--color-surface);
+    background-color: var(--color-panel-deep);
 }
 
 .tab-bar__button--active {
-    color: var(--color-gold);
-    border-bottom-color: var(--color-gold);
-    -unity-font-style: bold;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
 }
 
 /* ── 탭 콘텐츠 ─────────────────────── */
 .tab-content {
     flex-grow: 1;
+    background-color: var(--color-panel-deep);
+    background-image: url("project://database/Assets/Art/UIFrames/bottom_panel_content_frame.png?fileID=21300000&guid=16a4f8ca4603d254b888b78dbf58666b&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 92px;
+    -unity-slice-top: 92px;
+    -unity-slice-right: 92px;
+    -unity-slice-bottom: 92px;
+    -unity-slice-scale: 0.4;
+    padding-top: var(--bottom-panel-content-inset);
+    padding-bottom: var(--bottom-panel-content-inset);
+    padding-left: var(--bottom-panel-content-inset);
+    padding-right: var(--bottom-panel-content-inset);
 }
 
 .tab-page {
@@ -58,6 +74,30 @@
     padding-right: var(--gap-md);
 }
 
+.summon-tab__inventory {
+    flex-grow: 1;
+}
+
+.summon-tab__inventory-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--touch-min);
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-md);
+}
+
+.summon-tab__inventory-title {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.summon-tab__inventory-count {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
 .bench {
     flex-grow: 1;
     flex-direction: row;
@@ -65,17 +105,28 @@
     align-content: flex-start;
 }
 
+/* 벤치 슬롯 = 돌에 파인 홈 (recess) — 판재(버튼)와 반대로 어둡게 */
 .bench-slot {
-    width: 120px;
-    height: 120px;
+    width: var(--bench-slot-size);
+    height: var(--bench-slot-size);
     margin-top: var(--gap-sm);
     margin-bottom: var(--gap-sm);
     margin-left: var(--gap-sm);
     margin-right: var(--gap-sm);
-    background-color: var(--color-surface);
+    background-color: var(--color-panel-deep);
+    background-image: url("project://database/Assets/Art/UIFrames/bench_slot_frame.png?fileID=21300000&guid=162f6efbc056f5748b5a9b30af5c90de&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 190px;
+    -unity-slice-top: 190px;
+    -unity-slice-right: 190px;
+    -unity-slice-bottom: 190px;
+    -unity-slice-scale: 0.1;
     border-radius: var(--radius-md);
-    border-width: 2px;
-    border-color: var(--color-border);
+    border-width: var(--bench-slot-state-border);
+    border-color: var(--color-transparent);
 }
 
 .bench-slot--mergeable {
@@ -83,21 +134,63 @@
 }
 
 .summon-tab__right {
-    width: 320px;
+    width: var(--summon-side-width);
     justify-content: flex-end;
     margin-left: var(--gap-md);
+}
+
+.summon-tab__contracts {
+    min-height: var(--summon-contract-panel-height);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    border-width: 2px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    margin-bottom: var(--gap-sm);
+}
+
+.summon-tab__contracts-title {
+    color: var(--color-ink);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.summon-tab__contracts-value {
+    color: var(--color-ink);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.summon-tab__pool {
+    color: var(--color-text-disabled);
+    font-size: var(--font-caption);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: var(--gap-sm);
 }
 
 .summon-tab__prob {
     color: var(--color-text-dim);
     font-size: var(--font-caption);
     -unity-text-align: middle-center;
+    background-color: var(--color-panel-deep);
+    border-width: 2px;
+    border-color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-sm);
     margin-bottom: var(--gap-sm);
     white-space: normal;
 }
 
 .summon-tab__button {
-    min-height: 128px;
+    min-height: var(--row-height);
 }
 
 /* ── 장비 탭 ───────────────────────── */
@@ -119,50 +212,67 @@
     flex-grow: 1;
 }
 
-.summoner-tab__meta-button {
-    margin-top: var(--gap-sm);
-    margin-bottom: var(--gap-md);
-    margin-left: var(--gap-md);
-    margin-right: var(--gap-md);
-}
-
-/* ── 소환사 스트립 (상시 노출) ─────── */
-.summoner-strip {
-    height: var(--strip-height);
+.summoner-tab__profile {
+    height: var(--summoner-tab-profile-height);
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
     background-color: var(--color-bg);
-    border-top-width: 2px;
-    border-top-color: var(--color-border);
+    border-width: 2px;
+    border-color: var(--color-panel);
+    border-radius: var(--radius-md);
+    margin-top: var(--gap-sm);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
     padding-left: var(--gap-md);
     padding-right: var(--gap-md);
 }
 
-.summoner-strip__portrait {
-    width: 104px;
-    height: 104px;
-    border-radius: 52px;
-    background-color: var(--color-surface);
-    border-width: 3px;
-    border-color: var(--color-rarity-hero);
+.summoner-tab__portrait-frame {
+    width: var(--summoner-portrait-size);
+    height: var(--summoner-portrait-size);
+    flex-shrink: 0;
+    border-radius: var(--summoner-portrait-radius);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/frame_ring.png?fileID=21300000&guid=9603ecb7000a32e47a1b0382e5871157&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    padding-top: var(--portrait-ring-inset);
+    padding-bottom: var(--portrait-ring-inset);
+    padding-left: var(--portrait-ring-inset);
+    padding-right: var(--portrait-ring-inset);
     margin-right: var(--gap-md);
 }
 
-.summoner-strip__info {
+.summoner-tab__portrait {
+    flex-grow: 1;
+    border-radius: var(--summoner-portrait-radius);
+    background-color: var(--color-panel-deep);
+}
+
+.summoner-tab__profile-info {
     flex-grow: 1;
 }
 
-.summoner-strip__name {
+.summoner-tab__name {
     color: var(--color-text);
     font-size: var(--font-body);
     -unity-font-style: bold;
 }
 
-.summoner-strip__exp {
+.summoner-tab__exp {
     margin-top: var(--gap-sm);
 }
 
-.summoner-strip__button {
+.summoner-tab__upgrade-button {
     margin-left: var(--gap-md);
+}
+
+.summoner-tab__meta-button {
+    margin-top: var(--gap-sm);
+    margin-bottom: var(--gap-md);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
 }

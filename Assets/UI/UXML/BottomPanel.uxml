@@ -24,15 +24,5 @@
             <Instance template="GearTab" name="page-gear" class="tab-page hidden" />
             <Instance template="SummonerTab" name="page-summoner" class="tab-page hidden" />
         </VisualElement>
-        <VisualElement name="summoner-strip" class="summoner-strip">
-            <VisualElement name="summoner-portrait" class="summoner-strip__portrait" />
-            <VisualElement class="summoner-strip__info">
-                <Label name="summoner-level" class="summoner-strip__name" text="소환사 Lv.1" />
-                <VisualElement class="gauge summoner-strip__exp">
-                    <VisualElement name="summoner-exp-fill" class="gauge__fill gauge__fill--exp" />
-                </VisualElement>
-            </VisualElement>
-            <Button name="summoner-strip-button" class="btn summoner-strip__button" text="강화" />
-        </VisualElement>
     </VisualElement>
 </UXML>

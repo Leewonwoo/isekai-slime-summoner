@@ -1,17 +1,9 @@
 <UXML xmlns="UnityEngine.UIElements">
     <Style src="/Assets/UI/USS/FieldOverlay.uss" />
     <VisualElement name="field-overlay-root" class="field-overlay" picking-mode="Ignore">
-        <VisualElement name="badge-north" class="badge badge--muted" picking-mode="Ignore">
-            <Label class="badge__label" text="N ×0" picking-mode="Ignore" />
-        </VisualElement>
-        <VisualElement name="badge-east" class="badge badge--muted" picking-mode="Ignore">
-            <Label class="badge__label" text="E ×0" picking-mode="Ignore" />
-        </VisualElement>
-        <VisualElement name="badge-south" class="badge badge--muted" picking-mode="Ignore">
-            <Label class="badge__label" text="S ×0" picking-mode="Ignore" />
-        </VisualElement>
-        <VisualElement name="badge-west" class="badge badge--muted" picking-mode="Ignore">
-            <Label class="badge__label" text="W ×0" picking-mode="Ignore" />
+        <VisualElement name="wave-status" class="field-overlay__wave-status" picking-mode="Ignore">
+            <Label name="wave-label" class="field-overlay__wave" text="WAVE 1" picking-mode="Ignore" />
+            <Label name="remaining-monsters-label" class="field-overlay__remaining" text="잔여 몬스터 24" picking-mode="Ignore" />
         </VisualElement>
         <Button name="skill-button" class="skill-button" text="스킬" />
     </VisualElement>

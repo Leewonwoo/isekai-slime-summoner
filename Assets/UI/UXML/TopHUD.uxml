@@ -1,18 +1,32 @@
 <UXML xmlns="UnityEngine.UIElements">
     <Style src="/Assets/UI/USS/TopHUD.uss" />
     <VisualElement name="top-hud" class="top-hud">
-        <Label name="wave-label" class="top-hud__wave" text="Wave 1/20" />
-        <VisualElement name="core-hp" class="gauge top-hud__hp">
-            <VisualElement name="core-hp-fill" class="gauge__fill gauge__fill--hp" />
+        <VisualElement name="summoner-profile" class="top-hud__profile">
+            <VisualElement class="top-hud__portrait-frame">
+                <VisualElement name="summoner-portrait" class="top-hud__portrait" />
+            </VisualElement>
+            <VisualElement name="summoner-profile-info" class="top-hud__profile-info">
+                <Label name="summoner-nickname" class="top-hud__nickname" text="소환사" />
+                <Label name="summoner-level" class="top-hud__level" text="Lv.1" />
+            </VisualElement>
         </VisualElement>
-        <VisualElement name="gold-capsule" class="capsule top-hud__capsule">
-            <VisualElement class="capsule__icon capsule__icon--gold" />
-            <Label name="gold-value" class="capsule__value" text="0" />
+
+        <VisualElement name="stage-info" class="top-hud__stage">
+            <Label class="top-hud__section-label" text="STAGE" />
+            <Label name="stage-name" class="top-hud__stage-name" text="고블린 숲" />
         </VisualElement>
-        <VisualElement name="gem-capsule" class="capsule top-hud__capsule">
-            <VisualElement class="capsule__icon capsule__icon--gem" />
-            <Label name="gem-value" class="capsule__value" text="0" />
+
+        <VisualElement name="currency-group" class="top-hud__currency-group">
+            <VisualElement name="gold-capsule" class="capsule top-hud__capsule">
+                <VisualElement class="capsule__icon capsule__icon--gold" />
+                <Label name="gold-value" class="capsule__value" text="0" />
+            </VisualElement>
+            <VisualElement name="gem-capsule" class="capsule top-hud__capsule">
+                <VisualElement class="capsule__icon capsule__icon--gem" />
+                <Label name="gem-value" class="capsule__value" text="0" />
+            </VisualElement>
         </VisualElement>
-        <Button name="settings-button" class="top-hud__settings" text="설정" />
+
+        <Button name="settings-button" class="top-hud__settings" text="" tooltip="설정" />
     </VisualElement>
 </UXML>
