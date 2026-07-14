@@ -9,8 +9,8 @@
 
 | 담당 | 그리는 것 |
 |---|---|
-| **UI Toolkit** | 상단 HUD, 하단 패널(탭/리스트/벤치), 방향 예고 배지, 스킬 플로팅 버튼, 소환사 스트립, 팝업 |
-| **월드 (SpriteRenderer)** | 십자 필드, 유닛, 몹, 투사체, 코어, 이펙트 |
+| **UI Toolkit** | 상단 HUD, 하단 패널(탭/리스트/벤치/소환사 프로필), 필드 상단 웨이브 상태 표시, 스킬 플로팅 버튼, 팝업 |
+| **월드 (SpriteRenderer)** | 자연 숲 필드, 유닛, 몹, 투사체, 소환사·소환진 데칼(=코어), 이펙트 |
 
 - 필드를 UI Toolkit으로 그리지 않는다. UI가 월드 위에 얹히는 건 **FieldOverlay의 배지/버튼**뿐.
 - uGUI(Canvas) 사용 금지. UI는 전부 UI Toolkit으로 통일.
@@ -43,32 +43,41 @@ Assets/Scripts/UI/
 | Clear Color | 끔 (월드가 비쳐야 함) |
 
 - 패널을 추가로 만들지 않는다. UIDocument는 RootLayout 하나에 모두 태운다.
-- 세이프 에어리어: TopHUD와 SummonerStrip은 런타임에 `Screen.safeArea`를 읽어 상/하단 패딩을 C#에서 주입 (인라인 스타일 예외 허용 항목).
+- 세이프 에어리어: RootLayout은 런타임에 `Screen.safeArea`를 읽어 상/하단 패딩을 C#에서 주입한다 (인라인 스타일 예외 허용 항목).
 
 ## 4. 디자인 토큰 — variables.uss (하드코딩 금지, 항상 var() 참조)
 
-### 색상
+### 색상 — "척박한 숲" 픽셀 스킨 (돌 프레임 × 나무 판재, 2026-07-11 v2)
+
+> 컨셉: 척박한 숲 개간지(픽셀 아트, SPEC §5.1 v2)와 한 몸으로 보이는 UI. 프레임은 바랜 돌, 조작면(버튼/행)은 나무 판재 + 적갈 아웃라인, 판재 위 텍스트는 잉크색(진갈). 골드는 플레이어의 "행동"(주요 버튼·재화)에만 쓰고, 위협도 색과 절대 섞지 않는다.
+> 최종형은 9-slice 픽셀 프레임 스프라이트(아래 "픽셀 프레임" 절) — 스프라이트 생성 전까지는 아래 플랫 색상이 근사 플레이스홀더.
 
 ```css
 :root {
-    /* 배경/표면 */
-    --color-bg: rgb(18, 20, 28);            /* 앱 최심부 배경 */
-    --color-panel: rgb(28, 32, 41);         /* 하단 패널 */
-    --color-surface: rgb(38, 43, 56);       /* 카드/행/슬롯 */
-    --color-border: rgb(58, 65, 82);
+    /* 배경/표면 — 바랜 돌 + 나무 판재 */
+    --color-bg: rgb(24, 21, 15);            /* 앱 최심부 배경(숲 심야 흙) #18150F */
+    --color-transparent: rgba(0, 0, 0, 0);  /* 투명 레이어 */
+    --color-panel: rgb(66, 63, 53);         /* 하단 패널/프레임(바랜 돌) #423F35 */
+    --color-panel-deep: rgb(43, 41, 34);    /* 돌 음영·움푹한 곳(벤치 슬롯 바닥) #2B2922 */
+    --color-surface: rgb(198, 166, 106);    /* 조작면(나무 판재 — 버튼/행) #C6A66A */
+    --color-surface-deep: rgb(151, 118, 62);/* 판재 하단 엣지 #97763E */
+    --color-border: rgb(112, 58, 40);       /* 적갈 아웃라인 #703A28 */
 
-    /* 텍스트 */
-    --color-text: rgb(242, 244, 248);
-    --color-text-dim: rgb(168, 176, 192);
-    --color-text-disabled: rgb(107, 114, 128);
+    /* 텍스트 — 어두운 바탕엔 웜 화이트, 판재 위엔 잉크 */
+    --color-text: rgb(240, 234, 214);       /* #F0EAD6 */
+    --color-text-dim: rgb(178, 170, 144);   /* #B2AA90 */
+    --color-text-disabled: rgb(124, 118, 99);
+    --color-ink: rgb(59, 42, 23);           /* 판재 위 본문 #3B2A17 */
+    --color-ink-dim: rgb(110, 86, 50);      /* 판재 위 보조 #6E5632 */
 
-    /* 위협도 (방향 예고 배지 — SPEC §4.2) */
+    /* 위협도 (필드/전투 상태 확장용) */
     --color-danger: rgb(255, 82, 82);        /* 빨강 = 위험 */
     --color-warning: rgb(255, 193, 7);       /* 노랑 = 보통 */
     --color-muted: rgb(107, 114, 128);       /* 회색 = 없음 */
 
-    /* 재화 */
+    /* 재화/액션 */
     --color-gold: rgb(255, 192, 47);
+    --color-gold-deep: rgb(184, 128, 26);    /* 골드 버튼 보더/하단 엣지 #B8801A */
     --color-gem: rgb(79, 195, 247);
 
     /* 등급 (SPEC §4.5: 일반 회색 → 영웅 보라 → 전설 금) */
@@ -79,8 +88,56 @@ Assets/Scripts/UI/
     /* 상태 */
     --color-positive: rgb(76, 217, 100);     /* 합성 가능 테두리, 상승 수치 */
     --color-reddot: rgb(255, 59, 48);
+
+    /* 속성 미니 아이콘 (SPEC §2.8 — 배지 안 표시 전용, 위협도 색 채널과 분리) */
+    --color-attr-none: rgb(154, 163, 178);   /* 무 */
+    --color-attr-fire: rgb(255, 112, 67);    /* 화염 */
+    --color-attr-ice: rgb(79, 195, 247);     /* 빙결 */
+    --color-attr-nature: rgb(129, 199, 132); /* 자연 */
+
+    /* TopHUD 구조 (1080 기준) */
+    --top-hud-profile-width: 264px;
+    --top-hud-stage-width: 180px;
+    --wave-status-width: 200px;
+    --top-hud-settings-width: 104px;
+    --top-hud-settings-icon-size: 64px;
+    --currency-icon-size: 44px;
+    --top-hud-portrait-size: 96px;
+    --top-hud-portrait-radius: 48px;
+    --summoner-portrait-size: 104px;
+    --summoner-portrait-radius: 52px;
+    --portrait-ring-inset: 12px;
+    --skill-button-size: 128px;
+    --skill-button-radius: 64px;
+    --bottom-panel-content-inset: 40px;
+    --bench-slot-state-border: 4px;
+    --bench-slot-size: 120px;
+    --summon-side-width: 320px;
+    --summon-contract-panel-height: 96px;
 }
 ```
+
+### 스킨 문법 (모든 컴포넌트 공통)
+
+1. **청키 버튼**: `.btn`은 나무 판재(`--color-surface`) + 적갈 아웃라인(`--color-border`) + 두꺼운 하단 엣지(6px, `--color-surface-deep`). 판재 위 텍스트는 `--color-ink`. `:active`에서 하단 보더 2px + `translate: 0 4px`(눌림 피드백). 골드 버튼(주요 행동)만 `--color-gold`/`--color-gold-deep`.
+2. **상태 배지**: 전투 상태 배지가 추가될 경우 위협도 색을 **배경**으로 채우고 `--color-bg` 아웃라인 — 필드 위 즉독성. warning(노랑) 배경 위 텍스트는 `--color-bg`. 속성은 `--color-attr-*` 미니 아이콘으로만.
+3. **골드 = 행동**: 골드는 주요 버튼·재화 표기에만. 위협도(빨/노/회)·합성(초록)과 역할이 겹치지 않게.
+4. **탭바**: 바탕 `--color-bg`, 활성 탭 = 나무 판재(`--color-surface`) + `--color-ink` 텍스트 + 상단 라운드 — "눌려서 켜진 나무 버튼"으로 읽히게. 비활성 탭은 돌 톤(`--color-text-dim`).
+
+### 픽셀 프레임 (9-slice — 프레임 스프라이트 생성 후 적용)
+
+- 대상: 하단 패널 외곽(돌 프레임), `.btn`(나무 버튼), `.row`(나무 판), 벤치 슬롯(돌 홈). 프롬프트는 SPEC §5.1 레이어 2 "UI 프레임".
+- 적용법: `background-image` + `-unity-slice-left/-top/-right/-bottom`(px) + `-unity-slice-scale`. 슬라이스 값은 프레임 두께와 일치시키고 이 문서에 기록.
+- TopHUD 프레임: `Assets/Art/UIFrames/top_hud_frame.png` — slice left/right **96px**, top/bottom **72px**, scale **0.4**. 원본은 `ArtSource/ui-frames/top_hud_frame.png`.
+- TopHUD 프레임 배경은 UI 요소 전체를 채우도록 `background-size: 100% 100%`와 `background-repeat: no-repeat`을 사용한다.
+- TopHUD 설정 버튼 아이콘: `Assets/Art/UIIcons/icon_settings.png` — **64×64px**로 중앙 정렬하고 버튼 텍스트는 표시하지 않는다. 터치 영역은 유지하되 버튼 배경과 테두리는 투명하게 표시한다. 원본은 `ArtSource/ui-icons/icon_settings.png`.
+- BottomPanel 콘텐츠 프레임: `Assets/Art/UIFrames/bottom_panel_content_frame.png` — `.tab-content`에 적용, slice left/right/top/bottom **92px**, scale **0.4**, 내부 안전 여백 **40px**. 원본은 `ArtSource/ui-frames/bottom_panel_content_frame.png`.
+- 벤치·장비 공용 슬롯 프레임: `Assets/Art/UIFrames/bench_slot_frame.png` — `.bench-slot`에 적용, slice left/right/top/bottom **190px**, scale **0.1**. 기본 상태 테두리는 투명, 합성 가능 상태는 **4px** 초록 CSS 테두리를 이미지 위에 표시한다. 원본은 `ArtSource/ui-frames/bench_slot_frame.png`.
+- 공용 버튼 프레임: `Assets/Art/UIFrames/button_wood_frame.png`은 `.btn`, `button_gold_frame.png`은 `.btn--primary`에 적용한다. 두 이미지 모두 slice left/right **180px**, top/bottom **160px**, scale **0.1**. 비활성 `.btn--disabled`는 배경 이미지를 제거하고 기존 회색 플랫 스타일을 사용한다. 원본은 `ArtSource/ui-frames/`에 보존한다.
+- 원형 링 프레임: `Assets/Art/UIFrames/frame_ring.png` — **256×256px** 고정형(9-slice 미사용). 스킬 플로팅 버튼 128px, TopHUD 소환사 초상화 96px, SummonerTab 초상화 104px에 공용 적용하고 초상화 이미지는 링 안쪽 자식 요소에 배치한다. 원본은 `ArtSource/ui-frames/frame_ring.png`.
+- 스프라이트 임포트: Filter **Point**, Compression **None** (SPEC §5.1 픽셀 임포트 규격).
+- 9-slice 적용 후에도 위 플랫 토큰은 폴백·틴트 기준으로 유지 (프레임 없는 요소·게이지 등).
+- 폰트: 픽셀 스킨 확정에 따라 한글 픽셀 폰트(갈무리 Galmuri 또는 네오둥근모, 둘 다 OFL) 도입 검토 — 도입 시 이 표와 에셋 대장에 기록 후 교체.
 
 ### 간격 · 크기 · 라운드 (1080 기준 px)
 
@@ -90,8 +147,9 @@ Assets/Scripts/UI/
     --radius-sm: 8px;  --radius-md: 12px;  --radius-lg: 20px;
     --touch-min: 96px;         /* 터치 타깃 최소 한 변 */
     --row-height: 128px;       /* UpgradeRow 공용 행 높이 */
+    --row-icon-size: 88px;     /* UpgradeRow 스탯 아이콘 영역 */
     --tab-height: 112px;       /* 탭바 높이 */
-    --strip-height: 140px;     /* 소환사 스트립 높이 */
+    --summoner-tab-profile-height: 140px; /* 소환사 탭 상단 프로필 높이 */
 }
 ```
 
@@ -121,8 +179,8 @@ Assets/Scripts/UI/
 1. 트리 구조는 SPEC §3.2에서 벗어나지 않는다. RootLayout이 TopHUD/FieldOverlay/BottomPanel을 `<ui:Instance>`(Template)로 포함.
 2. 반복 요소(강화/스킬/소환사 행, 벤치 슬롯)는 **템플릿 1개 + 런타임 Instantiate**. 복붙으로 행을 늘리지 않는다.
 3. UXML에 인라인 `style` 속성 금지 (레이아웃 프로토타입도 USS로).
-4. FieldOverlay는 `position: absolute`, `picking-mode="Ignore"` 기본 — 배지/버튼 등 상호작용 요소만 개별적으로 피킹 허용. 필드 터치를 UI가 가로채면 안 된다.
-5. 하단 패널 존 비율은 flex로: 상단 HUD ~8% / 필드 ~50% / 하단 패널 ~40% (SPEC §4.1). 픽셀 고정 높이는 행/탭/스트립 같은 내부 요소에만.
+4. FieldOverlay는 `position: absolute`, `picking-mode="Ignore"` 기본 — 스킬 버튼 등 상호작용 요소만 개별적으로 피킹 허용. 필드 터치를 UI가 가로채면 안 된다.
+5. 하단 패널 존 비율은 flex로: 상단 HUD ~8% / 필드 ~50% / 하단 패널 ~40% (SPEC §4.1). 픽셀 고정 높이는 행/탭/소환사 탭 프로필 같은 내부 요소에만.
 
 ## 7. C# 컨트롤러 패턴
 
@@ -149,11 +207,9 @@ public class TopHUDController
 
 ## 8. 월드 ↔ UI 브릿지 (스파이크 A/B의 규격)
 
-### 8.1 월드 앵커 배지 (방향 예고 배지 4개)
-- FieldOverlay의 배지 요소를 매 프레임(또는 카메라/레이아웃 변경 시) 동기화:
-  `Camera.WorldToScreenPoint(월드앵커)` → `RuntimePanelUtils.ScreenToPanel(panel, screenPos)` → `style.translate`.
-- Y축 반전 주의: 스크린 좌표는 하단 원점, 패널 좌표는 상단 원점.
-- 이 동기화 코드는 `WorldAnchorBinder` 하나로 일반화해 배지 4개 + 이후 다른 월드 앵커 UI에 재사용.
+### 8.1 필드 상단 웨이브 상태
+- 현재 웨이브와 잔여 몬스터 수는 TopHUD 아래의 FieldOverlay 상단 중앙에 표시한다.
+- 방향 예고 배지(N/E/S/W)는 사용하지 않는다. FieldOverlay는 웨이브 상태와 스킬 플로팅 버튼을 소유한다.
 
 ### 8.2 벤치(UI) → 필드(월드) 드래그 앤 드롭
 - 흐름: 벤치 슬롯 `PointerDownEvent` → 루트에 고스트 요소 생성(`picking-mode: Ignore`) → `PointerMoveEvent`로 고스트 이동 + 포인터 캡처 → `PointerUpEvent`에서 스크린 좌표로 `Physics2D.OverlapPoint`(슬롯 레이어) → 유효 슬롯이면 스냅 배치, 아니면 벤치 복귀.
@@ -161,10 +217,11 @@ public class TopHUDController
 
 ## 9. 인터랙션 필수 문법 (키우기 문법 — SPEC §4)
 
-- **방향 예고 배지**: "N ×24" 형식, 위협도 색(`--color-danger/warning/muted`). 하단 패널에 절대 묻히지 않게 FieldOverlay 소속.
+- **웨이브 상태**: HUD 아래 필드 상단 중앙에 현재 웨이브(예: `WAVE 12`)와 잔여 몬스터 수를 함께 표시한다. 전체 웨이브 한계는 표시하지 않는다.
 - **레드닷**: 탭 버튼 우상단 12px 원, `--color-reddot`. 강화 가능/새 장비 시 표시. 공용 클래스 `.reddot`.
 - **탭 전환**: 탭 열면 하단 패널 확장 + 필드 축소(USS transition), 전투는 계속 보이게.
-- **소환 버튼**: 우측 엄지 위치(패널 우하단), 비용 표시, 등급 확률 노출.
+- **소환 탭**: 좌측은 실제 보유 유닛만 들어가는 벤치 12슬롯과 `보유 용병 n/12`, 우측은 `용병 계약서 n장`·★1 직행 확률·`소환 ×1` 버튼을 세로 배치한다. 해금된 8종 전체를 선택 슬롯처럼 상시 나열하지 않는다.
+- **소환 버튼**: 우측 엄지 위치(패널 우하단), 용병 계약서 1장 비용과 등급 확률을 노출한다. 계약서가 0장이면 회색 비활성화한다.
 - **합성 가능 벤치 슬롯**: `--color-positive` 테두리 + "합성" 뱃지.
 - **터치 타깃**: 상호작용 요소는 최소 `--touch-min`(96px) 확보.
 
@@ -179,3 +236,10 @@ public class TopHUDController
 | 비활성 = 회색 + SetEnabled(false) | 버튼 숨기기 |
 | PanelSettings 1개, UIDocument 1개 | 화면별 패널 남발 |
 | UI 전환은 USS transition | UI에 DOTween 사용 |
+
+## 11. 재화 아이콘
+
+- TopHUD 재화 캡슐은 `Assets/Art/UIIcons/icon_gold.png`와 `Assets/Art/UIIcons/icon_gem.png`을 사용한다.
+- `capsule__icon`은 `--currency-icon-size`로 크기를 제어하며, 아이콘 PNG의 투명 배경을 그대로 표시한다.
+- 용병 계약서는 소환 탭 전용 런 재화이므로 TopHUD에 추가하지 않는다. 계약서 아이콘 에셋 제작 전에는 소환 탭의 텍스트 캡슐로 보유량을 표시한다.
+- 강화 스탯 아이콘은 `Assets/Art/UIIcons/icon_atk.png`, `icon_aspd.png`, `icon_crit.png`, `icon_hp.png`, `icon_range.png`, `icon_income.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 UpgradeRow의 88px 아이콘 영역에 `background-size: 100% 100%`로 표시한다.
