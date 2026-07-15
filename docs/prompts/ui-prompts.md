@@ -123,6 +123,55 @@ SPEC §2.4 인게임 강화 4종(공격력/공속/소환사 HP 회복/치명타)
 (6) a rolled parchment scroll
 ```
 
+### I5. 하단 주요 탭 5종 — `icons_tab_sheet.png`, 개별 생성본 → `icon_tab_summon / icon_tab_upgrade / icon_tab_skill / icon_tab_gear / icon_tab_summoner`
+
+5개 탭은 텍스트를 유지한 채 아이콘을 함께 표시한다. 소환/강화/스킬은 단일 가로 3칸 시트, 장비/소환사는 기존 3종을 스타일 레퍼런스로 사용해 개별 생성한다. 각 아이콘의 시각적 무게를 동일하게 맞춘다.
+
+```
+{N}=3, the icons are: (1) a rolled parchment summoning contract with a violet seal and rune,
+(2) a blacksmith hammer striking a small antique-gold upward chevron with two sparks,
+(3) a violet spellbook with a bright magical four-point star above it
+
+individual gear icon: a sturdy steel knight helmet with antique-gold rim and leather strap
+individual summoner icon: a short dark-haired human summoner bust with a violet crystal staff
+```
+
+### I6. 하단 탭 배경 2종 — `tab_button_inactive_frame / tab_button_active_frame`
+
+```
+inactive: wide 2:1 empty tab frame, thin weathered stone rim, recessed near-black dark walnut center,
+active: preserve the same geometry, warm muted tan oak center, restrained antique-gold highlight only on the top inner rim,
+straight-on and symmetrical, large quiet center, 9-slice-friendly corners, uniform #00FF00 outside,
+no text, icon, badge, shadow, perspective, glow, or watermark
+```
+
+### I7. 3택 보상 팝업 외곽 — `choice_modal_frame.png`
+
+```
+tall empty 3:4 portrait modal frame for three stacked reward choices,
+thin weathered gray-brown stone outer border, restrained dark-walnut inner trim,
+tiny antique-gold corner rivets, quiet near-black center, straight-on and 9-slice-friendly,
+uniform #00FF00 outside, no text, cards, buttons, dividers, glow, shadow, perspective, or watermark
+```
+
+### I8. 소환 룰렛 모달 캐비닛 — `summon_roulette_panel_frame.png`
+
+```
+empty vertical 3:4 fantasy slot-machine cabinet frame for a goblin mercenary summon roulette,
+strict 16-bit pixel art, thin weathered gray-brown stone, dark walnut, restrained aged brass rails,
+two tiny violet rune gems near the upper corners, broad quiet center, straight-on and 9-slice-friendly,
+uniform #00FF00 outside, no text, reel windows, cards, buttons, handles, glow, shadow, perspective, or watermark
+```
+
+### I9. 소환 룰렛 릴 창 — `summon_roulette_reel_frame.png`
+
+```
+empty wide 32:9 fantasy mechanical reel-window bezel,
+strict 16-bit pixel art, recessed near-black walnut center, thin dark-walnut and aged-brass rails,
+stone end caps, square corner bolts, matching top-down and bottom-up center pointers,
+uniform #00FF00 outside, no text, cards, portraits, buttons, handles, glow, shadow, perspective, or watermark
+```
+
 ## 3. 실패 대응 치트시트 (UI 특화)
 
 | 증상 | 추가/수정 키워드 |

@@ -7,6 +7,8 @@
 
 | 날짜 | 무엇을 | 프롬프트/지시 요지 | 결과물 |
 |---|---|---|---|
+| 07-14 | uGUI 3택 보상 UI 독립 프로토타입 구성 | 사용자 지시에 따라 기존 UI Toolkit 규칙의 임시 예외로 CanvasScaler 1080×1920, 암막, 9-slice 팝업, 세로 선택 카드 3개, 확정 버튼과 선택 상태 이동 컨트롤러를 독립 프리팹으로 구성 | Assets/UI/Prefabs/ChoicePrototypeCanvas.prefab, Assets/Scripts/UI/Prototype/ChoicePrototypeController.cs, Assets/Screenshots/choice_ugui_prototype_final.png |
+| 07-14 | 기본 적 고블린 스프라이트를 현재 런타임 웨이브에 연결 | `MonsterData`에 Sprite 참조를 추가하고 런타임 프로토타입 타임라인에 씬의 기본 몬스터 Sprite를 주입. 기존 잘못된 Summoner GameObject 참조를 Transform 참조로 교정해 화면 밖 몬스터가 실제 필드로 이동하도록 수정 | Assets/Scripts/Data/MonsterData.cs, StageTimeline.cs, Assets/Scripts/Core/GameManager.cs, Assets/Scripts/Units/MonsterController.cs, Assets/Scenes/SampleScene.unity |
 | 07-14 | 소환 경제를 골드에서 용병 계약서로 분리하고 소환 탭 UX 개편 | "웨이브 마무리마다 주는 스크롤로 소환" — 골드는 강화 전용, 계약서는 시작·웨이브 클리어 보상으로 지급. 실제 보유 유닛 12슬롯과 우측 계약서·확률·소환 액션 구조로 정리 | docs/SPEC.md, docs/ui-guidelines.md, Assets/Scripts/Core/, Assets/Scripts/Data/StageTimeline.cs, Assets/UI/UXML/tabs/SummonTab.uxml, Assets/UI/USS/BottomPanel.uss |
 | 07-14 | 골드 아이콘 단일 주화 리디자인 | 몬스터 드랍 가독성을 높이기 위해 기존 겹친 주화 3개를 단일 두꺼운 금화로 편집. 기존 문양·팔레트·픽셀 스타일 유지 후 크로마키 제거 | Assets/Art/UIIcons/icon_gold.png; 원본 ArtSource/ui-icons/ |
 | 07-14 | TopHUD 골드·젬 아이콘 적용 | 기존 재화 캡슐의 색상 원형 플레이스홀더를 실제 투명 PNG 아이콘 참조로 교체하고 공통 크기 토큰을 추가 | Assets/UI/USS/common.uss, Assets/UI/USS/variables.uss, docs/ui-guidelines.md |
@@ -23,11 +25,22 @@
 | 07-14 | 웨이브 상태를 TopHUD에서 필드 상단 오버레이로 이동하고 표시 간소화 | "wave가 HUD에 들어가있거든? 아래로 빼줘야해" / "현재 웨이브만 딱 보여주면" — MCP로 UIDocument 트리를 확인한 뒤 FieldOverlay 상단 중앙에 배치, 전체 웨이브 표기·테두리·배경 제거 | Assets/UI/UXML/FieldOverlay.uxml, Assets/UI/USS/FieldOverlay.uss, Assets/Scripts/UI/FieldOverlayController.cs |
 | 07-14 | TopHUD 배경 프레임 생성 및 UI Toolkit 9-slice 적용 | 16-bit pixel-art 가로형 HUD 프레임 — 낡은 석재 테두리, 어두운 목재 내부, 절제된 금색 포인트, 중앙 텍스트 영역 비움. 외곽 검정 영역만 투명화해 목재 질감 보존 | ArtSource/ui-frames/top_hud_frame.png → Assets/Art/UIFrames/top_hud_frame.png; Assets/UI/USS/TopHUD.uss |
 | 07-14 | 그룹 A 실행 기반 구현 — StageTimeline 런타임 실행, 외곽 스폰, 몬스터 이동·소환사 피해, 씬·HUD 연결 | 기존 방향 레인 규칙을 화면 외곽 스폰 구역으로 전환하고, 임의 웨이브 수를 실행하는 데이터 기반 런타임 골격 구현 | Assets/Scripts/Core/GameManager.cs, WaveManager.cs, MonsterSpawner.cs, Assets/Scripts/Units/MonsterController.cs, Assets/Scripts/Data/StageTimeline.cs, Assets/Tests/EditMode/StageTimelineTests.cs |
+| 07-14 | 소환사 자동 투사체 공격·속성 상성·풀링 구현 | 가장 가까운 몬스터 자동 조준, 소환사 하위 FirePosition 발사, 에너지/화염/빙결 런타임 교체, 우향 스프라이트 진행 방향 회전, 12개 선할당 풀, SPEC의 유리 ×1.5·불리 ×0.75 배율을 코드와 테스트로 구현 | Assets/Scripts/Units/SummonerAttackController.cs, Assets/Scripts/Core/ElementalMatchup.cs, Assets/Tests/EditMode/ElementalMatchupTests.cs, Assets/Scenes/SampleScene.unity |
 
 ## 에셋 (이미지 — ChatGPT 이미지 생성)
 
 | 날짜 | 무엇을 | 프롬프트 | 결과물 |
 |---|---|---|---|
+| 07-14 | 아군 고블린 화염술사 정면 스프라이트 생성 | 궁수를 종족·제작 규격 앵커로 삼고 붉은 뾰족 두건, 굽은 지팡이, 머리보다 작은 주황 불꽃으로 화염 범위 역할을 분리. 마젠타 제거 후 15색 하드 알파로 가공 | [goblin-unit-prompts.md](prompts/goblin-unit-prompts.md) §3; ArtSource/units/unit_goblin_fire_mage.png → Assets/Art/Units/unit_goblin_fire_mage.png |
+| 07-14 | 아군 고블린 궁수 정면 스프라이트 생성 | 기존 고블린의 얼굴·체형과 슬라임의 저밀도 픽셀 스타일을 참조해, 대각선 장궁·황토색 숄·부분 화살통으로 역할 실루엣을 분리. 마젠타 제거 후 15색 하드 알파로 가공 | [goblin-unit-prompts.md](prompts/goblin-unit-prompts.md); ArtSource/units/unit_goblin_archer.png → Assets/Art/Units/unit_goblin_archer.png |
+| 07-14 | 3택 보상 팝업 외곽 프레임 생성 및 uGUI 9-slice 적용 | 기존 돌·목재 UI를 레퍼런스로 3:4 세로형 빈 모달 프레임을 생성하고 크로마 제거·768×1024px 가공 | ArtSource/ui-frames/choice_modal_frame.png → Assets/Art/UIFrames/choice_modal_frame.png; ChoicePrototypeCanvas.prefab |
+| 07-15 | 소환 슬롯머신 전용 캐비닛·릴 프레임 생성 및 UI Toolkit 적용 | 기존 돌 슬롯·목재 버튼·모달 프레임을 스타일 레퍼런스로 사용해 보랏빛 룬 장식의 세로 캐비닛과 중앙 결과 포인터가 있는 32:9 릴 창을 생성. 단색 패널·릴·카드를 이미지 프레임으로 교체하고 릴 내부 패딩을 애니메이션 중심 계산에 반영 | ArtSource/ui-frames/summon_roulette_* → Assets/Art/UIFrames/summon_roulette_*; Assets/UI/USS/RootLayout.uss, variables.uss; Assets/Scripts/UI/SummonRouletteView.cs; Assets/Screenshots/summon_roulette_skin_applied.png |
+| 07-14 | 월드 캐릭터 PPU를 200으로 통일해 소환사 대비 크기 교정 | Unity에서 PPU를 낮추면 커지는 관계를 확인하고 소환사·아군·적 캐릭터는 PPU 200, 배경·필드 타일은 PPU 100으로 카테고리별 규격화 | enemy_goblin_grunt.png, unit_punch_slime.png 및 이동·공격 시트; SPEC §5.1, ArtSource/README.md, 캐릭터 프롬프트 |
+| 07-14 | 웨이브 고블린 크기 미세 조정 | 고블린 PPU를 200에서 220으로 높여 캐릭터 기본 크기보다 약 9% 축소하고 소환사보다 작은 실루엣을 강화 | Assets/Art/Enemies/enemy_goblin_grunt.png.meta; 에셋 대장·고블린 프롬프트 동기화 |
+| 07-14 | 기본 적 고블린 3뷰 초안 생성 후 비채택 | 정면·후면·우측면 시트를 만들었으나 현재 게임에 불필요한 뷰와 프로젝트 기준보다 높은 디테일 밀도로 비채택 | [case-05](prompt-cases/case-05-goblin-style-simplification/) v1 |
+| 07-14 | 적 고블린을 정면 단일 저밀도 픽셀 스프라이트로 재생성 | 주먹 슬라임을 스타일 기준으로 삼아 정면 1개·64px급 정보량·최대 15색으로 단순화하고, 마젠타 제거 후 하드 알파·최근접 확대 적용 | [enemy-goblin-prompts.md](prompts/enemy-goblin-prompts.md); ArtSource/enemies/enemy_goblin_grunt.png → Assets/Art/Enemies/enemy_goblin_grunt.png; [case-05](prompt-cases/case-05-goblin-style-simplification/) v2 |
+| 07-14 | 장비·소환사 탭 아이콘과 활성·비활성 탭 배경 생성·적용 | 기존 탭 아이콘을 기준으로 강철 투구와 인간 소환사 흉상 아이콘을 개별 생성하고, 얇은 돌 테두리 안의 어두운 목재/밝은 목재 9-slice 탭 프레임 2종 생성 | ArtSource/ui-icons/, ArtSource/ui-frames/ → Assets/Art/UIIcons/icon_tab_gear·summoner.png, Assets/Art/UIFrames/tab_button_inactive·active_frame.png; BottomPanel 5탭 적용 |
+| 07-14 | 하단 소환·강화·스킬 탭 아이콘 3종 생성·분리·적용 | 기존 공격력·체력·설정 아이콘과 목재 프레임을 스타일 레퍼런스로 사용해 소환 계약서/강화 망치/마법서의 가로 3칸 크로마키 시트를 생성 | ArtSource/ui-icons/icons_tab_sheet.png → Assets/Art/UIIcons/icon_tab_summon·upgrade·skill.png; BottomPanel 탭에 텍스트와 함께 44px 적용 |
 | 07-14 | 강화 스탯 아이콘 6종 시트 생성·슬라이스·적용 | 기존 골드·젬·설정 아이콘을 스타일 레퍼런스로 사용해 3×2 시트(공격력/공속/치명타/HP 회복/사거리/골드 획득)를 생성하고 투명 128px 아이콘으로 분리 | ArtSource/ui-icons/icons_stat_sheet.png → Assets/Art/UIIcons/icon_atk·aspd·crit·hp·range·income.png; UpgradeRow 강화 탭 4종 적용 |
 | 07-14 | 원형 돌·골드 링 프레임 생성 및 공용 적용 | 기존 슬롯·버튼·TopHUD 프레임을 스타일 레퍼런스로 사용해 얇은 풍화 석재 링과 동서남북 금색 리벳을 생성. 크로마 제거 후 고정형 256px로 가공 | ArtSource/ui-frames/frame_ring.png → Assets/Art/UIFrames/frame_ring.png; 스킬 플로팅 버튼·TopHUD/SummonerTab 소환사 초상화 프레임 |
 | 07-14 | 설정 버튼 톱니 아이콘 생성·배경 제거·TopHUD 적용 | 낡은 석재·목재 HUD에 맞춘 16-bit 픽셀 아트 8톱니 골드 기어, 초록 크로마키 배경, 버튼 판·텍스트·그림자 제외 | ArtSource/ui-icons/icon_settings.png → Assets/Art/UIIcons/icon_settings.png; TopHUD 설정 버튼에 64px 중앙 정렬 적용 |
@@ -46,6 +59,8 @@
 | 07-14 | 주먹 슬라임 기본 공격용 3×3 9프레임 스프라이트 시트 생성 | 공격 시 임시 주먹이 천천히 돌출·유지·복귀하도록 9프레임 구성. 기본 몸체는 얼굴·사지 없는 상태 유지 | ArtSource/units/unit_punch_slime_attack_sheet.png → Assets/Art/Units/unit_punch_slime_attack_sheet.png (384×384px, 프레임당 128×128px) |
 | 07-14 | 주먹 슬라임 공격 주먹 형태를 양손형으로 개선 | 첨부 레퍼런스 기반 image-to-image 편집, reference-image conditioning과 invariant locking으로 양쪽 짧은 팔·뭉툭한 주먹을 고정하고 단일 긴 돌기를 제거 | docs/prompt-cases/case-04-punch-shape/, unit_punch_slime_attack_sheet.png v2 |
 | 07-14 | 주먹 슬라임 공격 콘티 기반 단일 주먹 동작으로 재생성 | 사용자가 그린 3×3 러프 콘티를 sketch-to-image/reference conditioning으로 반영. 오른쪽 한쪽 팔·주먹의 준비→대각선 돌출→회수 타이밍을 9프레임으로 고정 | docs/prompt-cases/case-04-punch-shape/v3.png, unit_punch_slime_attack_sheet.png v3 |
+| 07-14 | 소환사 기본 투사체 3종 생성·가공 | 기존 소환사 전신을 스타일 레퍼런스로 사용해 무속성 에너지 볼트·화염 파이어볼·빙결 아이스볼을 각각 생성. 크로마키 제거 후 방향 회전이 가능한 우향 128×128px 정적 스프라이트로 가공 | docs/prompts/projectile-prompts.md; ArtSource/projectiles/ → Assets/Art/Projectiles/ |
+| 07-15 | 소환사 투사체 발사 원점 연결 수정 | SampleScene의 `Summoner/FirePosition`을 `SummonerAttackController`에 직렬화 연결하고 런타임 자식 검색·누락 오류 진단을 추가 | Assets/Scenes/SampleScene.unity, Assets/Scripts/Units/SummonerAttackController.cs |
 
 > 개별 에셋은 [asset-ledger.csv](asset-ledger.csv)에 전수 기록. 여기에는 배치 작업 단위로 요약.
 
@@ -55,6 +70,9 @@
 |---|---|---|---|
 | | | | |
 | 07-13 | Stage Timeline ScriptableObject and Unity editor window implementation | User requirement: editable stage wave count, monster composition, and balance overrides from a direct editor menu | Assets/Scripts/Data/StageTimeline.cs, Assets/Scripts/Data/MonsterData.cs, Assets/Editor/StageTimelineEditorWindow.cs |
+| 07-15 | Roulette summon vertical slice: contract consumption, weighted result resolver, bench registration, and UI Toolkit DOTween reel animation | User-approved slot-machine summon flow with currency consolation result, direct ★1 jackpot, unowned rare preference, and skip-safe result commit | Assets/Scripts/Core/SummonManager.cs, Assets/Scripts/Core/SummonResult.cs, Assets/Scripts/Data/SummonUnitData.cs, Assets/Scripts/UI/SummonRouletteView.cs |
+| 07-15 | Full-screen summon reel modal migration | Moved the roulette reel out of the bottom summon tab into a RootLayout overlay while keeping the summon button locked until result confirmation | Assets/UI/UXML/RootLayout.uxml, Assets/UI/USS/RootLayout.uss, Assets/Scripts/UI/SummonRouletteView.cs |
+| 07-15 | PoolBoss·Animated Sprite Outline 기반 소환/전투 수직 슬라이스 | 자유 이동 슬라임 8종, 공용 투사체·피해·상태, 클릭 공격, 벤치/필드 드래그 배치, 3머지, HUD 골드 흡수 연출을 기능 단위로 구현하고 정적 빌드 검증 | Assets/Scripts/Core/RuntimePoolService.cs, CombatProjectileService.cs, GoldRewardFlow.cs; Assets/Scripts/Units/SummonedUnit*.cs, CombatInputController.cs, AnimatedOutlineFeedback.cs; Assets/Scripts/UI/BottomPanelController.cs, TopHUDController.cs |
 
 ## 사운드 (Suno / ElevenLabs / jsfxr)
 
