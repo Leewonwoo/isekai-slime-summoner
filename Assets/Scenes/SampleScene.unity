@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &115237140
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 115237141}
+  m_Layer: 0
+  m_Name: FirePosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &115237141
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 115237140}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.227, y: 0.112, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1104651445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &257950157
 GameObject:
   m_ObjectHideFlags: 0
@@ -441,6 +472,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1104651445}
   - component: {fileID: 1104651446}
+  - component: {fileID: 1104651447}
   m_Layer: 0
   m_Name: Summoner
   m_TagString: Untagged
@@ -460,7 +492,8 @@ Transform:
   m_LocalPosition: {x: 0.19, y: 0.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 115237141}
   m_Father: {fileID: 1839978296}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1104651446
@@ -522,6 +555,32 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1104651447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1104651444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d71dce296217d4246aaeb91e4a43d8dc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Units.SummonerAttackController
+  selectedProjectile: 0
+  energyBoltSprite: {fileID: 21300000, guid: ff37767346c8ea1459355e522a28a9e6, type: 3}
+  fireballSprite: {fileID: 21300000, guid: 9b10f9039114ed04887effab2e3c8366, type: 3}
+  iceballSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
+  attackDamage: 12
+  attacksPerSecond: 1.25
+  attackRange: 10
+  projectileSpeed: 10
+  clickAttackDamage: 18
+  clickAttacksPerSecond: 2
+  clickHitRadius: 0.65
+  firePosition: {fileID: 115237141}
+  spawnOffset: 0.4
+  projectileScale: 0.65
 --- !u!1 &1477278019
 GameObject:
   m_ObjectHideFlags: 0
@@ -765,9 +824,21 @@ MonoBehaviour:
   stageTimeline: {fileID: 0}
   autoStart: 1
   useRuntimePrototypeWhenTimelineMissing: 1
-  summoner: {fileID: 1104651444}
+  runtimePrototypeMonsterSprite: {fileID: 21300000, guid: 07da60cd6b815bc448ba897100442ed4, type: 3}
+  summoner: {fileID: 1104651445}
   maxCoreHp: 100
   startingGold: 0
+  startingSummonContracts: 10
+  summonPool: []
+  runtimePrototypeSummonSprite: {fileID: 21300000, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
+  runtimePrototypeNeutralProjectileSprite: {fileID: 21300000, guid: ff37767346c8ea1459355e522a28a9e6, type: 3}
+  runtimePrototypeFireProjectileSprite: {fileID: 21300000, guid: 9b10f9039114ed04887effab2e3c8366, type: 3}
+  runtimePrototypeIceProjectileSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
+  autoDeploySummonedUnits: 1
+  currencyResultChance: 0.18
+  directRankOneChance: 0.05
+  currencyResultGold: 10
+  summonBenchCapacity: 12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
