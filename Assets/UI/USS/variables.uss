@@ -55,6 +55,11 @@
     --row-height: 128px;
     --row-icon-size: 88px;
     --tab-height: 112px;
+    --tab-button-width: 20%;
+    --tab-icon-size: 44px;
+    --tab-frame-slice-x: 56px;
+    --tab-frame-slice-y: 48px;
+    --tab-frame-slice-scale: 0.35;
     --summoner-tab-profile-height: 140px;
 
     /* TopHUD 구조 (1080 기준) */
@@ -78,6 +83,16 @@
     --bench-slot-size: 120px;
     --summon-side-width: 320px;
     --summon-contract-panel-height: 96px;
+    --summon-modal-width: 84%;
+    --summon-modal-height: 52%;
+    --summon-modal-content-inset: 72px;
+    --summon-modal-frame-slice: 112px;
+    --summon-modal-frame-slice-scale: 0.45;
+    --summon-modal-reel-height: 230px;
+    --summon-modal-reel-inset-x: 48px;
+    --summon-modal-card-width: 180px;
+    --summon-modal-card-height: 150px;
+    --summon-modal-card-gap: 16px;
 
     /* 폰트 */
     --font-display: 56px;

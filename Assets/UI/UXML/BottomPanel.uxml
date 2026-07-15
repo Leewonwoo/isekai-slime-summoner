@@ -7,15 +7,38 @@
     <Template name="SummonerTab" src="/Assets/UI/UXML/tabs/SummonerTab.uxml" />
     <VisualElement name="bottom-panel" class="bottom-panel">
         <VisualElement name="tab-bar" class="tab-bar">
-            <Button name="tab-summon" class="tab-bar__button tab-bar__button--active" text="소환" />
-            <Button name="tab-upgrade" class="tab-bar__button" text="강화">
+            <Button name="tab-summon" class="tab-bar__button tab-bar__button--active">
+                <VisualElement class="tab-bar__content" picking-mode="Ignore">
+                    <VisualElement class="tab-bar__icon tab-bar__icon--summon" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="소환" picking-mode="Ignore" />
+                </VisualElement>
+            </Button>
+            <Button name="tab-upgrade" class="tab-bar__button">
+                <VisualElement class="tab-bar__content" picking-mode="Ignore">
+                    <VisualElement class="tab-bar__icon tab-bar__icon--upgrade" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="강화" picking-mode="Ignore" />
+                </VisualElement>
                 <VisualElement name="reddot-upgrade" class="reddot hidden" picking-mode="Ignore" />
             </Button>
-            <Button name="tab-skill" class="tab-bar__button" text="스킬" />
-            <Button name="tab-gear" class="tab-bar__button" text="장비">
+            <Button name="tab-skill" class="tab-bar__button">
+                <VisualElement class="tab-bar__content" picking-mode="Ignore">
+                    <VisualElement class="tab-bar__icon tab-bar__icon--skill" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="스킬" picking-mode="Ignore" />
+                </VisualElement>
+            </Button>
+            <Button name="tab-gear" class="tab-bar__button">
+                <VisualElement class="tab-bar__content" picking-mode="Ignore">
+                    <VisualElement class="tab-bar__icon tab-bar__icon--gear" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="장비" picking-mode="Ignore" />
+                </VisualElement>
                 <VisualElement name="reddot-gear" class="reddot hidden" picking-mode="Ignore" />
             </Button>
-            <Button name="tab-summoner" class="tab-bar__button" text="소환사" />
+            <Button name="tab-summoner" class="tab-bar__button">
+                <VisualElement class="tab-bar__content" picking-mode="Ignore">
+                    <VisualElement class="tab-bar__icon tab-bar__icon--summoner" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="소환사" picking-mode="Ignore" />
+                </VisualElement>
+            </Button>
         </VisualElement>
         <VisualElement name="tab-content" class="tab-content">
             <Instance template="SummonTab" name="page-summon" class="tab-page" />

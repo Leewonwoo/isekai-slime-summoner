@@ -1,4 +1,8 @@
+using System;
 using System.Collections.Generic;
+using CrossDefense.Core;
+using CrossDefense.Data;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace CrossDefense.UI
@@ -8,15 +12,26 @@ namespace CrossDefense.UI
     {
         const int BenchSlotCount = 12;
         const int GearSlotCount = 6;
+        const float BenchDragThreshold = 22f;
 
         static readonly string[] TabKeys = { "summon", "upgrade", "skill", "gear", "summoner" };
 
         readonly Dictionary<string, Button> _tabButtons = new();
         readonly Dictionary<string, VisualElement> _tabPages = new();
         readonly VisualElement _root;
+        readonly VisualElement _bench;
+        readonly List<VisualElement> _benchSlots = new();
         readonly Label _benchCount;
         readonly Label _summonContractCount;
         readonly Button _summonButton;
+        int _summonContracts;
+        bool _isSummonAnimating;
+
+        public event Action SummonRequested;
+        public event Action<SummonUnitInstance, Vector2> BenchDragStarted;
+        public event Action<SummonUnitInstance, Vector2> BenchDragMoved;
+        public event Action<SummonUnitInstance, Vector2> BenchDragEnded;
+        public bool IsSummonAnimating => _isSummonAnimating;
 
         public BottomPanelController(VisualElement root, VisualTreeAsset upgradeRowTemplate)
         {
@@ -30,11 +45,13 @@ namespace CrossDefense.UI
                 button.clicked += () => SelectTab(captured);
             }
 
-            BuildSlots(root.Q<VisualElement>("bench"), BenchSlotCount);
+            _bench = root.Q<VisualElement>("bench");
+            BuildBenchSlots();
             BuildSlots(root.Q<VisualElement>("gear-slots"), GearSlotCount);
             _benchCount = root.Q<Label>("bench-count");
             _summonContractCount = root.Q<Label>("summon-contract-count");
             _summonButton = root.Q<Button>("summon-button");
+            _summonButton.clicked += () => SummonRequested?.Invoke();
             SetBenchUsage(0);
             SetSummonContracts(0);
 
@@ -66,10 +83,94 @@ namespace CrossDefense.UI
 
         public void SetSummonContracts(int amount)
         {
+            _summonContracts = amount;
             _summonContractCount.text = UIFormat.SummonContracts(amount);
-            bool canSummon = amount > 0;
+            UpdateSummonButtonState();
+        }
+
+        public void SetSummonAnimationState(bool isAnimating)
+        {
+            _isSummonAnimating = isAnimating;
+            UpdateSummonButtonState();
+        }
+
+        public void SetBench(IReadOnlyList<SummonUnitInstance> units)
+        {
+            for (int i = 0; i < _benchSlots.Count; i++)
+            {
+                var slot = _benchSlots[i];
+                slot.Clear();
+                if (units == null || i >= units.Count)
+                    continue;
+
+                var instance = units[i];
+                var card = new VisualElement();
+                card.AddToClassList("bench-card");
+                var name = new Label(instance.Unit == null ? "알 수 없는 유닛" : instance.Unit.DisplayName);
+                name.AddToClassList("bench-card__name");
+                var rank = new Label(instance.Rank <= 0 ? "기본" : new string('★', instance.Rank));
+                rank.AddToClassList("bench-card__rank");
+                card.Add(rank);
+                card.Add(name);
+                RegisterBenchDrag(card, instance);
+                slot.Add(card);
+            }
+
+            SetBenchUsage(units == null ? 0 : units.Count);
+        }
+
+        void RegisterBenchDrag(VisualElement card, SummonUnitInstance instance)
+        {
+            Vector2 pressPosition = default;
+            bool dragging = false;
+            card.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (evt.button != 0) return;
+                card.CapturePointer(evt.pointerId);
+                pressPosition = evt.position;
+                dragging = false;
+                evt.StopPropagation();
+            });
+            card.RegisterCallback<PointerMoveEvent>(evt =>
+            {
+                if (!card.HasPointerCapture(evt.pointerId)) return;
+                if (!dragging && Vector2.Distance(pressPosition, evt.position) >= BenchDragThreshold)
+                {
+                    dragging = true;
+                    BenchDragStarted?.Invoke(instance, evt.position);
+                }
+                if (!dragging) return;
+                BenchDragMoved?.Invoke(instance, evt.position);
+                evt.StopPropagation();
+            });
+            card.RegisterCallback<PointerUpEvent>(evt =>
+            {
+                if (!card.HasPointerCapture(evt.pointerId)) return;
+                card.ReleasePointer(evt.pointerId);
+                if (dragging)
+                    BenchDragEnded?.Invoke(instance, evt.position);
+                dragging = false;
+                evt.StopPropagation();
+            });
+        }
+
+        void UpdateSummonButtonState()
+        {
+            bool canSummon = _summonContracts > 0 && !_isSummonAnimating;
             _summonButton.SetEnabled(canSummon);
             _summonButton.EnableInClassList("btn--disabled", !canSummon);
+        }
+
+        void BuildBenchSlots()
+        {
+            if (_bench == null) return;
+            for (int i = 0; i < BenchSlotCount; i++)
+            {
+                var slot = new VisualElement();
+                slot.AddToClassList("bench-slot");
+                _bench.Add(slot);
+                _benchSlots.Add(slot);
+            }
         }
 
         static void BuildSlots(VisualElement container, int count)

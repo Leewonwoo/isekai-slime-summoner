@@ -11,5 +11,18 @@
             <Instance template="FieldOverlay" name="field-overlay" picking-mode="Ignore" />
         </VisualElement>
         <Instance template="BottomPanel" name="zone-bottom" />
+        <VisualElement name="summon-modal-overlay" class="summon-modal-overlay hidden">
+            <VisualElement name="summon-modal-backdrop" class="summon-modal__backdrop" picking-mode="Ignore" />
+            <VisualElement name="summon-modal-panel" class="summon-modal__panel">
+                <Label name="summon-modal-title" class="summon-modal__title" text="용병 소환" picking-mode="Ignore" />
+                <Label name="summon-modal-subtitle" class="summon-modal__subtitle" text="계약서 1장을 사용했습니다" picking-mode="Ignore" />
+                <VisualElement name="summon-modal-reel-viewport" class="summon-modal-reel-viewport" picking-mode="Ignore">
+                    <VisualElement name="summon-modal-reel-strip" class="summon-modal-reel-strip" picking-mode="Ignore" />
+                    <VisualElement name="summon-modal-center-marker" class="summon-modal-center-marker" picking-mode="Ignore" />
+                </VisualElement>
+                <Label name="summon-modal-result-label" class="summon-modal__result" text="소환 준비" picking-mode="Ignore" />
+                <Button name="summon-modal-skip-button" class="summon-modal__skip btn btn--primary" text="결과 보기" />
+            </VisualElement>
+        </VisualElement>
     </VisualElement>
 </UXML>
