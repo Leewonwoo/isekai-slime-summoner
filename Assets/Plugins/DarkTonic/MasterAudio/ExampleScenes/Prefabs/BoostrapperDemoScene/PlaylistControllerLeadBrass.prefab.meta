@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: dd03210627a52364d8fd1f542c655466
+NativeFormatImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 212962
+  packageName: 'Master Audio 2022: AAA Sound'
+  packageVersion: 1.1.2
+  assetPath: Assets/Plugins/DarkTonic/MasterAudio/ExampleScenes/Prefabs/BoostrapperDemoScene/PlaylistControllerLeadBrass.prefab
+  uploadId: 940600

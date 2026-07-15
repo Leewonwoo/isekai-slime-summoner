@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: f9961ebd5e721f94e9356c2958a91f87
+timeCreated: 1642925653
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 212962
+  packageName: 'Master Audio 2022: AAA Sound'
+  packageVersion: 1.1.2
+  assetPath: Assets/Plugins/DarkTonic/MasterAudioMultiplayer/MasterAudioMultiplayerAdapter.cs
+  uploadId: 940600
