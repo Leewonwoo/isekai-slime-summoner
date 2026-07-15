@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3935155715b2f464888a7378259fbf33
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/Editor/UndoHelper.cs
+  uploadId: 940970

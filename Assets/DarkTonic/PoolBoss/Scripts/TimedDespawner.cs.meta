@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8fbdf1d0f8421fe45bbd67ae177eda65
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/PoolBoss/Scripts/TimedDespawner.cs
+  uploadId: 940970

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2094b3483abfa294e8f875d77c46178a
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/PoolBoss/Scripts/PoolableInfo.cs
+  uploadId: 940970

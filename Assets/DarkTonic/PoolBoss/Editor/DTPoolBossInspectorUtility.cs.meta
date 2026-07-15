@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0c9096f80f14e4448b82d616db5f4edd
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/PoolBoss/Editor/DTPoolBossInspectorUtility.cs
+  uploadId: 940970
