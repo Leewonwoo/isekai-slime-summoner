@@ -15,6 +15,13 @@
 - 필드를 UI Toolkit으로 그리지 않는다. UI가 월드 위에 얹히는 건 **FieldOverlay의 배지/버튼**뿐.
 - uGUI(Canvas) 사용 금지. UI는 전부 UI Toolkit으로 통일.
 
+### 임시 uGUI 프로토타입 예외 (2026-07-14 사용자 지시)
+
+- 3택 보상 UX 검증용 `ChoicePrototypeCanvas`만 uGUI로 임시 제작한다. 기존 UIDocument와 게임 로직에는 연결하지 않는다.
+- 기준 해상도는 **1080×1920**, CanvasScaler는 Scale With Screen Size / Match Width Or Height **0**을 사용한다.
+- 팝업은 `Assets/Art/UIFrames/choice_modal_frame.png`를 9-slice로 사용하며 기준 크기 **920×1450px**, Sprite Border **64px**로 설정한다.
+- 프로토타입 채택 여부가 결정되기 전에는 다른 화면으로 uGUI 사용 범위를 확대하지 않는다.
+
 ## 2. 파일 구조와 네이밍
 
 ```
@@ -135,6 +142,11 @@ Assets/Scripts/UI/
 - 벤치·장비 공용 슬롯 프레임: `Assets/Art/UIFrames/bench_slot_frame.png` — `.bench-slot`에 적용, slice left/right/top/bottom **190px**, scale **0.1**. 기본 상태 테두리는 투명, 합성 가능 상태는 **4px** 초록 CSS 테두리를 이미지 위에 표시한다. 원본은 `ArtSource/ui-frames/bench_slot_frame.png`.
 - 공용 버튼 프레임: `Assets/Art/UIFrames/button_wood_frame.png`은 `.btn`, `button_gold_frame.png`은 `.btn--primary`에 적용한다. 두 이미지 모두 slice left/right **180px**, top/bottom **160px**, scale **0.1**. 비활성 `.btn--disabled`는 배경 이미지를 제거하고 기존 회색 플랫 스타일을 사용한다. 원본은 `ArtSource/ui-frames/`에 보존한다.
 - 원형 링 프레임: `Assets/Art/UIFrames/frame_ring.png` — **256×256px** 고정형(9-slice 미사용). 스킬 플로팅 버튼 128px, TopHUD 소환사 초상화 96px, SummonerTab 초상화 104px에 공용 적용하고 초상화 이미지는 링 안쪽 자식 요소에 배치한다. 원본은 `ArtSource/ui-frames/frame_ring.png`.
+- 하단 탭 프레임: `Assets/Art/UIFrames/tab_button_inactive_frame.png`과 `tab_button_active_frame.png` — 모든 탭 버튼에 9-slice로 적용한다. slice left/right **56px**, top/bottom **48px**, scale **0.35**. 활성 탭은 밝은 목재와 상단 골드 라인, 비활성 탭은 어두운 목재 홈으로 구분한다. 원본은 `ArtSource/ui-frames/`에 보존한다.
+- 3택 프로토타입 팝업 프레임: `Assets/Art/UIFrames/choice_modal_frame.png` — uGUI `Image.Type.Sliced`, Sprite Border left/top/right/bottom **64px**, 기준 표시 크기 **920×1450px**. 원본은 `ArtSource/ui-frames/choice_modal_frame.png`.
+- 소환 룰렛 모달 외곽: `Assets/Art/UIFrames/summon_roulette_panel_frame.png` — `.summon-modal__panel`에 9-slice로 적용한다. 원본 크기 **768×1024px**, slice left/top/right/bottom **112px**, scale **0.45**, 내부 안전 여백 **72px**. 원본은 `ArtSource/ui-frames/summon_roulette_panel_frame.png`.
+- 소환 룰렛 릴 창: `Assets/Art/UIFrames/summon_roulette_reel_frame.png` — `.summon-modal-reel-viewport`에 적용한다. 원본 크기 **1024×288px**, 기준 표시 비율 **32:9**, `background-size: 100% 100%`, 좌우 내부 여백 **48px**. 중앙 상·하 포인터가 늘어나므로 9-slice는 사용하지 않는다. 원본은 `ArtSource/ui-frames/summon_roulette_reel_frame.png`.
+- 소환 룰렛 카드: 기본 상태는 기존 `bench_slot_frame.png`, 최종 결과는 기존 `button_gold_frame.png`를 재사용한다. 카드 기준 크기는 **180×150px**, 카드 간격은 **16px**이며 별도 단색 배경과 CSS 테두리는 두지 않는다.
 - 스프라이트 임포트: Filter **Point**, Compression **None** (SPEC §5.1 픽셀 임포트 규격).
 - 9-slice 적용 후에도 위 플랫 토큰은 폴백·틴트 기준으로 유지 (프레임 없는 요소·게이지 등).
 - 폰트: 픽셀 스킨 확정에 따라 한글 픽셀 폰트(갈무리 Galmuri 또는 네오둥근모, 둘 다 OFL) 도입 검토 — 도입 시 이 표와 에셋 대장에 기록 후 교체.
@@ -149,6 +161,11 @@ Assets/Scripts/UI/
     --row-height: 128px;       /* UpgradeRow 공용 행 높이 */
     --row-icon-size: 88px;     /* UpgradeRow 스탯 아이콘 영역 */
     --tab-height: 112px;       /* 탭바 높이 */
+    --tab-button-width: 20%;   /* 하단 고정 5탭 균등 폭 */
+    --tab-icon-size: 44px;     /* 하단 5탭 아이콘 */
+    --tab-frame-slice-x: 56px;
+    --tab-frame-slice-y: 48px;
+    --tab-frame-slice-scale: 0.35;
     --summoner-tab-profile-height: 140px; /* 소환사 탭 상단 프로필 높이 */
 }
 ```
@@ -171,7 +188,7 @@ Assets/Scripts/UI/
    - **예외 3가지만 허용**: ① 월드 앵커 위치 동기화(배지 `style.translate`), ② 세이프 에어리어 패딩, ③ 연속 수치 게이지 fill(`.gauge__fill`의 `style.width` — HP/EXP 등).
 3. 상태 변형은 `--modifier` 클래스: `.badge--danger`, `.buy-button--disabled`, `.tab__button--active`, `.slot--mergeable`.
 4. `:hover` 의존 금지 (모바일). 눌림 피드백은 `:active`로.
-5. 전환 효과는 USS `transition`으로 선언 (예: 탭 콘텐츠 페이드, 패널 확장). DOTween은 월드 오브젝트 전용 — UI 트윈에 쓰지 않는다.
+5. 전환 효과는 USS `transition`으로 선언 (예: 탭 콘텐츠 페이드, 패널 확장). DOTween은 원칙적으로 월드 오브젝트 전용이다. 단, 소환 룰렛 릴과 몬스터 드랍 골드가 HUD에 도착한 직후의 **골드 숫자 카운트업**은 값 보간만 허용하며 레이아웃·색상·위치를 직접 트윈하지 않는다.
 6. `common.uss`: 버튼/캡슐/레드닷 등 2곳 이상에서 쓰는 공용 클래스만. 한 화면 전용 스타일은 그 화면의 USS로.
 
 ## 6. UXML 규칙
@@ -227,6 +244,11 @@ public class TopHUDController
 
 ## 10. Do / Don't 요약
 
+### 슬롯 릴 애니메이션 예외
+
+- 소환 룰렛 릴은 제한된 UI 애니메이션 예외로, `SummonRouletteView`가 런타임 생성 `summon-reel-strip`의 `style.translate`와 결과 카드의 `style.scale`을 DOTween `DOTween.To`로 보간할 수 있다.
+- 릴은 기존 `BottomPanel` 내부에만 두며 별도 UIDocument나 Canvas를 만들지 않는다. 결과는 애니메이션 시작 전에 게임 로직이 확정한다.
+
 | ✅ Do | ❌ Don't |
 |---|---|
 | 색상/간격은 `var(--토큰)` | USS/UXML/C#에 리터럴 색상·매직넘버 |
@@ -243,3 +265,4 @@ public class TopHUDController
 - `capsule__icon`은 `--currency-icon-size`로 크기를 제어하며, 아이콘 PNG의 투명 배경을 그대로 표시한다.
 - 용병 계약서는 소환 탭 전용 런 재화이므로 TopHUD에 추가하지 않는다. 계약서 아이콘 에셋 제작 전에는 소환 탭의 텍스트 캡슐로 보유량을 표시한다.
 - 강화 스탯 아이콘은 `Assets/Art/UIIcons/icon_atk.png`, `icon_aspd.png`, `icon_crit.png`, `icon_hp.png`, `icon_range.png`, `icon_income.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 UpgradeRow의 88px 아이콘 영역에 `background-size: 100% 100%`로 표시한다.
+- 하단 5개 탭은 `icon_tab_summon.png`, `icon_tab_upgrade.png`, `icon_tab_skill.png`, `icon_tab_gear.png`, `icon_tab_summoner.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 **44px**로 표시하고, 탭 텍스트는 기능명 확인을 위해 유지한다.
