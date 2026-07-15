@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: fa1562dee63e5a2499b9ba71432ac96c
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 181726
+  packageName: Animated Sprite Outline
+  packageVersion: 1.01
+  assetPath: Assets/Animated Sprite Outline/Assets/Shaders/AnimatedSpriteOutline_Particles.shader
+  uploadId: 419303
