@@ -29,6 +29,7 @@ namespace CrossDefense.Data
         [SerializeField] string displayName = "Basic Slime";
         [SerializeField] MonsterShape shape = MonsterShape.BasicSlime;
         [SerializeField] MonsterAttribute attribute = MonsterAttribute.None;
+        [SerializeField] Sprite sprite;
 
         [Header("Base Balance")]
         [Min(1)] [SerializeField] int baseHp = 100;
@@ -41,6 +42,7 @@ namespace CrossDefense.Data
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
         public MonsterShape Shape => shape;
         public MonsterAttribute Attribute => attribute;
+        public Sprite Sprite => sprite;
         public int BaseHp => baseHp;
         public float MoveSpeed => moveSpeed;
         public int ContactDamage => contactDamage;
@@ -48,13 +50,14 @@ namespace CrossDefense.Data
         public float SizeMultiplier => sizeMultiplier;
 
         public static MonsterData CreatePrototype(string id, string displayName, MonsterShape shape, MonsterAttribute attribute,
-            int hp, float speed, int contactDamage, int rewardGold)
+            int hp, float speed, int contactDamage, int rewardGold, Sprite sprite = null)
         {
             var data = CreateInstance<MonsterData>();
             data.monsterId = id;
             data.displayName = displayName;
             data.shape = shape;
             data.attribute = attribute;
+            data.sprite = sprite;
             data.baseHp = hp;
             data.moveSpeed = speed;
             data.contactDamage = contactDamage;

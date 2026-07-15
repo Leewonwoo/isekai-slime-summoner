@@ -30,6 +30,21 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void PrototypeTimeline_AssignsRequestedMonsterSprite()
+        {
+            var texture = new Texture2D(1, 1);
+            var sprite = Sprite.Create(texture, new Rect(0, 0, 1, 1), Vector2.one * 0.5f, 1f);
+            var timeline = StageTimeline.CreatePrototype(1, sprite);
+
+            Assert.That(timeline.TryGetWave(0, out var wave), Is.True);
+            Assert.That(wave.MonsterSpawns[0].Monster.Sprite, Is.SameAs(sprite));
+
+            Object.DestroyImmediate(timeline);
+            Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(texture);
+        }
+
+        [Test]
         public void SpawnZoneSelection_IsDeterministicForSameSeed()
         {
             var timeline = StageTimeline.CreatePrototype(1);

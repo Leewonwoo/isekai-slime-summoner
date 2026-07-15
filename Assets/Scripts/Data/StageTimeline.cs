@@ -192,7 +192,7 @@ namespace CrossDefense.Data
             return false;
         }
 
-        public static StageTimeline CreatePrototype(int waveCount = 3)
+        public static StageTimeline CreatePrototype(int waveCount = 3, Sprite defaultMonsterSprite = null)
         {
             var timeline = CreateInstance<StageTimeline>();
             timeline.stageId = "runtime-prototype";
@@ -200,10 +200,10 @@ namespace CrossDefense.Data
             timeline.randomSeed = 20260714;
             timeline.randomizeDirectionWeights = false;
 
-            var basic = MonsterData.CreatePrototype("runtime-basic", "Prototype Slime", MonsterShape.BasicSlime,
-                MonsterAttribute.None, 40, 0.75f, 5, 2);
-            var fast = MonsterData.CreatePrototype("runtime-fast", "Prototype Fast Slime", MonsterShape.SpitterSlime,
-                MonsterAttribute.Fire, 24, 1.2f, 4, 3);
+            var basic = MonsterData.CreatePrototype("runtime-basic", "Prototype Goblin", MonsterShape.BasicSlime,
+                MonsterAttribute.None, 40, 0.75f, 5, 2, defaultMonsterSprite);
+            var fast = MonsterData.CreatePrototype("runtime-fast", "Prototype Fast Goblin", MonsterShape.SpitterSlime,
+                MonsterAttribute.Fire, 24, 1.2f, 4, 3, defaultMonsterSprite);
 
             int count = Mathf.Max(1, waveCount);
             for (int i = 0; i < count; i++)

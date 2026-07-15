@@ -15,10 +15,16 @@ namespace CrossDefense.Units
         int _contactDamage;
         int _rewardGold;
         bool _resolved;
+        float _slowMultiplier = 1f;
+        float _slowUntil;
+        float _dotDamagePerSecond;
+        float _dotUntil;
+        float _nextDotTick;
 
         public MonsterData Data => _data;
         public float CurrentHp => _hp;
         public float MaxHp { get; private set; }
+        public bool IsResolved => _resolved;
 
         public void Initialize(GameManager gameManager, Transform target, MonsterData data,
             float hpMultiplier, float speedMultiplier, float rewardMultiplier)
@@ -32,12 +38,20 @@ namespace CrossDefense.Units
             _contactDamage = Mathf.Max(0, data.ContactDamage);
             _rewardGold = Mathf.Max(0, Mathf.RoundToInt(data.RewardGold * rewardMultiplier));
             _resolved = false;
+            _slowMultiplier = 1f;
+            _slowUntil = 0f;
+            _dotDamagePerSecond = 0f;
+            _dotUntil = 0f;
+            _nextDotTick = 0f;
             ApplyVisual(data);
         }
 
         void Update()
         {
-            if (_resolved || _target == null) return;
+            if (_resolved || _target == null || _gameManager == null || _gameManager.IsRunOver) return;
+
+            TickStatusEffects();
+            if (_resolved) return;
 
             Vector3 targetPosition = _target.position;
             Vector3 offset = targetPosition - transform.position;
@@ -48,7 +62,8 @@ namespace CrossDefense.Units
                 return;
             }
 
-            transform.position += offset.normalized * (_speed * Time.unscaledDeltaTime);
+            float slowMultiplier = Time.unscaledTime < _slowUntil ? _slowMultiplier : 1f;
+            transform.position += offset.normalized * (_speed * slowMultiplier * Time.unscaledDeltaTime);
         }
 
         public void TakeDamage(float amount)
@@ -60,6 +75,27 @@ namespace CrossDefense.Units
                 ResolveDefeated();
         }
 
+        public void ApplyDamage(DamagePacket packet)
+        {
+            if (_resolved) return;
+            TakeDamage(packet.ResolveDamage(_data.Attribute));
+            if (_resolved) return;
+
+            if (packet.SlowPercent > 0f && packet.SlowDuration > 0f)
+            {
+                _slowMultiplier = Mathf.Min(_slowMultiplier, 1f - packet.SlowPercent);
+                _slowUntil = Mathf.Max(_slowUntil, Time.unscaledTime + packet.SlowDuration);
+            }
+
+            if (packet.DamageOverTime > 0f && packet.DamageOverTimeDuration > 0f)
+            {
+                _dotDamagePerSecond = Mathf.Max(_dotDamagePerSecond, packet.DamageOverTime);
+                _dotUntil = Mathf.Max(_dotUntil, Time.unscaledTime + packet.DamageOverTimeDuration);
+                _nextDotTick = Mathf.Min(_nextDotTick <= 0f ? Time.unscaledTime + 0.25f : _nextDotTick,
+                    Time.unscaledTime + 0.25f);
+            }
+        }
+
         public void ResetForPool()
         {
             _data = null;
@@ -68,7 +104,26 @@ namespace CrossDefense.Units
             _hp = 0f;
             MaxHp = 0f;
             _resolved = false;
-            gameObject.SetActive(false);
+            _slowMultiplier = 1f;
+            _slowUntil = 0f;
+            _dotDamagePerSecond = 0f;
+            _dotUntil = 0f;
+            _nextDotTick = 0f;
+        }
+
+        void TickStatusEffects()
+        {
+            if (_dotDamagePerSecond <= 0f || Time.unscaledTime >= _dotUntil)
+            {
+                if (Time.unscaledTime >= _dotUntil)
+                    _dotDamagePerSecond = 0f;
+                return;
+            }
+
+            if (Time.unscaledTime < _nextDotTick) return;
+            const float tickInterval = 0.25f;
+            _nextDotTick = Time.unscaledTime + tickInterval;
+            TakeDamage(_dotDamagePerSecond * tickInterval);
         }
 
         void ResolveDefeated()
@@ -89,7 +144,7 @@ namespace CrossDefense.Units
         {
             if (!TryGetComponent<SpriteRenderer>(out var renderer))
                 renderer = gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = RuntimeSprite.Shared;
+            renderer.sprite = data.Sprite != null ? data.Sprite : RuntimeSprite.Shared;
             renderer.color = AttributeColor(data.Attribute);
             float size = Mathf.Clamp(data.SizeMultiplier, 0.5f, 2f);
             transform.localScale = Vector3.one * size;
@@ -104,7 +159,7 @@ namespace CrossDefense.Units
                 MonsterAttribute.Fire => new Color(1f, 0.32f, 0.2f),
                 MonsterAttribute.Ice => new Color(0.35f, 0.75f, 1f),
                 MonsterAttribute.Nature => new Color(0.4f, 0.9f, 0.45f),
-                _ => new Color(0.72f, 0.72f, 0.72f),
+                _ => Color.white,
             };
         }
 

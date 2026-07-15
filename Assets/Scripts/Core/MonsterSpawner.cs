@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using CrossDefense.Data;
 using CrossDefense.Units;
 using UnityEngine;
@@ -10,7 +9,7 @@ namespace CrossDefense.Core
     {
         readonly Transform _parent;
         readonly Camera _camera;
-        readonly Stack<MonsterController> _pool = new();
+        readonly Transform _monsterTemplate;
         readonly float _spawnMargin;
         readonly float _spawnDepth;
 
@@ -20,15 +19,30 @@ namespace CrossDefense.Core
             _camera = camera != null ? camera : Camera.main;
             _spawnMargin = Mathf.Max(0.1f, spawnMargin);
             _spawnDepth = Mathf.Max(0.1f, spawnDepth);
+            _monsterTemplate = RuntimePoolService.GetOrCreateTemplate(
+                "CrossDefenseMonster",
+                gameObject =>
+                {
+                    var renderer = gameObject.AddComponent<SpriteRenderer>();
+                    renderer.sortingOrder = 2;
+                    var collider = gameObject.AddComponent<CircleCollider2D>();
+                    collider.radius = 0.35f;
+                    gameObject.AddComponent<MonsterController>();
+                },
+                24,
+                256);
         }
 
         public MonsterController Spawn(GameManager gameManager, Transform target, MonsterData data,
             SpawnZone zone, float hpMultiplier, float speedMultiplier, float rewardMultiplier, System.Random random)
         {
-            var monster = _pool.Count > 0 ? _pool.Pop() : CreateMonsterObject();
-            monster.transform.SetParent(_parent, true);
-            monster.transform.position = GetSpawnPosition(zone, random);
-            monster.gameObject.SetActive(true);
+            var spawned = RuntimePoolService.Spawn(
+                _monsterTemplate,
+                GetSpawnPosition(zone, random),
+                Quaternion.identity,
+                _parent);
+            if (spawned == null) return null;
+            var monster = spawned.GetComponent<MonsterController>();
             monster.Initialize(gameManager, target, data, hpMultiplier, speedMultiplier, rewardMultiplier);
             return monster;
         }
@@ -37,7 +51,7 @@ namespace CrossDefense.Core
         {
             if (monster == null) return;
             monster.ResetForPool();
-            _pool.Push(monster);
+            RuntimePoolService.Despawn(monster.transform);
         }
 
         Vector3 GetSpawnPosition(SpawnZone zone, System.Random random)
@@ -64,11 +78,5 @@ namespace CrossDefense.Core
             };
         }
 
-        static MonsterController CreateMonsterObject()
-        {
-            var gameObject = new GameObject("Monster");
-            gameObject.AddComponent<SpriteRenderer>();
-            return gameObject.AddComponent<MonsterController>();
-        }
     }
 }
