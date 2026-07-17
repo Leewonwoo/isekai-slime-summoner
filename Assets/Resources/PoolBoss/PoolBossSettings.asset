@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 616f752c49db94e4f918f1b5314d781d, type: 3}
   m_Name: PoolBossSettings
   m_EditorClassIdentifier: Assembly-CSharp::DarkTonic.PoolBoss.PoolBossSettings
-  ShowWelcomeWindowOnStart: 1
+  ShowWelcomeWindowOnStart: 0
