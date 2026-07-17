@@ -11,9 +11,11 @@ namespace CrossDefense.Core
         readonly GameManager _gameManager;
         readonly List<SummonUnitData> _pool;
         readonly List<SummonUnitInstance> _bench = new();
+        readonly Dictionary<string, SummonUnitUpgradeState> _unitUpgrades = new();
         readonly System.Random _random;
         readonly float _currencyChance;
         readonly float _directRankOneChance;
+        readonly Func<float> _directRankOneChanceProvider;
         readonly int _currencyReward;
         readonly int _benchCapacity;
 
@@ -24,12 +26,14 @@ namespace CrossDefense.Core
 
         public IReadOnlyList<SummonUnitInstance> Bench => _bench;
         public int BenchCapacity => _benchCapacity;
-        public bool IsBenchFull => _bench.Count >= _benchCapacity;
+        public int BenchStackCount => CountBenchStacks();
+        public bool IsBenchFull => BenchStackCount >= _benchCapacity;
         public bool HasPendingResult => _hasPendingResult;
 
         public event Action<IReadOnlyList<SummonUnitInstance>> BenchChanged;
         public event Action<SummonResult> ResultCommitted;
         public event Action<SummonUnitInstance> UnitAdded;
+        public event Action<SummonUnitUpgradeState> UnitUpgradeChanged;
 
         public SummonManager(
             GameManager gameManager,
@@ -38,7 +42,8 @@ namespace CrossDefense.Core
             float directRankOneChance,
             int currencyReward,
             int benchCapacity,
-            int randomSeed = 0)
+            int randomSeed = 0,
+            Func<float> directRankOneChanceProvider = null)
         {
             _gameManager = gameManager;
             _pool = new List<SummonUnitData>();
@@ -53,6 +58,7 @@ namespace CrossDefense.Core
 
             _currencyChance = Mathf.Clamp01(currencyChance);
             _directRankOneChance = Mathf.Clamp01(directRankOneChance);
+            _directRankOneChanceProvider = directRankOneChanceProvider;
             _currencyReward = Mathf.Max(0, currencyReward);
             _benchCapacity = Mathf.Max(1, benchCapacity);
             _random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
@@ -73,12 +79,14 @@ namespace CrossDefense.Core
             }
             else
             {
-                bool jackpot = _random.NextDouble() < _directRankOneChance;
+                float jackpotChance = Mathf.Clamp01(
+                    _directRankOneChanceProvider?.Invoke() ?? _directRankOneChance);
+                bool jackpot = _random.NextDouble() < jackpotChance;
                 result = SummonResult.UnitResult(id, PickUnit(jackpot), jackpot);
             }
 
             // 벤치가 가득 찬 상태에서 계약서를 잃지 않도록 소환 결과를 재화 보상으로 전환한다.
-            if (result.IsUnit && IsBenchFull)
+            if (result.IsUnit && !CanAddToBench(result.Unit, result.Rank))
                 result = SummonResult.CurrencyResult(id, _currencyReward);
 
             _pendingResult = result;
@@ -98,9 +106,13 @@ namespace CrossDefense.Core
             {
                 _gameManager.AddGold(result.CurrencyAmount);
             }
-            else if (result.Unit != null && _bench.Count < _benchCapacity)
+            else if (result.Unit != null && CanAddToBench(result.Unit, result.Rank))
             {
-                var instance = new SummonUnitInstance(_nextInstanceId++, result.Unit, result.Rank);
+                var instance = new SummonUnitInstance(
+                    _nextInstanceId++,
+                    result.Unit,
+                    result.Rank,
+                    GetUnitUpgradeState(result.Unit.UnitId));
                 _bench.Add(instance);
                 BenchChanged?.Invoke(_bench);
                 UnitAdded?.Invoke(instance);
@@ -152,10 +164,84 @@ namespace CrossDefense.Core
 
         public bool ReturnToBench(SummonUnitInstance instance)
         {
-            if (instance == null || IsBenchFull || _bench.Contains(instance)) return false;
+            if (instance == null || _bench.Contains(instance) || !CanAddToBench(instance.Unit, instance.Rank))
+                return false;
+            instance.BindUpgradeState(GetUnitUpgradeState(instance.Unit.UnitId));
             _bench.Add(instance);
             BenchChanged?.Invoke(_bench);
             return true;
+        }
+
+        public SummonUnitUpgradeState GetUnitUpgradeState(string unitId)
+        {
+            string safeUnitId = unitId ?? string.Empty;
+            if (_unitUpgrades.TryGetValue(safeUnitId, out var state))
+                return state;
+
+            state = new SummonUnitUpgradeState(safeUnitId);
+            _unitUpgrades.Add(safeUnitId, state);
+            return state;
+        }
+
+        public bool ApplyUnitUpgrade(
+            string unitId,
+            int level,
+            float damageMultiplier,
+            float attackSpeedMultiplier)
+        {
+            if (string.IsNullOrWhiteSpace(unitId)) return false;
+            var state = GetUnitUpgradeState(unitId);
+            if (!state.Apply(level, damageMultiplier, attackSpeedMultiplier)) return false;
+
+            UnitUpgradeChanged?.Invoke(state);
+            BenchChanged?.Invoke(_bench);
+            return true;
+        }
+
+        public bool IsUnitOwned(string unitId)
+        {
+            if (string.IsNullOrWhiteSpace(unitId)) return false;
+            foreach (var instance in _bench)
+            {
+                if (instance?.Unit != null && instance.Unit.UnitId == unitId)
+                    return true;
+            }
+
+            var fieldUnits = _gameManager?.SummonedUnitManager?.Units;
+            if (fieldUnits == null) return false;
+            foreach (var fieldUnit in fieldUnits)
+            {
+                if (fieldUnit?.Data != null && fieldUnit.Data.UnitId == unitId)
+                    return true;
+            }
+            return false;
+        }
+
+        bool CanAddToBench(SummonUnitData unit, int rank)
+        {
+            if (unit == null) return false;
+            return HasBenchStack(unit.UnitId, rank) || BenchStackCount < _benchCapacity;
+        }
+
+        bool HasBenchStack(string unitId, int rank)
+        {
+            foreach (var instance in _bench)
+            {
+                if (instance?.Unit != null && instance.Unit.UnitId == unitId && instance.Rank == rank)
+                    return true;
+            }
+            return false;
+        }
+
+        int CountBenchStacks()
+        {
+            var keys = new HashSet<string>();
+            foreach (var instance in _bench)
+            {
+                if (instance?.Unit == null) continue;
+                keys.Add($"{instance.Unit.UnitId}:{instance.Rank}");
+            }
+            return keys.Count;
         }
 
         SummonUnitData PickUnit(bool jackpot)
@@ -190,23 +276,7 @@ namespace CrossDefense.Core
 
         bool IsOwned(SummonUnitData unit)
         {
-            foreach (var instance in _bench)
-            {
-                if (instance.Unit != null && instance.Unit.UnitId == unit.UnitId)
-                    return true;
-            }
-
-            var fieldUnits = _gameManager?.SummonedUnitManager?.Units;
-            if (fieldUnits != null)
-            {
-                foreach (var fieldUnit in fieldUnits)
-                {
-                    if (fieldUnit?.Data != null && fieldUnit.Data.UnitId == unit.UnitId)
-                        return true;
-                }
-            }
-
-            return false;
+            return unit != null && IsUnitOwned(unit.UnitId);
         }
     }
 }
