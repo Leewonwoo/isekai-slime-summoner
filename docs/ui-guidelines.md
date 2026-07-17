@@ -10,17 +10,23 @@
 | 담당 | 그리는 것 |
 |---|---|
 | **UI Toolkit** | 상단 HUD, 하단 패널(탭/리스트/벤치/소환사 프로필), 필드 상단 웨이브 상태 표시, 스킬 플로팅 버튼, 팝업 |
-| **월드 (SpriteRenderer)** | 자연 숲 필드, 유닛, 몹, 투사체, 소환사·소환진 데칼(=코어), 이펙트 |
+| **월드 (SpriteRenderer)** | 자연 숲 필드, 유닛, 몹, 투사체, 소환사·소환진 데칼(=코어), 개체 체력바, 이펙트 |
 
 - 필드를 UI Toolkit으로 그리지 않는다. UI가 월드 위에 얹히는 건 **FieldOverlay의 배지/버튼**뿐.
+- 소환사·소환수·몬스터 체력바는 개체와 함께 풀링되는 월드 `SpriteRenderer`로 그린다. 개체별 Canvas/UIDocument를 추가하지 않고, HP 변경 이벤트 때만 fill 크기를 갱신한다.
 - uGUI(Canvas) 사용 금지. UI는 전부 UI Toolkit으로 통일.
 
-### 임시 uGUI 프로토타입 예외 (2026-07-14 사용자 지시)
+### 영구·런 특성 3택 uGUI 예외 (2026-07-17 사용자 지시)
 
-- 3택 보상 UX 검증용 `ChoicePrototypeCanvas`만 uGUI로 임시 제작한다. 기존 UIDocument와 게임 로직에는 연결하지 않는다.
+- 소환사 레벨업 영구 특성과 5웨이브 런 특성 3택용 `ChoicePrototypeCanvas`만 uGUI로 사용한다.
 - 기준 해상도는 **1080×1920**, CanvasScaler는 Scale With Screen Size / Match Width Or Height **0**을 사용한다.
 - 팝업은 `Assets/Art/UIFrames/choice_modal_frame.png`를 9-slice로 사용하며 기준 크기 **920×1450px**, Sprite Border **64px**로 설정한다.
-- 프로토타입 채택 여부가 결정되기 전에는 다른 화면으로 uGUI 사용 범위를 확대하지 않는다.
+- 영구 특성은 제목 `영구 특성 선택`, 부제 `레벨업 보상 · 남은 선택 N`으로 표시한다.
+- 런 특성은 제목 `런 특성 선택`, 부제 `WAVE N 클리어 · 사망 시 소멸`로 표시한다.
+- 두 팝업 모두 카드에 이름·이번 선택의 증가량·선택 후 누적 레벨을 표시하고 첫 번째 카드를 기본 선택한다.
+- 팝업은 미선택 특성이 있을 때만 생성·표시하고 선택 완료 후 닫는다. 미선택 수가 2개 이상이면 다음 프레임에 다음 3택을 연속 표시한다.
+- 영구 선택권과 런 선택이 동시에 대기하면 현재 팝업을 먼저 마친 뒤 런 선택을 우선 표시해 웨이브 진행 정지를 해제한다.
+- 이 팝업 외의 화면으로 uGUI 사용 범위를 확대하지 않는다.
 
 ## 2. 파일 구조와 네이밍
 
@@ -69,6 +75,7 @@ Assets/Scripts/UI/
     --color-surface: rgb(198, 166, 106);    /* 조작면(나무 판재 — 버튼/행) #C6A66A */
     --color-surface-deep: rgb(151, 118, 62);/* 판재 하단 엣지 #97763E */
     --color-border: rgb(112, 58, 40);       /* 적갈 아웃라인 #703A28 */
+    --color-modal-scrim: rgba(0, 0, 0, 0.72);
 
     /* 텍스트 — 어두운 바탕엔 웜 화이트, 판재 위엔 잉크 */
     --color-text: rgb(240, 234, 214);       /* #F0EAD6 */
@@ -118,9 +125,20 @@ Assets/Scripts/UI/
     --skill-button-radius: 64px;
     --bottom-panel-content-inset: 40px;
     --bench-slot-state-border: 4px;
-    --bench-slot-size: 120px;
+    --bench-slot-size: 120px;               /* 장비 슬롯 등 공용 기본값 */
+    --summon-grid-slot-width: 188px;
+    --summon-grid-slot-height: 210px;
+    --summon-grid-icon-size: 112px;
+    --summon-merge-badge-height: 36px;
+    --summon-scrollbar-width: 16px;
     --summon-side-width: 320px;
     --summon-contract-panel-height: 96px;
+    --unit-detail-width: 760px;
+    --unit-detail-height: 920px;
+    --unit-detail-icon-size: 200px;
+    --unit-detail-stat-row-height: 72px;
+    --unit-detail-content-inset: 72px;
+    --font-small: 20px;
 }
 ```
 
@@ -146,7 +164,7 @@ Assets/Scripts/UI/
 - 3택 프로토타입 팝업 프레임: `Assets/Art/UIFrames/choice_modal_frame.png` — uGUI `Image.Type.Sliced`, Sprite Border left/top/right/bottom **64px**, 기준 표시 크기 **920×1450px**. 원본은 `ArtSource/ui-frames/choice_modal_frame.png`.
 - 소환 룰렛 모달 외곽: `Assets/Art/UIFrames/summon_roulette_panel_frame.png` — `.summon-modal__panel`에 9-slice로 적용한다. 원본 크기 **768×1024px**, slice left/top/right/bottom **112px**, scale **0.45**, 내부 안전 여백 **72px**. 원본은 `ArtSource/ui-frames/summon_roulette_panel_frame.png`.
 - 소환 룰렛 릴 창: `Assets/Art/UIFrames/summon_roulette_reel_frame.png` — `.summon-modal-reel-viewport`에 적용한다. 원본 크기 **1024×288px**, 기준 표시 비율 **32:9**, `background-size: 100% 100%`, 좌우 내부 여백 **48px**. 중앙 상·하 포인터가 늘어나므로 9-slice는 사용하지 않는다. 원본은 `ArtSource/ui-frames/summon_roulette_reel_frame.png`.
-- 소환 룰렛 카드: 기본 상태는 기존 `bench_slot_frame.png`, 최종 결과는 기존 `button_gold_frame.png`를 재사용한다. 카드 기준 크기는 **180×150px**, 카드 간격은 **16px**이며 별도 단색 배경과 CSS 테두리는 두지 않는다.
+- 소환 룰렛 카드: 기본 상태는 기존 `bench_slot_frame.png`, 최종 결과는 기존 `button_gold_frame.png`를 재사용한다. 카드 기준 크기는 **180×150px**, 카드 간격은 **0px**로 서로 맞붙여 하나의 연속 릴처럼 보이게 하며 별도 단색 배경과 CSS 테두리는 두지 않는다. 확정 결과 앞뒤에 최소 3개 이상의 미끼 카드를 유지하고 결과 카드는 중앙 포인터에서 정지해야 한다.
 - 스프라이트 임포트: Filter **Point**, Compression **None** (SPEC §5.1 픽셀 임포트 규격).
 - 9-slice 적용 후에도 위 플랫 토큰은 폴백·틴트 기준으로 유지 (프레임 없는 요소·게이지 등).
 - 폰트: 픽셀 스킨 확정에 따라 한글 픽셀 폰트(갈무리 Galmuri 또는 네오둥근모, 둘 다 OFL) 도입 검토 — 도입 시 이 표와 에셋 대장에 기록 후 교체.
@@ -237,16 +255,19 @@ public class TopHUDController
 - **웨이브 상태**: HUD 아래 필드 상단 중앙에 현재 웨이브(예: `WAVE 12`)와 잔여 몬스터 수를 함께 표시한다. 전체 웨이브 한계는 표시하지 않는다.
 - **레드닷**: 탭 버튼 우상단 12px 원, `--color-reddot`. 강화 가능/새 장비 시 표시. 공용 클래스 `.reddot`.
 - **탭 전환**: 탭 열면 하단 패널 확장 + 필드 축소(USS transition), 전투는 계속 보이게.
-- **소환 탭**: 좌측은 실제 보유 유닛만 들어가는 벤치 12슬롯과 `보유 용병 n/12`, 우측은 `용병 계약서 n장`·★1 직행 확률·`소환 ×1` 버튼을 세로 배치한다. 해금된 8종 전체를 선택 슬롯처럼 상시 나열하지 않는다.
+- **소환 탭**: 좌측은 벤치 대기 + 필드 배치 개체를 합친 전체 보유 유닛을 12슬롯 **3열 × N 세로 스크롤 그리드**로 배치한다. 같은 유닛 + 같은 머지 등급은 슬롯 하나로 묶고 좌상단에 전체 `xN`, 본문에 유닛 공통 `Lv.N`과 머지 등급을 표시한다. 헤더는 `보유 슬롯 n/12 · 총 m개` 형식이며 슬롯 한도는 개체 수가 아니라 스택 수를 센다. 수량 3개 이상인 ★3 미만 스택은 합성 가능 상태로 표시한다. 우측은 `용병 계약서 n장`·★1 직행 확률·`소환 ×1` 버튼을 세로 배치한다. 해금된 8종 전체를 선택 슬롯처럼 상시 나열하지 않는다.
+- **소환 슬롯 탭/드래그 분리**: 포인터 이동이 드래그 임계값 미만이면 유닛 상세 팝업을 연다. 임계값 이상일 때 해당 스택에 벤치 대기 개체가 있으면 그 인스턴스 1개로 기존 벤치→필드 배치를 시작하고, 필드 배치 개체만 있으면 드래그를 시작하지 않는다. 상세 팝업은 전체 스택 수량·공통 강화 레벨·머지 등급·속성·공격 방식과 강화 배율까지 반영한 현재 전투 수치를 표시하며 열려 있는 동안 필드 클릭 공격을 차단한다.
 - **소환 버튼**: 우측 엄지 위치(패널 우하단), 용병 계약서 1장 비용과 등급 확률을 노출한다. 계약서가 0장이면 회색 비활성화한다.
 - **합성 가능 벤치 슬롯**: `--color-positive` 테두리 + "합성" 뱃지.
+- **강화 탭**: 상단부터 전체 공격력·전체 공격속도·소환사 HP 회복·치명타 런 강화 4행을 표시하고, 그 아래에 현재 보유한 슬라임 종류별 공통 레벨 행을 표시한다. 각 행은 현재→다음 수치와 골드 비용을 함께 표시하며, 골드 부족·최대 레벨·HP 회복이 불필요한 상태에서는 버튼을 회색 비활성화한다. 강화 버튼은 짧게 누르면 1회, 0.4초 이상 누르면 0.08초 간격으로 반복 시도한다.
+- **소환사 영구 성장**: 소환사 탭 프로필은 저장된 영구 Lv와 현재 EXP/요구 EXP 게이지를 표시한다. EXP가 충분할 때만 `레벨업` 버튼을 활성화하고, 공격력·최대 HP·★1 직행 확률의 현재→다음 영구 수치를 공용 행으로 표시한다.
 - **터치 타깃**: 상호작용 요소는 최소 `--touch-min`(96px) 확보.
 
 ## 10. Do / Don't 요약
 
 ### 슬롯 릴 애니메이션 예외
 
-- 소환 룰렛 릴은 제한된 UI 애니메이션 예외로, `SummonRouletteView`가 런타임 생성 `summon-reel-strip`의 `style.translate`와 결과 카드의 `style.scale`을 DOTween `DOTween.To`로 보간할 수 있다.
+- 소환 룰렛 릴은 제한된 UI 애니메이션 예외로, `SummonRouletteView`가 런타임 생성 `summon-reel-strip`의 `style.translate`와 결과 카드의 `style.scale`을 DOTween `DOTween.To`로 보간할 수 있다. 결과 카드는 배열 끝이 아닌 중간에 배치하고, 스킵 여부와 관계없이 중앙 포인터에 동일하게 정렬한다.
 - 릴은 기존 `BottomPanel` 내부에만 두며 별도 UIDocument나 Canvas를 만들지 않는다. 결과는 애니메이션 시작 전에 게임 로직이 확정한다.
 
 | ✅ Do | ❌ Don't |
