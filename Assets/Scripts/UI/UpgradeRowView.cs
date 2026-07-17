@@ -10,6 +10,7 @@ namespace CrossDefense.UI
         readonly Button _action;
         readonly VisualElement _icon;
         string _iconClass;
+        public Button ActionButton => _action;
 
         public UpgradeRowView(VisualElement row)
         {

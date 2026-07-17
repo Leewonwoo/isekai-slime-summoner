@@ -9,6 +9,7 @@
     --color-surface: rgb(198, 166, 106);
     --color-surface-deep: rgb(151, 118, 62);
     --color-border: rgb(112, 58, 40);
+    --color-modal-scrim: rgba(0, 0, 0, 0.72);
 
     /* 텍스트 — 어두운 바탕엔 웜 화이트, 판재 위엔 잉크 */
     --color-text: rgb(240, 234, 214);
@@ -81,8 +82,18 @@
     --bottom-panel-content-inset: 40px;
     --bench-slot-state-border: 4px;
     --bench-slot-size: 120px;
+    --summon-grid-slot-width: 188px;
+    --summon-grid-slot-height: 210px;
+    --summon-grid-icon-size: 112px;
+    --summon-merge-badge-height: 36px;
+    --summon-scrollbar-width: 16px;
     --summon-side-width: 320px;
     --summon-contract-panel-height: 96px;
+    --unit-detail-width: 760px;
+    --unit-detail-height: 920px;
+    --unit-detail-icon-size: 200px;
+    --unit-detail-stat-row-height: 72px;
+    --unit-detail-content-inset: 72px;
     --summon-modal-width: 84%;
     --summon-modal-height: 52%;
     --summon-modal-content-inset: 72px;
@@ -92,9 +103,10 @@
     --summon-modal-reel-inset-x: 48px;
     --summon-modal-card-width: 180px;
     --summon-modal-card-height: 150px;
-    --summon-modal-card-gap: 16px;
+    --summon-modal-card-gap: 0px;
 
     /* 폰트 */
+    --font-small: 20px;
     --font-display: 56px;
     --font-title: 44px;
     --font-body: 36px;

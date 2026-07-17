@@ -24,5 +24,38 @@
                 <Button name="summon-modal-skip-button" class="summon-modal__skip btn btn--primary" text="결과 보기" />
             </VisualElement>
         </VisualElement>
+        <VisualElement name="unit-detail-overlay" class="unit-detail-overlay hidden">
+            <VisualElement name="unit-detail-backdrop" class="unit-detail__backdrop" />
+            <VisualElement name="unit-detail-panel" class="unit-detail__panel">
+                <Button name="unit-detail-close-button" class="unit-detail__close btn" text="닫기" />
+                <Image name="unit-detail-icon" class="unit-detail__icon" picking-mode="Ignore" />
+                <Label name="unit-detail-name" class="unit-detail__name" text="유닛 이름" picking-mode="Ignore" />
+                <Label name="unit-detail-rank" class="unit-detail__rank" text="기본" picking-mode="Ignore" />
+                <VisualElement class="unit-detail__tags" picking-mode="Ignore">
+                    <Label name="unit-detail-rarity" class="unit-detail__tag" text="일반" picking-mode="Ignore" />
+                    <Label name="unit-detail-attribute" class="unit-detail__tag" text="무속성" picking-mode="Ignore" />
+                    <Label name="unit-detail-attack-style" class="unit-detail__tag" text="근접" picking-mode="Ignore" />
+                </VisualElement>
+                <VisualElement class="unit-detail__stats" picking-mode="Ignore">
+                    <VisualElement class="unit-detail__stat-row">
+                        <Label class="unit-detail__stat-name" text="공격력" />
+                        <Label name="unit-detail-damage" class="unit-detail__stat-value" text="0" />
+                    </VisualElement>
+                    <VisualElement class="unit-detail__stat-row">
+                        <Label class="unit-detail__stat-name" text="초당 공격" />
+                        <Label name="unit-detail-attack-speed" class="unit-detail__stat-value" text="0" />
+                    </VisualElement>
+                    <VisualElement class="unit-detail__stat-row">
+                        <Label class="unit-detail__stat-name" text="공격 범위" />
+                        <Label name="unit-detail-attack-range" class="unit-detail__stat-value" text="0" />
+                    </VisualElement>
+                    <VisualElement class="unit-detail__stat-row">
+                        <Label class="unit-detail__stat-name" text="이동 속도" />
+                        <Label name="unit-detail-move-speed" class="unit-detail__stat-value" text="0" />
+                    </VisualElement>
+                </VisualElement>
+                <Label class="unit-detail__hint" text="슬롯을 길게 끌어 필드에 배치할 수 있습니다." picking-mode="Ignore" />
+            </VisualElement>
+        </VisualElement>
     </VisualElement>
 </UXML>

@@ -15,8 +15,22 @@ namespace CrossDefense.UI
 
         public static string Capacity(int current, int total) => $"{current:N0} / {total:N0}";
 
+        public static string StackedCapacity(int stacks, int capacity, int totalUnits) =>
+            $"보유 슬롯 {stacks:N0}/{capacity:N0} · 총 {totalUnits:N0}개";
+
         /// <summary>"현재 → 다음" 변화량 표기 (SPEC §4.5)</summary>
         public static string Delta(float current, float next) => $"{Num(current)} → {Num(next)}";
+
+        public static string Percent(float multiplier) => $"{multiplier * 100f:0.#}%";
+
+        public static string PercentDelta(float current, float next) =>
+            $"{Percent(current)} → {Percent(next)}";
+
+        public static string ChanceDelta(float current, float next) =>
+            $"{current * 100f:0.#}% → {next * 100f:0.#}%";
+
+        public static string HpDelta(float current, float next) =>
+            $"{Num(current)} HP → {Num(next)} HP";
 
         static string Num(float v) => v % 1f == 0f ? ((int)v).ToString("N0") : v.ToString("0.##");
     }

@@ -10,8 +10,10 @@ namespace CrossDefense.UI
     public sealed class SummonRouletteView
     {
         const float CardWidth = 180f;
-        const float CardGap = 16f;
-        const int FinalCardIndex = 10;
+        const float CardGap = 0f;
+        const int ResultLeadCardCount = 14;
+        const int ResultIndexVariationCount = 4;
+        const int TrailingCardCount = 6;
 
         readonly VisualElement _viewport;
         readonly VisualElement _strip;
@@ -20,9 +22,9 @@ namespace CrossDefense.UI
         readonly Button _skipButton;
         readonly string[] _decoyNames =
         {
-            "고블린 정찰병", "고블린 궁수", "재화 보상", "고블린 방패병",
-            "고블린 화염술사", "재화 보상", "고블린 궁수", "고블린 정찰병",
-            "희귀 유닛", "재화 보상"
+            "주먹 슬라임", "물총 슬라임", "재화 보상", "불꽃 슬라임",
+            "얼음 슬라임", "재화 보상", "초록 슬라임", "버프 슬라임",
+            "폭발 슬라임", "빙결 슬라임"
         };
 
         Tween _moveTween;
@@ -30,6 +32,7 @@ namespace CrossDefense.UI
         Action _onComplete;
         SummonResult _result;
         VisualElement _finalCard;
+        int _resultCardIndex;
         bool _isPlaying;
 
         public bool IsPlaying => _isPlaying;
@@ -64,15 +67,22 @@ namespace CrossDefense.UI
             _finishTween?.Kill();
             _strip.Clear();
             _strip.style.translate = new Translate(0f, 0f, 0f);
+            _finalCard = null;
+            _resultCardIndex = ResultLeadCardCount +
+                Mathf.Abs(result.Id % ResultIndexVariationCount);
             if (_resultLabel != null)
                 _resultLabel.text = "릴을 돌리는 중...";
             if (_skipButton != null)
                 _skipButton.SetEnabled(true);
 
-            for (int i = 0; i <= FinalCardIndex; i++)
+            int cardCount = _resultCardIndex + TrailingCardCount + 1;
+            int decoyOffset = Mathf.Abs(result.Id * 3 % _decoyNames.Length);
+            for (int i = 0; i < cardCount; i++)
             {
-                bool isFinal = i == FinalCardIndex;
-                string label = isFinal ? GetResultName(result) : _decoyNames[i % _decoyNames.Length];
+                bool isFinal = i == _resultCardIndex;
+                string label = isFinal
+                    ? GetResultName(result)
+                    : _decoyNames[(decoyOffset + i) % _decoyNames.Length];
                 string subLabel = isFinal ? GetResultSubLabel(result) : "결과 확인 중";
                 var card = CreateCard(label, subLabel, isFinal);
                 _strip.Add(card);
@@ -120,7 +130,7 @@ namespace CrossDefense.UI
             if (float.IsNaN(contentWidth) || contentWidth <= 0f)
                 contentWidth = viewportWidth;
 
-            return -(FinalCardIndex * (CardWidth + CardGap)
+            return -(_resultCardIndex * (CardWidth + CardGap)
                 - (contentWidth - CardWidth) * 0.5f);
         }
 
