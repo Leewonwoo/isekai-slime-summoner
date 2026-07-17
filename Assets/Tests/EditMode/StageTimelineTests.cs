@@ -45,6 +45,47 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void PrototypeTimeline_AssignsRequestedMonsterMoveFrames()
+        {
+            var texture = new Texture2D(2, 1);
+            var first = Sprite.Create(texture, new Rect(0, 0, 1, 1), Vector2.one * 0.5f, 1f);
+            var second = Sprite.Create(texture, new Rect(1, 0, 1, 1), Vector2.one * 0.5f, 1f);
+            var frames = new[] { first, second };
+            var timeline = StageTimeline.CreatePrototype(1, first, frames);
+
+            Assert.That(timeline.TryGetWave(0, out var wave), Is.True);
+            Assert.That(wave.MonsterSpawns[0].Monster.MoveFrames, Is.SameAs(frames));
+            Assert.That(wave.MonsterSpawns[0].Monster.MoveAnimationFps, Is.EqualTo(12f));
+
+            Object.DestroyImmediate(timeline);
+            Object.DestroyImmediate(first);
+            Object.DestroyImmediate(second);
+            Object.DestroyImmediate(texture);
+        }
+
+        [Test]
+        public void PrototypeMonster_HasValidGoblinCombatValues()
+        {
+            var monster = MonsterData.CreatePrototype(
+                "combat-probe",
+                "Combat Probe",
+                MonsterShape.Grunt,
+                MonsterAttribute.None,
+                100,
+                1f,
+                7,
+                1,
+                attacksPerSecond: 1.5f,
+                attackRange: 0.65f);
+
+            Assert.That(monster.ContactDamage, Is.EqualTo(7));
+            Assert.That(monster.AttacksPerSecond, Is.EqualTo(1.5f));
+            Assert.That(monster.AttackRange, Is.EqualTo(0.65f));
+
+            Object.DestroyImmediate(monster);
+        }
+
+        [Test]
         public void SpawnZoneSelection_IsDeterministicForSameSeed()
         {
             var timeline = StageTimeline.CreatePrototype(1);

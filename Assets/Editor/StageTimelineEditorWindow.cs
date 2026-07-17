@@ -65,12 +65,12 @@ namespace CrossDefense.Editor
             EnsureFolder("Assets/Data", "Monsters");
 
             var balance = GetOrCreateAsset<StageBalanceProfile>("Assets/Data/StageBalance_Default.asset");
-            var basic = CreateMonster("Monster_BasicSlime", "Basic Slime", MonsterShape.BasicSlime, MonsterAttribute.None, 100, 1.0f, 1, 2);
-            var fast = CreateMonster("Monster_FastSlime", "Fast Slime", MonsterShape.SpitterSlime, MonsterAttribute.Fire, 65, 1.6f, 1, 3);
-            var tank = CreateMonster("Monster_TankSlime", "Tank Slime", MonsterShape.TankSlime, MonsterAttribute.Ice, 280, 0.65f, 3, 8);
-            var splitter = CreateMonster("Monster_SplitSlime", "Split Slime", MonsterShape.SplitSlime, MonsterAttribute.Nature, 180, 0.9f, 2, 6);
-            var king = CreateMonster("Monster_KingSlime", "King Slime", MonsterShape.Boss, MonsterAttribute.None, 1800, 0.45f, 10, 40);
-            var mother = CreateMonster("Monster_MotherSlime", "Mother Slime", MonsterShape.Boss, MonsterAttribute.Fire, 3200, 0.4f, 14, 70);
+            var basic = CreateMonster("Monster_GoblinGrunt", "고블린 일반병", MonsterShape.Grunt, MonsterAttribute.None, 100, 1.0f, 1, 2, 1f);
+            var fast = CreateMonster("Monster_GoblinFireScout", "화염 고블린 정찰병", MonsterShape.Scout, MonsterAttribute.Fire, 65, 1.6f, 1, 3, 0.9f);
+            var tank = CreateMonster("Monster_GoblinIceBruiser", "빙결 고블린 중갑병", MonsterShape.Bruiser, MonsterAttribute.Ice, 280, 0.65f, 3, 8, 1.15f);
+            var splitter = CreateMonster("Monster_GoblinNatureRaider", "자연 고블린 약탈자", MonsterShape.Raider, MonsterAttribute.Nature, 180, 0.9f, 2, 6, 1.05f);
+            var king = CreateMonster("Monster_GoblinChief", "고블린 족장", MonsterShape.Boss, MonsterAttribute.None, 1800, 0.45f, 10, 40, 1.35f);
+            var mother = CreateMonster("Monster_GoblinWarlord", "화염 고블린 대전사", MonsterShape.Boss, MonsterAttribute.Fire, 3200, 0.4f, 14, 70, 1.5f);
 
             var path = AssetDatabase.GenerateUniqueAssetPath($"{DefaultTimelineFolder}/Stage_01.asset");
             var timeline = CreateInstance<StageTimeline>();
@@ -440,7 +440,8 @@ namespace CrossDefense.Editor
             return asset;
         }
 
-        static MonsterData CreateMonster(string fileName, string displayName, MonsterShape shape, MonsterAttribute attribute, int hp, float speed, int damage, int reward)
+        static MonsterData CreateMonster(string fileName, string displayName, MonsterShape shape,
+            MonsterAttribute attribute, int hp, float speed, int damage, int reward, float sizeMultiplier)
         {
             string path = AssetDatabase.GenerateUniqueAssetPath($"{DefaultMonsterFolder}/{fileName}.asset");
             var monster = CreateInstance<MonsterData>();
@@ -454,8 +455,41 @@ namespace CrossDefense.Editor
             serialized.FindProperty("moveSpeed").floatValue = speed;
             serialized.FindProperty("contactDamage").intValue = damage;
             serialized.FindProperty("rewardGold").intValue = reward;
+            serialized.FindProperty("sizeMultiplier").floatValue = sizeMultiplier;
+            serialized.FindProperty("sprite").objectReferenceValue =
+                LoadFirstSprite("Assets/Art/Enemies/enemy_goblin_grunt.png");
+            var runFrames = LoadSprites("Assets/Art/Enemies/enemy_goblin_grunt_run_sheet.png");
+            var moveFrames = serialized.FindProperty("moveFrames");
+            moveFrames.arraySize = runFrames.Length;
+            for (int i = 0; i < runFrames.Length; i++)
+                moveFrames.GetArrayElementAtIndex(i).objectReferenceValue = runFrames[i];
+            serialized.FindProperty("moveAnimationFps").floatValue = 9f;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             return monster;
+        }
+
+        static Sprite LoadFirstSprite(string path)
+        {
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
+            {
+                if (asset is Sprite sprite)
+                    return sprite;
+            }
+
+            return null;
+        }
+
+        static Sprite[] LoadSprites(string path)
+        {
+            var sprites = new System.Collections.Generic.List<Sprite>();
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
+            {
+                if (asset is Sprite sprite)
+                    sprites.Add(sprite);
+            }
+
+            sprites.Sort((left, right) => string.CompareOrdinal(left.name, right.name));
+            return sprites.ToArray();
         }
 
         static void ConfigureStarterTimeline(StageTimeline timeline, StageBalanceProfile balance, MonsterData basic, MonsterData fast, MonsterData tank, MonsterData splitter, MonsterData king, MonsterData mother)

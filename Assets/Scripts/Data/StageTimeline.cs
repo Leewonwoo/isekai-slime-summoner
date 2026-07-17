@@ -169,6 +169,7 @@ namespace CrossDefense.Data
         [Range(0f, 1f)] [SerializeField] float directionWeightJitter = 0.15f;
 
         [Header("Timeline")]
+        [Min(1)] [SerializeField] int runTraitInterval = 5;
         [SerializeField] List<StageWave> waves = new();
 
         public string StageId => stageId;
@@ -177,8 +178,12 @@ namespace CrossDefense.Data
         public int RandomSeed => randomSeed;
         public bool RandomizeDirectionWeights => randomizeDirectionWeights;
         public float DirectionWeightJitter => directionWeightJitter;
+        public int RunTraitInterval => Mathf.Max(1, runTraitInterval);
         public IReadOnlyList<StageWave> Waves => waves;
         public int WaveCount => waves.Count;
+
+        public bool ShouldOfferRunTrait(int clearedWave) =>
+            clearedWave > 0 && clearedWave % RunTraitInterval == 0;
 
         public bool TryGetWave(int zeroBasedIndex, out StageWave wave)
         {
@@ -192,7 +197,8 @@ namespace CrossDefense.Data
             return false;
         }
 
-        public static StageTimeline CreatePrototype(int waveCount = 3, Sprite defaultMonsterSprite = null)
+        public static StageTimeline CreatePrototype(int waveCount = 3, Sprite defaultMonsterSprite = null,
+            Sprite[] defaultMonsterMoveFrames = null)
         {
             var timeline = CreateInstance<StageTimeline>();
             timeline.stageId = "runtime-prototype";
@@ -200,10 +206,10 @@ namespace CrossDefense.Data
             timeline.randomSeed = 20260714;
             timeline.randomizeDirectionWeights = false;
 
-            var basic = MonsterData.CreatePrototype("runtime-basic", "Prototype Goblin", MonsterShape.BasicSlime,
-                MonsterAttribute.None, 40, 0.75f, 5, 2, defaultMonsterSprite);
-            var fast = MonsterData.CreatePrototype("runtime-fast", "Prototype Fast Goblin", MonsterShape.SpitterSlime,
-                MonsterAttribute.Fire, 24, 1.2f, 4, 3, defaultMonsterSprite);
+            var basic = MonsterData.CreatePrototype("runtime-basic", "Prototype Goblin", MonsterShape.Grunt,
+                MonsterAttribute.None, 40, 0.75f, 5, 2, defaultMonsterSprite, defaultMonsterMoveFrames);
+            var fast = MonsterData.CreatePrototype("runtime-fast", "Prototype Fast Goblin", MonsterShape.Scout,
+                MonsterAttribute.Fire, 24, 1.2f, 4, 3, defaultMonsterSprite, defaultMonsterMoveFrames);
 
             int count = Mathf.Max(1, waveCount);
             for (int i = 0; i < count; i++)

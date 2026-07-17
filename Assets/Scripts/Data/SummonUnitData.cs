@@ -39,6 +39,10 @@ namespace CrossDefense.Data
         [SerializeField] Sprite projectileSprite;
         [SerializeField] Color tint = Color.white;
 
+        [Header("Animation")]
+        [SerializeField] Sprite[] moveFrames;
+        [Min(1f)] [SerializeField] float moveAnimationFps = 9f;
+
         [Header("Summon Pool")]
         [Min(0)] [SerializeField] int weight = 100;
         [SerializeField] bool unlockedByDefault = true;
@@ -47,6 +51,7 @@ namespace CrossDefense.Data
         [SerializeField] MonsterAttribute attribute = MonsterAttribute.None;
         [SerializeField] SummonAttackStyle attackStyle = SummonAttackStyle.Melee;
         [SerializeField] SummonTargetPriority targetPriority = SummonTargetPriority.Nearest;
+        [Min(1f)] [SerializeField] float baseMaxHp = 100f;
         [Min(0.1f)] [SerializeField] float baseDamage = 8f;
         [Min(0.1f)] [SerializeField] float attacksPerSecond = 1f;
         [Min(0.1f)] [SerializeField] float attackRange = 0.85f;
@@ -62,6 +67,7 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float supportRadius = 2.5f;
 
         [Header("Rank")]
+        [SerializeField] float[] rankHpMultipliers = { 1f, 1.5f, 2.25f, 3.5f };
         [SerializeField] float[] rankDamageMultipliers = { 1f, 1.8f, 3.25f, 5.5f };
         [SerializeField] float[] rankAttackSpeedMultipliers = { 1f, 1.08f, 1.16f, 1.25f };
         [SerializeField] float[] rankScaleMultipliers = { 1f, 1.08f, 1.16f, 1.25f };
@@ -74,11 +80,14 @@ namespace CrossDefense.Data
         public Sprite WorldSprite => worldSprite != null ? worldSprite : icon;
         public Sprite ProjectileSprite => projectileSprite;
         public Color Tint => tint;
+        public Sprite[] MoveFrames => moveFrames;
+        public float MoveAnimationFps => moveAnimationFps;
         public int Weight => weight;
         public bool UnlockedByDefault => unlockedByDefault;
         public MonsterAttribute Attribute => attribute;
         public SummonAttackStyle AttackStyle => attackStyle;
         public SummonTargetPriority TargetPriority => targetPriority;
+        public float BaseMaxHp => baseMaxHp;
         public float BaseDamage => baseDamage;
         public float AttacksPerSecond => attacksPerSecond;
         public float AttackRange => attackRange;
@@ -93,6 +102,7 @@ namespace CrossDefense.Data
         public float SupportAttackSpeedBonus => supportAttackSpeedBonus;
         public float SupportRadius => supportRadius;
 
+        public float MaxHpAtRank(int rank) => baseMaxHp * RankValue(rankHpMultipliers, rank, 1f);
         public float DamageAtRank(int rank) => baseDamage * RankValue(rankDamageMultipliers, rank, 1f);
         public float AttacksPerSecondAtRank(int rank) => attacksPerSecond * RankValue(rankAttackSpeedMultipliers, rank, 1f);
         public float ScaleAtRank(int rank) => RankValue(rankScaleMultipliers, rank, 1f);
@@ -115,7 +125,8 @@ namespace CrossDefense.Data
             float attacksPerSecond = 1f,
             float range = 0.85f,
             float moveSpeed = 2.5f,
-            Color? tint = null)
+            Color? tint = null,
+            float maxHp = 100f)
         {
             var data = CreateInstance<SummonUnitData>();
             data.unitId = id;
@@ -126,6 +137,7 @@ namespace CrossDefense.Data
             data.worldSprite = icon;
             data.attribute = attribute;
             data.attackStyle = attackStyle;
+            data.baseMaxHp = Mathf.Max(1f, maxHp);
             data.baseDamage = Mathf.Max(0.1f, damage);
             data.attacksPerSecond = Mathf.Max(0.1f, attacksPerSecond);
             data.attackRange = Mathf.Max(0.1f, range);
@@ -156,6 +168,12 @@ namespace CrossDefense.Data
             pierceCount = Mathf.Max(1, pierce);
             supportAttackSpeedBonus = Mathf.Clamp01(supportBonus);
             supportRadius = Mathf.Max(0f, supportRange);
+        }
+
+        public void ConfigurePrototypeAnimation(Sprite[] frames, float framesPerSecond = 9f)
+        {
+            moveFrames = frames;
+            moveAnimationFps = Mathf.Max(1f, framesPerSecond);
         }
 
         static float RankValue(float[] values, int rank, float fallback)

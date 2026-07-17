@@ -1,0 +1,584 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a12a2f7df0e4f78b6d8bc7dc3f2a4e5, type: 3}
+  m_Name: Stage_01
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.StageTimeline
+  stageId: stage-01
+  displayName: "\uACE0\uBE14\uB9B0 \uC232"
+  balanceProfile: {fileID: 11400000, guid: 31baa6477aefec244a09094e7c7515e3, type: 2}
+  randomSeed: 2026
+  randomizeDirectionWeights: 1
+  directionWeightJitter: 0.15
+  runTraitInterval: 5
+  waves:
+  - label: Wave 1
+    isBoss: 0
+    preparationTime: 5
+    hpMultiplier: 1
+    speedMultiplier: 1
+    summonContractReward: 5
+    spawnZoneWeights:
+      top: 3
+      right: 1
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
+      count: 6
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 2
+    isBoss: 0
+    preparationTime: 4.9
+    hpMultiplier: 1.1
+    speedMultiplier: 1.015
+    summonContractReward: 5
+    spawnZoneWeights:
+      top: 1
+      right: 3
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
+      count: 8
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 3
+    isBoss: 0
+    preparationTime: 4.8
+    hpMultiplier: 1.2
+    speedMultiplier: 1.03
+    summonContractReward: 5
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 3
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
+      count: 10
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 4
+    isBoss: 0
+    preparationTime: 4.7
+    hpMultiplier: 1.3
+    speedMultiplier: 1.045
+    summonContractReward: 5
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 1
+      left: 3
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 12
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 5
+    isBoss: 0
+    preparationTime: 4.6
+    hpMultiplier: 1.4
+    speedMultiplier: 1.06
+    summonContractReward: 10
+    spawnZoneWeights:
+      top: 3
+      right: 1
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 14
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 4
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 6
+    isBoss: 0
+    preparationTime: 4.5
+    hpMultiplier: 1.5
+    speedMultiplier: 1.075
+    summonContractReward: 6
+    spawnZoneWeights:
+      top: 1
+      right: 3
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 16
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 4
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 7
+    isBoss: 0
+    preparationTime: 4.4
+    hpMultiplier: 1.6
+    speedMultiplier: 1.09
+    summonContractReward: 6
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 3
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 18
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 5
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 8
+    isBoss: 0
+    preparationTime: 4.3
+    hpMultiplier: 1.7
+    speedMultiplier: 1.105
+    summonContractReward: 6
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 1
+      left: 3
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 20
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 5
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 9
+    isBoss: 0
+    preparationTime: 4.2
+    hpMultiplier: 1.8
+    speedMultiplier: 1.12
+    summonContractReward: 6
+    spawnZoneWeights:
+      top: 3
+      right: 1
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 22
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 6
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 10
+    isBoss: 1
+    preparationTime: 4.1
+    hpMultiplier: 1.9
+    speedMultiplier: 1.135
+    summonContractReward: 12
+    spawnZoneWeights:
+      top: 1
+      right: 3
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 8
+      spawnInterval: 0.65
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: ae19594e0fdae4a4fabc5c92f68cdb7b, type: 2}
+      count: 1
+      spawnInterval: 1.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 11
+    isBoss: 0
+    preparationTime: 4
+    hpMultiplier: 2
+    speedMultiplier: 1.15
+    summonContractReward: 7
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 3
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 26
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 7
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 12
+    isBoss: 0
+    preparationTime: 3.9
+    hpMultiplier: 2.1
+    speedMultiplier: 1.165
+    summonContractReward: 7
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 1
+      left: 3
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 28
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 7
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 13
+    isBoss: 0
+    preparationTime: 3.8
+    hpMultiplier: 2.2
+    speedMultiplier: 1.18
+    summonContractReward: 7
+    spawnZoneWeights:
+      top: 3
+      right: 1
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 30
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 8
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 14
+    isBoss: 0
+    preparationTime: 3.7
+    hpMultiplier: 2.3
+    speedMultiplier: 1.195
+    summonContractReward: 7
+    spawnZoneWeights:
+      top: 1
+      right: 3
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 32
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 8
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 15
+    isBoss: 0
+    preparationTime: 3.6
+    hpMultiplier: 2.4
+    speedMultiplier: 1.21
+    summonContractReward: 10
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 3
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 34
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 9
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 16
+    isBoss: 0
+    preparationTime: 3.5
+    hpMultiplier: 2.5
+    speedMultiplier: 1.225
+    summonContractReward: 8
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 1
+      left: 3
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 36
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 9
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 17
+    isBoss: 0
+    preparationTime: 3.4
+    hpMultiplier: 2.6
+    speedMultiplier: 1.24
+    summonContractReward: 8
+    spawnZoneWeights:
+      top: 3
+      right: 1
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 38
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 10
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 18
+    isBoss: 0
+    preparationTime: 3.3
+    hpMultiplier: 2.7
+    speedMultiplier: 1.255
+    summonContractReward: 8
+    spawnZoneWeights:
+      top: 1
+      right: 3
+      bottom: 1
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 40
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 10
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 19
+    isBoss: 0
+    preparationTime: 3.2
+    hpMultiplier: 2.8
+    speedMultiplier: 1.27
+    summonContractReward: 8
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 3
+      left: 1
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
+      count: 42
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 11
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+  - label: Wave 20
+    isBoss: 1
+    preparationTime: 3.1
+    hpMultiplier: 2.9
+    speedMultiplier: 1.285
+    summonContractReward: 0
+    spawnZoneWeights:
+      top: 1
+      right: 1
+      bottom: 1
+      left: 3
+    directionWeights:
+      north: 0
+      east: 0
+      south: 0
+      west: 0
+    monsterSpawns:
+    - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
+      count: 18
+      spawnInterval: 0.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: e4a2688a5d751a44e9aefe0617b3e587, type: 2}
+      count: 10
+      spawnInterval: 0.7
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
+    - monster: {fileID: 11400000, guid: a39e18a2c4680924d937d4aaf86aa6f6, type: 2}
+      count: 1
+      spawnInterval: 1.5
+      hpMultiplier: 1
+      speedMultiplier: 1
+      rewardMultiplier: 1
