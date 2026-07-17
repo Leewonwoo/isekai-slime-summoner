@@ -565,7 +565,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d71dce296217d4246aaeb91e4a43d8dc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Units.SummonerAttackController
   selectedProjectile: 0
   energyBoltSprite: {fileID: 21300000, guid: ff37767346c8ea1459355e522a28a9e6, type: 3}
@@ -573,7 +573,7 @@ MonoBehaviour:
   iceballSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
   attackDamage: 12
   attacksPerSecond: 1.25
-  attackRange: 10
+  attackRange: 4.5
   projectileSpeed: 10
   clickAttackDamage: 18
   clickAttacksPerSecond: 2
@@ -581,6 +581,28 @@ MonoBehaviour:
   firePosition: {fileID: 115237141}
   spawnOffset: 0.4
   projectileScale: 0.65
+  idleFrames:
+  - {fileID: 3707358749038027266, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: -1558088450625946277, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 5180751724325418611, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: -2074296473064832079, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 4081435322716883744, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 2347078073250366566, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 5535744570206609154, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 5025590400573802668, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  - {fileID: 7157685068579967672, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
+  idleAnimationFps: 8
+  attackFrames:
+  - {fileID: -6318949849356596030, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: -5822497269296879019, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: 4811929827194054792, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: 9219769443956520386, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: 731819370179990463, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: -247763341110276175, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: -8985981078168720458, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: -1077825658140382148, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  - {fileID: -4816822272668904797, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
+  attackAnimationFps: 18
 --- !u!1 &1477278019
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,6 +634,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.UI.RootLayoutController
   upgradeRowTemplate: {fileID: 9197481963319205126, guid: d64ffb382eb1a4849bec454561156853, type: 3}
+  traitChoicePopupPrefab: {fileID: 2362700463260785385, guid: b24e0d7d8b13d97449259d5853fa61f4, type: 3}
 --- !u!114 &1477278021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -819,18 +842,73 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d11791bca7f4ed5b8b8e0c47f4a4ad1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: CrossDefense.Core.GameManager
-  stageTimeline: {fileID: 0}
+  stageTimeline: {fileID: 11400000, guid: 518fde30078353a40a6f5a9dfe11072c, type: 2}
   autoStart: 1
   useRuntimePrototypeWhenTimelineMissing: 1
   runtimePrototypeMonsterSprite: {fileID: 21300000, guid: 07da60cd6b815bc448ba897100442ed4, type: 3}
+  runtimePrototypeMonsterRunFrames:
+  - {fileID: 814720638514902731, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: -295104837620581466, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: 673905218437106829, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: -784126509330741852, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: 391650284716092537, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: -619837205481360924, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: 528104963720481635, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: -237650918436205781, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  - {fileID: 746318205974103682, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  gameplayBackground: {fileID: 257950159}
+  monsterSpawnMinOutsideDistance: 0.4
+  monsterSpawnMaxOutsideDistance: 1.1
+  summonedUnitTargetSearchRange: 4.5
+  combatPbd:
+    enabled: 1
+    solverIterations: 1
+    correctionStrength: 0.38
+    summonedUnitSpacingScale: 0.82
+    monsterSpacingScale: 0.78
+    opposingSpacingScale: 0.52
+    penetrationSlop: 0.06
+    maxCorrectionSpeed: 0.9
+    summonedUnitInverseMass: 0.65
+    monsterInverseMass: 1
+  summonFormation:
+    enabled: 1
+    returnSpeed: 3.4
+    stoppingDistance: 0.06
+    innerRadius: 1.15
+    ringSpacing: 0.7
+    slotsPerRing: 6
+    rotationOffsetDegrees: 90
   summoner: {fileID: 1104651445}
   maxCoreHp: 100
   startingGold: 0
   startingSummonContracts: 10
+  restartStageOnDefeat: 1
+  defeatRestartDelay: 1.25
+  growthBalance: {fileID: 11400000, guid: bdc2782e003172949ad988967dd55bfc, type: 2}
   summonPool: []
-  runtimePrototypeSummonSprite: {fileID: 21300000, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
+  runtimePrototypeSummonSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
+  runtimePrototypePunchSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
+  runtimePrototypeWatergunSprite: {fileID: 3013684235858901341, guid: 6bf5318b12187c1408a1167138587ddc, type: 3}
+  runtimePrototypeFlameSprite: {fileID: -691601476373139064, guid: 6a402657aa9940a48a134550381faf69, type: 3}
+  runtimePrototypeIceSprite: {fileID: -8070034397944155849, guid: 8c5dab60b85281346a2c232e0f27447f, type: 3}
+  runtimePrototypeGreenSprite: {fileID: 4378471494569808391, guid: 7bb910d4497f35c4d8b1864e16c2efae, type: 3}
+  runtimePrototypeBuffSprite: {fileID: -5001199551054921638, guid: cc2a80b8cf1735f428110cfa16a39960, type: 3}
+  runtimePrototypeExplosionSprite: {fileID: 2972943333547804390, guid: 36ba449a61b5a0e4fa345b09a419e5b5, type: 3}
+  runtimePrototypeFreezeSprite: {fileID: -1717748923568280147, guid: cb054c90c6825fa4fbc44be9e9829bd5, type: 3}
+  runtimePrototypePunchMoveFrames:
+  - {fileID: 7078453641938519378, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -199204680781642534, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -8373758754401639871, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -7717853021907792319, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -4450605685356787060, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -1192736157123674389, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -5395799091464134987, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: 4678997526071849050, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  - {fileID: -2618907496058387109, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
+  runtimePrototypePunchMoveFps: 9
   runtimePrototypeNeutralProjectileSprite: {fileID: 21300000, guid: ff37767346c8ea1459355e522a28a9e6, type: 3}
   runtimePrototypeFireProjectileSprite: {fileID: 21300000, guid: 9b10f9039114ed04887effab2e3c8366, type: 3}
   runtimePrototypeIceProjectileSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
