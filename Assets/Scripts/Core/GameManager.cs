@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using CrossDefense.Data;
 using CrossDefense.Units;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace CrossDefense.Core
 {
@@ -15,6 +17,17 @@ namespace CrossDefense.Core
         [SerializeField] bool autoStart = true;
         [SerializeField] bool useRuntimePrototypeWhenTimelineMissing = true;
         [SerializeField] Sprite runtimePrototypeMonsterSprite;
+        [SerializeField] Sprite[] runtimePrototypeMonsterRunFrames;
+
+        [Header("Encounter Bounds")]
+        [SerializeField] SpriteRenderer gameplayBackground;
+        [Min(0.1f)] [SerializeField] float monsterSpawnMinOutsideDistance = 0.4f;
+        [Min(0.1f)] [SerializeField] float monsterSpawnMaxOutsideDistance = 1.1f;
+        [Min(0.1f)] [SerializeField] float summonedUnitTargetSearchRange = 4.5f;
+
+        [Header("Combat Motion")]
+        [SerializeField] CombatPbdSettings combatPbd = new();
+        [SerializeField] SummonFormationSettings summonFormation = new();
 
         [Header("Summoner")]
         [SerializeField] Transform summoner;
@@ -22,9 +35,26 @@ namespace CrossDefense.Core
         [Min(0)] [SerializeField] int startingGold = 0;
         [Min(0)] [SerializeField] int startingSummonContracts = 10;
 
+        [Header("Defeat Restart")]
+        [SerializeField] bool restartStageOnDefeat = true;
+        [Min(0f)] [SerializeField] float defeatRestartDelay = 1.25f;
+
+        [Header("Growth")]
+        [SerializeField] GrowthBalanceData growthBalance;
+
         [Header("Summon Roulette")]
         [SerializeField] List<SummonUnitData> summonPool = new();
         [SerializeField] Sprite runtimePrototypeSummonSprite;
+        [SerializeField] Sprite runtimePrototypePunchSprite;
+        [SerializeField] Sprite runtimePrototypeWatergunSprite;
+        [SerializeField] Sprite runtimePrototypeFlameSprite;
+        [SerializeField] Sprite runtimePrototypeIceSprite;
+        [SerializeField] Sprite runtimePrototypeGreenSprite;
+        [SerializeField] Sprite runtimePrototypeBuffSprite;
+        [SerializeField] Sprite runtimePrototypeExplosionSprite;
+        [SerializeField] Sprite runtimePrototypeFreezeSprite;
+        [SerializeField] Sprite[] runtimePrototypePunchMoveFrames;
+        [Min(1f)] [SerializeField] float runtimePrototypePunchMoveFps = 9f;
         [SerializeField] Sprite runtimePrototypeNeutralProjectileSprite;
         [SerializeField] Sprite runtimePrototypeFireProjectileSprite;
         [SerializeField] Sprite runtimePrototypeIceProjectileSprite;
@@ -41,7 +71,15 @@ namespace CrossDefense.Core
         GoldRewardFlow _goldRewardFlow;
         Func<Vector2> _goldScreenPositionProvider;
         StageTimeline _runtimeTimeline;
+        GrowthBalanceData _runtimeGrowthBalance;
+        WorldHealthBar _summonerHealthBar;
+        SummonerProgression _summonerProgression;
+        PermanentTraitProgression _permanentTraits;
+        RunTraitProgression _runTraits;
+        GrowthManager _growthManager;
+        Coroutine _defeatRestartRoutine;
         float _coreHp;
+        float _effectiveMaxCoreHp;
         int _gold;
         int _summonContracts;
         RunPhase _phase;
@@ -50,16 +88,39 @@ namespace CrossDefense.Core
         public Transform Summoner => summoner;
         public RunPhase Phase => _phase;
         public float CoreHp => _coreHp;
-        public float MaxCoreHp => maxCoreHp;
+        public float MaxCoreHp => _effectiveMaxCoreHp;
         public int Gold => _gold;
         public int SummonContracts => _summonContracts;
         public SummonManager SummonManager => _summonManager;
         public SummonedUnitManager SummonedUnitManager => _summonedUnitManager;
+        public SummonerProgression SummonerProgression => _summonerProgression;
+        public PermanentTraitProgression PermanentTraits => _permanentTraits;
+        public RunTraitProgression RunTraits => _runTraits;
+        public GrowthManager Growth => _growthManager;
+        public GrowthBalanceData GrowthBalance => growthBalance;
+        public float DirectRankOneChance => Mathf.Clamp01(
+            directRankOneChance +
+            (_summonerProgression?.Snapshot.JackpotChanceBonus ?? 0f) +
+            (_permanentTraits?.Snapshot.JackpotChanceBonus ?? 0f));
+        public float RunAttackSpeedMultiplier => _growthManager?.RunAttackSpeedMultiplier ?? 1f;
+        public float SummonerAttackSpeedMultiplier =>
+            RunAttackSpeedMultiplier *
+            (_permanentTraits?.Snapshot.SummonerAttackSpeedMultiplier ?? 1f) *
+            (_runTraits?.Snapshot.AllAttackSpeedMultiplier ?? 1f);
+        public float SlimeAttackSpeedMultiplier =>
+            RunAttackSpeedMultiplier *
+            (_permanentTraits?.Snapshot.SlimeAttackSpeedMultiplier ?? 1f) *
+            (_runTraits?.Snapshot.AllAttackSpeedMultiplier ?? 1f);
+        public bool IsRunTraitChoicePending => _runTraits?.IsChoicePending ?? false;
         public CombatProjectileService Projectiles => _summonedUnitManager?.Projectiles;
         public bool IsRunOver => _phase == RunPhase.Victory || _phase == RunPhase.Defeat;
         public int CurrentWave => _waveManager == null ? 0 : _waveManager.CurrentWaveIndex + 1;
         public int TotalWaves => _waveManager == null ? 0 : _waveManager.TotalWaves;
         public int LivingMonsterCount => _waveManager == null ? 0 : _waveManager.LivingMonsterCount;
+        public SpriteRenderer GameplayBackground => gameplayBackground;
+        public float MonsterSpawnMinOutsideDistance => monsterSpawnMinOutsideDistance;
+        public float MonsterSpawnMaxOutsideDistance => monsterSpawnMaxOutsideDistance;
+        public float SummonedUnitTargetSearchRange => summonedUnitTargetSearchRange;
 
         public event Action<RunPhase> PhaseChanged;
         public event Action<int, int> WaveChanged;
@@ -70,8 +131,64 @@ namespace CrossDefense.Core
         public event Action<MonsterController, StageWave, int> MonsterSpawned;
         public event Action<MonsterController> MonsterResolved;
 
+        void OnValidate()
+        {
+            if (gameplayBackground == null)
+                gameplayBackground = transform.Find("Background")?.GetComponent<SpriteRenderer>();
+            monsterSpawnMinOutsideDistance = Mathf.Max(0.1f, monsterSpawnMinOutsideDistance);
+            monsterSpawnMaxOutsideDistance = Mathf.Max(
+                monsterSpawnMinOutsideDistance,
+                monsterSpawnMaxOutsideDistance);
+            summonedUnitTargetSearchRange = Mathf.Max(0.1f, summonedUnitTargetSearchRange);
+            runtimePrototypePunchMoveFps = Mathf.Max(1f, runtimePrototypePunchMoveFps);
+        }
+
+        void OnDrawGizmosSelected()
+        {
+            Vector3 center;
+            float width;
+            float height;
+            if (gameplayBackground != null && gameplayBackground.sprite != null)
+            {
+                Bounds bounds = gameplayBackground.bounds;
+                center = bounds.center;
+                width = bounds.extents.x;
+                height = bounds.extents.y;
+            }
+            else
+            {
+                var worldCamera = Camera.main;
+                if (worldCamera == null || !worldCamera.orthographic) return;
+                center = worldCamera.transform.position;
+                center.z = 0f;
+                height = worldCamera.orthographicSize;
+                width = height * worldCamera.aspect;
+            }
+
+            Gizmos.color = new Color(0.2f, 1f, 0.55f, 0.75f);
+            DrawSpawnRect(center, width + monsterSpawnMinOutsideDistance,
+                height + monsterSpawnMinOutsideDistance);
+            Gizmos.color = new Color(0.15f, 0.65f, 1f, 0.75f);
+            DrawSpawnRect(center, width + monsterSpawnMaxOutsideDistance,
+                height + monsterSpawnMaxOutsideDistance);
+        }
+
+        static void DrawSpawnRect(Vector3 center, float halfWidth, float halfHeight)
+        {
+            var topLeft = center + new Vector3(-halfWidth, halfHeight);
+            var topRight = center + new Vector3(halfWidth, halfHeight);
+            var bottomRight = center + new Vector3(halfWidth, -halfHeight);
+            var bottomLeft = center + new Vector3(-halfWidth, -halfHeight);
+            Gizmos.DrawLine(topLeft, topRight);
+            Gizmos.DrawLine(topRight, bottomRight);
+            Gizmos.DrawLine(bottomRight, bottomLeft);
+            Gizmos.DrawLine(bottomLeft, topLeft);
+        }
+
         void Awake()
         {
+            if (gameplayBackground == null)
+                gameplayBackground = transform.Find("Background")?.GetComponent<SpriteRenderer>();
             if (summoner == null)
                 summoner = transform.Find("Summoner");
             if (summoner == null)
@@ -79,16 +196,43 @@ namespace CrossDefense.Core
 
             if (stageTimeline == null && useRuntimePrototypeWhenTimelineMissing)
             {
-                _runtimeTimeline = StageTimeline.CreatePrototype(defaultMonsterSprite: runtimePrototypeMonsterSprite);
+                _runtimeTimeline = StageTimeline.CreatePrototype(
+                    defaultMonsterSprite: runtimePrototypeMonsterSprite,
+                    defaultMonsterMoveFrames: runtimePrototypeMonsterRunFrames);
                 stageTimeline = _runtimeTimeline;
                 Debug.Log("[CrossDefense] StageTimeline이 비어 있어 런타임 프로토타입 타임라인을 사용합니다.", this);
             }
 
+            if (growthBalance == null)
+            {
+                _runtimeGrowthBalance = GrowthBalanceData.CreateRuntimeDefault();
+                growthBalance = _runtimeGrowthBalance;
+            }
+            _summonerProgression = SummonerProgression.CreatePersistent(growthBalance);
+            _summonerProgression.Changed += OnSummonerProgressionChanged;
+            _permanentTraits = PermanentTraitProgression.CreatePersistent(
+                growthBalance,
+                () => _summonerProgression.Snapshot.Level);
+            _permanentTraits.Changed += OnPermanentTraitsChanged;
+            _runTraits = new RunTraitProgression(growthBalance, stageTimeline?.RandomSeed ?? 0);
+            _runTraits.Changed += OnRunTraitsChanged;
+
             maxCoreHp = Mathf.Max(1f, maxCoreHp);
-            _coreHp = maxCoreHp;
+            _effectiveMaxCoreHp = maxCoreHp *
+                                  _summonerProgression.Snapshot.MaxHpMultiplier *
+                                  _permanentTraits.Snapshot.CoreMaxHpMultiplier *
+                                  _runTraits.Snapshot.CoreMaxHpMultiplier;
+            _coreHp = _effectiveMaxCoreHp;
             _gold = Mathf.Max(0, startingGold);
             _summonContracts = Mathf.Max(0, startingSummonContracts);
             _phase = RunPhase.Prepare;
+
+            if (summoner != null && summoner.TryGetComponent(out SpriteRenderer summonerRenderer))
+            {
+                _summonerHealthBar = WorldHealthBar.GetOrAdd(summoner.gameObject);
+                _summonerHealthBar.Configure(summonerRenderer, WorldHealthBarProfile.Summoner);
+                _summonerHealthBar.SetHealth(_coreHp, _effectiveMaxCoreHp);
+            }
 
             _summonManager = new SummonManager(
                 this,
@@ -96,7 +240,9 @@ namespace CrossDefense.Core
                 currencyResultChance,
                 directRankOneChance,
                 currencyResultGold,
-                summonBenchCapacity);
+                summonBenchCapacity,
+                directRankOneChanceProvider: () => DirectRankOneChance);
+            _growthManager = new GrowthManager(this, _summonManager, growthBalance);
 
             _summonedUnitManager = GetComponent<SummonedUnitManager>();
             if (_summonedUnitManager == null)
@@ -106,7 +252,10 @@ namespace CrossDefense.Core
                 _summonManager,
                 summoner,
                 Camera.main,
-                autoDeploySummonedUnits);
+                autoDeploySummonedUnits,
+                summonedUnitTargetSearchRange,
+                combatPbd,
+                summonFormation);
 
             var input = GetComponent<CombatInputController>();
             if (input == null)
@@ -115,7 +264,12 @@ namespace CrossDefense.Core
                 ? summoner.GetComponent<SummonerAttackController>()
                 : null);
 
-            _monsterSpawner = new MonsterSpawner(transform, Camera.main);
+            _monsterSpawner = new MonsterSpawner(
+                transform,
+                Camera.main,
+                gameplayBackground,
+                monsterSpawnMinOutsideDistance,
+                monsterSpawnMaxOutsideDistance);
             _goldRewardFlow = new GoldRewardFlow(
                 Camera.main,
                 () => _goldScreenPositionProvider?.Invoke() ??
@@ -123,7 +277,7 @@ namespace CrossDefense.Core
                 AddGold);
             _waveManager = new WaveManager();
             _waveManager.Initialize(this, stageTimeline, _monsterSpawner, summoner);
-            CoreHpChanged?.Invoke(_coreHp, maxCoreHp);
+            CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
             GoldChanged?.Invoke(_gold);
             SummonContractsChanged?.Invoke(_summonContracts);
         }
@@ -142,59 +296,74 @@ namespace CrossDefense.Core
 
             var punch = SummonUnitData.CreatePrototype(
                 "punch-slime", "주먹 슬라임", SummonUnitRarity.Common, 100,
-                runtimePrototypeSummonSprite, MonsterAttribute.None, SummonAttackStyle.Melee,
-                10f, 1.15f, 0.85f, 2.8f, new Color(0.82f, 0.9f, 1f));
+                ResolvePrototypeSprite(runtimePrototypePunchSprite), MonsterAttribute.None, SummonAttackStyle.Melee,
+                10f, 1.15f, 0.85f, 2.8f,
+                ResolvePrototypeTint(runtimePrototypePunchSprite, new Color(0.82f, 0.9f, 1f)));
+            punch.ConfigurePrototypeAnimation(runtimePrototypePunchMoveFrames, runtimePrototypePunchMoveFps);
             yield return punch;
 
             var watergun = SummonUnitData.CreatePrototype(
                 "watergun-slime", "물총 슬라임", SummonUnitRarity.Common, 90,
-                runtimePrototypeSummonSprite, MonsterAttribute.None, SummonAttackStyle.Projectile,
-                7f, 1.35f, 4.5f, 2.35f, new Color(0.45f, 0.8f, 1f));
+                ResolvePrototypeSprite(runtimePrototypeWatergunSprite), MonsterAttribute.None, SummonAttackStyle.Projectile,
+                7f, 1.35f, 4.5f, 2.35f,
+                ResolvePrototypeTint(runtimePrototypeWatergunSprite, new Color(0.45f, 0.8f, 1f)));
             watergun.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 0f, 0f, 1);
             yield return watergun;
 
-            var ember = SummonUnitData.CreatePrototype(
-                "ember-slime", "불씨 슬라임", SummonUnitRarity.Common, 72,
-                runtimePrototypeSummonSprite, MonsterAttribute.Fire, SummonAttackStyle.Area,
-                8f, 0.85f, 2.1f, 2.2f, new Color(1f, 0.42f, 0.22f));
-            ember.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.15f, 0f, 0f, 0f, 0f, 1);
-            yield return ember;
+            var flame = SummonUnitData.CreatePrototype(
+                "flame-slime", "불꽃 슬라임", SummonUnitRarity.Common, 72,
+                ResolvePrototypeSprite(runtimePrototypeFlameSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
+                8f, 0.85f, 2.1f, 2.2f,
+                ResolvePrototypeTint(runtimePrototypeFlameSprite, new Color(1f, 0.42f, 0.22f)));
+            flame.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.15f, 0f, 0f, 0f, 0f, 1);
+            yield return flame;
 
-            var frost = SummonUnitData.CreatePrototype(
-                "frost-slime", "서리 슬라임", SummonUnitRarity.Rare, 52,
-                runtimePrototypeSummonSprite, MonsterAttribute.Ice, SummonAttackStyle.Projectile,
-                5.5f, 1f, 4.2f, 2.2f, new Color(0.55f, 0.9f, 1f));
-            frost.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.32f, 2f, 0f, 0f, 1);
-            yield return frost;
+            var ice = SummonUnitData.CreatePrototype(
+                "ice-slime", "얼음 슬라임", SummonUnitRarity.Rare, 52,
+                ResolvePrototypeSprite(runtimePrototypeIceSprite), MonsterAttribute.Ice, SummonAttackStyle.Projectile,
+                5.5f, 1f, 4.2f, 2.2f,
+                ResolvePrototypeTint(runtimePrototypeIceSprite, new Color(0.55f, 0.9f, 1f)));
+            ice.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.32f, 2f, 0f, 0f, 1);
+            yield return ice;
 
-            var sprout = SummonUnitData.CreatePrototype(
-                "sprout-slime", "새싹 슬라임", SummonUnitRarity.Rare, 45,
-                runtimePrototypeSummonSprite, MonsterAttribute.Nature, SummonAttackStyle.Projectile,
-                4.5f, 1f, 4f, 2.2f, new Color(0.5f, 1f, 0.48f));
-            sprout.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 3f, 2.5f, 1);
-            yield return sprout;
+            var green = SummonUnitData.CreatePrototype(
+                "green-slime", "초록 슬라임", SummonUnitRarity.Rare, 45,
+                ResolvePrototypeSprite(runtimePrototypeGreenSprite), MonsterAttribute.Nature, SummonAttackStyle.Projectile,
+                4.5f, 1f, 4f, 2.2f,
+                ResolvePrototypeTint(runtimePrototypeGreenSprite, new Color(0.5f, 1f, 0.48f)));
+            green.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 3f, 2.5f, 1);
+            yield return green;
 
-            var resonance = SummonUnitData.CreatePrototype(
-                "resonance-slime", "공명 슬라임", SummonUnitRarity.Rare, 38,
-                runtimePrototypeSummonSprite, MonsterAttribute.None, SummonAttackStyle.Support,
-                0.1f, 1f, 0.8f, 2f, new Color(0.78f, 0.55f, 1f));
-            resonance.ConfigurePrototypeEffects(null, 0f, 0f, 0f, 0f, 0f, 1, 0.16f, 2.8f);
-            yield return resonance;
+            var buff = SummonUnitData.CreatePrototype(
+                "buff-slime", "버프 슬라임", SummonUnitRarity.Rare, 38,
+                ResolvePrototypeSprite(runtimePrototypeBuffSprite), MonsterAttribute.None, SummonAttackStyle.Support,
+                0.1f, 1f, 0.8f, 2f,
+                ResolvePrototypeTint(runtimePrototypeBuffSprite, new Color(0.78f, 0.55f, 1f)));
+            buff.ConfigurePrototypeEffects(null, 0f, 0f, 0f, 0f, 0f, 1, 0.16f, 2.8f);
+            yield return buff;
 
-            var burst = SummonUnitData.CreatePrototype(
-                "burst-slime", "팽창 슬라임", SummonUnitRarity.Rare, 32,
-                runtimePrototypeSummonSprite, MonsterAttribute.Fire, SummonAttackStyle.Area,
-                15f, 0.55f, 1.1f, 2.7f, new Color(1f, 0.62f, 0.3f));
-            burst.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.45f, 0f, 0f, 0f, 0f, 1);
-            yield return burst;
+            var explosion = SummonUnitData.CreatePrototype(
+                "explosion-slime", "폭발 슬라임", SummonUnitRarity.Rare, 32,
+                ResolvePrototypeSprite(runtimePrototypeExplosionSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
+                15f, 0.55f, 1.1f, 2.7f,
+                ResolvePrototypeTint(runtimePrototypeExplosionSprite, new Color(1f, 0.62f, 0.3f)));
+            explosion.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.45f, 0f, 0f, 0f, 0f, 1);
+            yield return explosion;
 
-            var crystal = SummonUnitData.CreatePrototype(
-                "crystal-slime", "빙정 슬라임", SummonUnitRarity.Legendary, 18,
-                runtimePrototypeSummonSprite, MonsterAttribute.Ice, SummonAttackStyle.Piercing,
-                13f, 0.65f, 6f, 1.9f, new Color(0.65f, 0.72f, 1f));
-            crystal.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.15f, 1f, 0f, 0f, 3);
-            yield return crystal;
+            var freeze = SummonUnitData.CreatePrototype(
+                "freeze-slime", "빙결 슬라임", SummonUnitRarity.Legendary, 18,
+                ResolvePrototypeSprite(runtimePrototypeFreezeSprite), MonsterAttribute.Ice, SummonAttackStyle.Piercing,
+                13f, 0.65f, 6f, 1.9f,
+                ResolvePrototypeTint(runtimePrototypeFreezeSprite, new Color(0.65f, 0.72f, 1f)));
+            freeze.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.15f, 1f, 0f, 0f, 3);
+            yield return freeze;
         }
+
+        Sprite ResolvePrototypeSprite(Sprite configuredSprite) =>
+            configuredSprite != null ? configuredSprite : runtimePrototypeSummonSprite;
+
+        static Color ResolvePrototypeTint(Sprite configuredSprite, Color fallbackTint) =>
+            configuredSprite != null ? Color.white : fallbackTint;
 
         void Start()
         {
@@ -212,18 +381,73 @@ namespace CrossDefense.Core
         {
             if (IsRunOver || amount <= 0) return;
             _coreHp = Mathf.Max(0f, _coreHp - amount);
-            CoreHpChanged?.Invoke(_coreHp, maxCoreHp);
+            _summonerHealthBar?.SetHealth(_coreHp, _effectiveMaxCoreHp);
+            CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
             if (_coreHp <= 0f)
             {
                 SetPhase(RunPhase.Defeat);
                 Debug.Log("[CrossDefense] 소환사 HP가 0이 되어 런이 종료되었습니다.", this);
+                if (restartStageOnDefeat && _defeatRestartRoutine == null)
+                    _defeatRestartRoutine = StartCoroutine(RestartStageAfterDefeat());
             }
+        }
+
+        public void RestartCurrentStage()
+        {
+            _summonerProgression?.Flush();
+            _permanentTraits?.Flush();
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.buildIndex >= 0)
+                SceneManager.LoadScene(scene.buildIndex);
+            else if (!string.IsNullOrWhiteSpace(scene.name))
+                SceneManager.LoadScene(scene.name);
         }
 
         public void AddGold(int amount)
         {
             _gold = Mathf.Max(0, _gold + amount);
             GoldChanged?.Invoke(_gold);
+        }
+
+        public bool TrySpendGold(int amount)
+        {
+            if (amount <= 0 || _gold < amount) return false;
+            _gold -= amount;
+            GoldChanged?.Invoke(_gold);
+            return true;
+        }
+
+        public void HealCore(float amount)
+        {
+            if (amount <= 0f || _coreHp <= 0f || _coreHp >= _effectiveMaxCoreHp) return;
+            _coreHp = Mathf.Min(_effectiveMaxCoreHp, _coreHp + amount);
+            _summonerHealthBar?.SetHealth(_coreHp, _effectiveMaxCoreHp);
+            CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
+        }
+
+        public float ModifySlimeDamage(float baseDamage)
+        {
+            float permanentDamage = Mathf.Max(0f, baseDamage) *
+                                    (_permanentTraits?.Snapshot.SlimeDamageMultiplier ?? 1f) *
+                                    (_runTraits?.Snapshot.AllDamageMultiplier ?? 1f) *
+                                    (_runTraits?.Snapshot.SlimeDamageMultiplier ?? 1f);
+            return _growthManager?.ModifyPlayerDamage(
+                       permanentDamage,
+                       _runTraits?.Snapshot.CriticalChanceBonus ?? 0f) ??
+                   permanentDamage;
+        }
+
+        public float ModifySummonerDamage(float baseDamage)
+        {
+            float permanentDamage = Mathf.Max(0f, baseDamage) *
+                                    (_summonerProgression?.Snapshot.DamageMultiplier ?? 1f) *
+                                    (_permanentTraits?.Snapshot.SummonerDamageMultiplier ?? 1f) *
+                                    (_runTraits?.Snapshot.AllDamageMultiplier ?? 1f) *
+                                    (_runTraits?.Snapshot.SummonerDamageMultiplier ?? 1f);
+            return _growthManager?.ModifyPlayerDamage(
+                       permanentDamage,
+                       _runTraits?.Snapshot.CriticalChanceBonus ?? 0f) ??
+                   permanentDamage;
         }
 
         public void RegisterGoldScreenPositionProvider(Func<Vector2> provider)
@@ -253,6 +477,14 @@ namespace CrossDefense.Core
             Debug.Log($"[CrossDefense] Wave clear reward: summon contracts +{wave.SummonContractReward}", this);
         }
 
+        public bool BeginRunTraitChoice(int clearedWave)
+        {
+            if (_runTraits == null || !_runTraits.BeginChoice(clearedWave))
+                return false;
+            SetPhase(RunPhase.TraitChoice);
+            return true;
+        }
+
         public void SetPhase(RunPhase phase)
         {
             if (_phase == phase) return;
@@ -277,6 +509,7 @@ namespace CrossDefense.Core
         {
             if (_waveManager == null) return;
             Vector3 rewardOrigin = monster != null ? monster.transform.position : Vector3.zero;
+            _summonerProgression?.AddExperience(growthBalance.SummonerExperienceReward(rewardGold));
             _waveManager.NotifyMonsterDefeated(monster);
             _monsterSpawner.Release(monster);
             MonsterResolved?.Invoke(monster);
@@ -287,14 +520,77 @@ namespace CrossDefense.Core
             LivingMonsterCountChanged?.Invoke(_waveManager.LivingMonsterCount);
         }
 
-        public void NotifyMonsterReachedCore(MonsterController monster, int contactDamage)
+        void OnSummonerProgressionChanged(SummonerProgressionSnapshot snapshot)
         {
-            if (_waveManager == null) return;
-            _waveManager.NotifyMonsterReachedCore(monster);
-            _monsterSpawner.Release(monster);
-            ApplyCoreDamage(contactDamage);
-            MonsterResolved?.Invoke(monster);
-            LivingMonsterCountChanged?.Invoke(_waveManager.LivingMonsterCount);
+            RecalculateEffectiveCoreHp(true);
         }
+
+        void OnPermanentTraitsChanged(PermanentTraitSnapshot snapshot)
+        {
+            RecalculateEffectiveCoreHp(true);
+        }
+
+        void OnRunTraitsChanged(RunTraitSnapshot snapshot)
+        {
+            RecalculateEffectiveCoreHp(true);
+        }
+
+        void RecalculateEffectiveCoreHp(bool healAddedMaximum)
+        {
+            float previousMax = Mathf.Max(1f, _effectiveMaxCoreHp);
+            float nextMax = Mathf.Max(
+                1f,
+                maxCoreHp *
+                (_summonerProgression?.Snapshot.MaxHpMultiplier ?? 1f) *
+                (_permanentTraits?.Snapshot.CoreMaxHpMultiplier ?? 1f) *
+                (_runTraits?.Snapshot.CoreMaxHpMultiplier ?? 1f));
+            _effectiveMaxCoreHp = nextMax;
+            if (healAddedMaximum && nextMax > previousMax)
+                _coreHp = Mathf.Min(nextMax, _coreHp + nextMax - previousMax);
+            else
+                _coreHp = Mathf.Min(_coreHp, nextMax);
+            _summonerHealthBar?.SetHealth(_coreHp, nextMax);
+            CoreHpChanged?.Invoke(_coreHp, nextMax);
+        }
+
+        void OnDestroy()
+        {
+            if (_summonerProgression != null)
+            {
+                _summonerProgression.Flush();
+                _summonerProgression.Changed -= OnSummonerProgressionChanged;
+            }
+            if (_permanentTraits != null)
+            {
+                _permanentTraits.Flush();
+                _permanentTraits.Changed -= OnPermanentTraitsChanged;
+            }
+            if (_runTraits != null)
+                _runTraits.Changed -= OnRunTraitsChanged;
+            if (_runtimeGrowthBalance != null)
+                Destroy(_runtimeGrowthBalance);
+        }
+
+        IEnumerator RestartStageAfterDefeat()
+        {
+            yield return new WaitForSecondsRealtime(Mathf.Max(0f, defeatRestartDelay));
+            RestartCurrentStage();
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (paused)
+            {
+                _summonerProgression?.Flush();
+                _permanentTraits?.Flush();
+            }
+        }
+
+        void OnApplicationQuit()
+        {
+            _summonerProgression?.Flush();
+            _permanentTraits?.Flush();
+        }
+
     }
 }

@@ -8,7 +8,14 @@ namespace CrossDefense.Units
     [DisallowMultipleComponent]
     public sealed class CombatInputController : MonoBehaviour
     {
-        const float ClickMoveThreshold = 22f;
+        enum ActivePointerSource
+        {
+            None,
+            Mouse,
+            Touch,
+        }
+
+        public const float DragStartThreshold = 22f;
 
         Core.GameManager _gameManager;
         SummonedUnitManager _unitManager;
@@ -17,11 +24,13 @@ namespace CrossDefense.Units
         UIDocument _uiDocument;
         Vector2 _pressScreenPosition;
         Vector3 _pressWorldPosition;
+        Vector3 _dragGrabOffset;
         SummonedUnitController _pressedUnit;
         MonsterController _pressedMonster;
         bool _pointerDown;
         bool _fieldDrag;
         bool _blockedByUi;
+        ActivePointerSource _activePointerSource;
 
         public void Initialize(
             Core.GameManager gameManager,
@@ -37,16 +46,36 @@ namespace CrossDefense.Units
 
         void Update()
         {
-            var pointer = Pointer.current;
-            if (pointer == null || _camera == null || _unitManager == null) return;
-            Vector2 screen = pointer.position.ReadValue();
+            if (_camera == null || _unitManager == null) return;
 
-            if (pointer.press.wasPressedThisFrame)
-                HandlePress(screen);
-            else if (_pointerDown && pointer.press.isPressed)
-                HandleMove(screen);
-            else if (_pointerDown && pointer.press.wasReleasedThisFrame)
+            if (!_pointerDown)
+            {
+                if (TryGetPressedPointer(out Vector2 pressedScreen, out ActivePointerSource source))
+                {
+                    _activePointerSource = source;
+                    HandlePress(pressedScreen);
+                }
+                return;
+            }
+
+            if (!TryGetActivePointerState(out Vector2 screen, out bool isPressed, out bool wasReleased))
+            {
+                CancelActivePointer();
+                return;
+            }
+
+            if (wasReleased)
                 HandleRelease(screen);
+            else if (isPressed)
+                HandleMove(screen);
+        }
+
+        void OnDisable() => CancelActivePointer();
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+                CancelActivePointer();
         }
 
         void HandlePress(Vector2 screen)
@@ -55,6 +84,7 @@ namespace CrossDefense.Units
             _pressScreenPosition = screen;
             _blockedByUi = IsBlockedByUi(screen);
             _fieldDrag = false;
+            _dragGrabOffset = Vector3.zero;
             _pressedUnit = null;
             _pressedMonster = null;
             if (_blockedByUi) return;
@@ -65,6 +95,8 @@ namespace CrossDefense.Units
                 if (_pressedUnit == null && hit.TryGetComponent<SummonedUnitController>(out var unit))
                 {
                     _pressedUnit = unit;
+                    _dragGrabOffset = unit.transform.position - _pressWorldPosition;
+                    _dragGrabOffset.z = 0f;
                     continue;
                 }
                 if (_pressedMonster == null && hit.TryGetComponent<MonsterController>(out var monster))
@@ -76,10 +108,10 @@ namespace CrossDefense.Units
         {
             if (_blockedByUi) return;
             if (!_fieldDrag && _pressedUnit != null &&
-                Vector2.Distance(screen, _pressScreenPosition) >= ClickMoveThreshold)
+                HasExceededDragThreshold(_pressScreenPosition, screen))
                 _fieldDrag = _unitManager.BeginFieldDrag(_pressedUnit);
             if (_fieldDrag)
-                _unitManager.UpdateFieldDrag(ScreenToWorld(screen));
+                _unitManager.UpdateFieldDrag(GetDragWorldPosition(ScreenToWorld(screen), _dragGrabOffset));
         }
 
         void HandleRelease(Vector2 screen)
@@ -94,14 +126,83 @@ namespace CrossDefense.Units
             Vector3 world = ScreenToWorld(screen);
             if (_fieldDrag)
             {
-                _unitManager.EndFieldDrag(world, _unitManager.IsScreenPositionInField(screen));
+                _unitManager.EndFieldDrag(
+                    GetDragWorldPosition(world, _dragGrabOffset),
+                    _unitManager.IsScreenPositionInField(screen));
                 ResetPointerState();
                 return;
             }
 
-            if (Vector2.Distance(screen, _pressScreenPosition) <= ClickMoveThreshold)
+            if (!HasExceededDragThreshold(_pressScreenPosition, screen))
                 _summonerAttack?.TryClickAttack(world, _pressedMonster);
             ResetPointerState();
+        }
+
+        public static bool HasExceededDragThreshold(Vector2 pressPosition, Vector2 currentPosition) =>
+            (currentPosition - pressPosition).sqrMagnitude >= DragStartThreshold * DragStartThreshold;
+
+        public static Vector3 GetDragWorldPosition(Vector3 pointerWorldPosition, Vector3 grabOffset)
+        {
+            Vector3 position = pointerWorldPosition + grabOffset;
+            position.z = 0f;
+            return position;
+        }
+
+        public static Vector2 GetPanelInputPosition(Vector2 screenPosition, float screenHeight) =>
+            new(screenPosition.x, Mathf.Max(0f, screenHeight) - screenPosition.y);
+
+        static bool TryGetPressedPointer(out Vector2 screen, out ActivePointerSource source)
+        {
+            var touchscreen = Touchscreen.current;
+            if (touchscreen != null && touchscreen.primaryTouch.press.wasPressedThisFrame)
+            {
+                screen = touchscreen.primaryTouch.position.ReadValue();
+                source = ActivePointerSource.Touch;
+                return true;
+            }
+
+            var mouse = Mouse.current;
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+            {
+                screen = mouse.position.ReadValue();
+                source = ActivePointerSource.Mouse;
+                return true;
+            }
+
+            screen = default;
+            source = ActivePointerSource.None;
+            return false;
+        }
+
+        bool TryGetActivePointerState(out Vector2 screen, out bool isPressed, out bool wasReleased)
+        {
+            if (_activePointerSource == ActivePointerSource.Touch)
+            {
+                var touchscreen = Touchscreen.current;
+                if (touchscreen != null)
+                {
+                    screen = touchscreen.primaryTouch.position.ReadValue();
+                    isPressed = touchscreen.primaryTouch.press.isPressed;
+                    wasReleased = touchscreen.primaryTouch.press.wasReleasedThisFrame;
+                    return true;
+                }
+            }
+            else if (_activePointerSource == ActivePointerSource.Mouse)
+            {
+                var mouse = Mouse.current;
+                if (mouse != null)
+                {
+                    screen = mouse.position.ReadValue();
+                    isPressed = mouse.leftButton.isPressed;
+                    wasReleased = mouse.leftButton.wasReleasedThisFrame;
+                    return true;
+                }
+            }
+
+            screen = default;
+            isPressed = false;
+            wasReleased = false;
+            return false;
         }
 
         bool IsBlockedByUi(Vector2 screen)
@@ -111,12 +212,15 @@ namespace CrossDefense.Units
             var panel = root?.panel;
             if (panel == null) return false;
 
-            Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(panel, screen);
+            Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(
+                panel,
+                GetPanelInputPosition(screen, Screen.height));
             var picked = panel.Pick(panelPosition);
             while (picked != null)
             {
                 if (picked.name == "zone-bottom" || picked.name == "zone-top" ||
-                    picked.name == "summon-modal-overlay" || picked is Button)
+                    picked.name == "summon-modal-overlay" || picked.name == "unit-detail-overlay" ||
+                    picked is Button)
                     return true;
                 picked = picked.parent;
             }
@@ -134,8 +238,18 @@ namespace CrossDefense.Units
         {
             _blockedByUi = false;
             _fieldDrag = false;
+            _dragGrabOffset = Vector3.zero;
+            _activePointerSource = ActivePointerSource.None;
             _pressedUnit = null;
             _pressedMonster = null;
+        }
+
+        void CancelActivePointer()
+        {
+            if (_fieldDrag)
+                _unitManager?.CancelFieldDrag();
+            _pointerDown = false;
+            ResetPointerState();
         }
     }
 }

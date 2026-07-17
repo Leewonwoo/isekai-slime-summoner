@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using CrossDefense.Core;
@@ -15,6 +16,10 @@ namespace CrossDefense.Units
 
         readonly HashSet<MonsterController> _monsters = new();
         readonly List<SummonedUnitController> _units = new();
+        readonly List<CombatPbdBody> _pbdBodies = new(64);
+        readonly List<SummonedUnitController> _pbdUnits = new(16);
+        readonly List<MonsterController> _pbdMonsters = new(48);
+        readonly List<SummonedUnitController> _formationUnits = new(16);
 
         GameManager _gameManager;
         SummonManager _summonManager;
@@ -23,6 +28,10 @@ namespace CrossDefense.Units
         Transform _unitRoot;
         Transform _unitTemplate;
         bool _autoDeploy;
+        float _targetSearchRange = 4.5f;
+        CombatPbdSettings _combatPbd = new();
+        SummonFormationSettings _formation = new();
+        bool _formationActive;
         SummonedUnitController _draggedUnit;
         SummonedUnitController _mergeTarget;
         Vector3 _dragOrigin;
@@ -34,19 +43,30 @@ namespace CrossDefense.Units
         public CombatProjectileService Projectiles { get; private set; }
         public bool CanUnitsFight => _gameManager != null && !_gameManager.IsRunOver && _gameManager.Phase == RunPhase.InWave;
         public bool IsDragging => _draggedUnit != null || _benchPreview != null;
+        public float TargetSearchRange => _targetSearchRange;
+        public float SlimeAttackSpeedMultiplier => _gameManager?.SlimeAttackSpeedMultiplier ?? 1f;
+
+        public event Action<IReadOnlyList<SummonedUnitController>> UnitsChanged;
 
         public void Initialize(
             GameManager gameManager,
             SummonManager summonManager,
             Transform summoner,
             Camera worldCamera,
-            bool autoDeploy)
+            bool autoDeploy,
+            float targetSearchRange,
+            CombatPbdSettings combatPbd = null,
+            SummonFormationSettings formation = null)
         {
             _gameManager = gameManager;
             _summonManager = summonManager;
             _summoner = summoner;
             _camera = worldCamera != null ? worldCamera : Camera.main;
             _autoDeploy = autoDeploy;
+            _targetSearchRange = Mathf.Max(0.1f, targetSearchRange);
+            _combatPbd = combatPbd ?? new CombatPbdSettings();
+            _formation = formation ?? new SummonFormationSettings();
+            _formationActive = ShouldUseFormation(_gameManager.Phase);
 
             var rootObject = new GameObject("SummonedUnits");
             _unitRoot = rootObject.transform;
@@ -61,6 +81,7 @@ namespace CrossDefense.Units
                     var collider = gameObject.AddComponent<CircleCollider2D>();
                     collider.radius = 0.38f;
                     gameObject.AddComponent<AnimatedOutlineFeedback>();
+                    gameObject.AddComponent<WorldHealthBar>();
                     gameObject.AddComponent<SummonedUnitController>();
                 },
                 16,
@@ -68,6 +89,7 @@ namespace CrossDefense.Units
 
             _gameManager.MonsterSpawned += OnMonsterSpawned;
             _gameManager.MonsterResolved += OnMonsterResolved;
+            _gameManager.PhaseChanged += OnPhaseChanged;
             _summonManager.UnitAdded += OnUnitAdded;
         }
 
@@ -77,9 +99,96 @@ namespace CrossDefense.Units
             {
                 _gameManager.MonsterSpawned -= OnMonsterSpawned;
                 _gameManager.MonsterResolved -= OnMonsterResolved;
+                _gameManager.PhaseChanged -= OnPhaseChanged;
             }
             if (_summonManager != null)
                 _summonManager.UnitAdded -= OnUnitAdded;
+        }
+
+        void LateUpdate()
+        {
+            if (CanUnitsFight)
+            {
+                SolvePbd();
+                return;
+            }
+
+            if (!_formationActive || !ShouldUseFormation(_gameManager?.Phase ?? RunPhase.Defeat)) return;
+
+            bool allArrived = MoveUnitsIntoFormation();
+            SolvePbd();
+            if (allArrived)
+                _formationActive = false;
+        }
+
+        void SolvePbd()
+        {
+            if (_combatPbd == null || !_combatPbd.Enabled) return;
+
+            BuildPbdBodies();
+            CombatPbdSolver.Solve(_pbdBodies, _combatPbd, Time.unscaledDeltaTime);
+            ApplyPbdPositions();
+        }
+
+        bool MoveUnitsIntoFormation()
+        {
+            if (_summoner == null || _formation == null || !_formation.Enabled)
+            {
+                StopFormationMotion();
+                return true;
+            }
+
+            _formationUnits.Clear();
+            foreach (var unit in _units)
+            {
+                if (unit == null || unit.IsDragging || unit.IsDefeated || !unit.gameObject.activeInHierarchy ||
+                    unit.Data == null || unit.Instance == null)
+                    continue;
+                _formationUnits.Add(unit);
+            }
+            _formationUnits.Sort(CompareFormationUnits);
+
+            bool allArrived = true;
+            Vector2 center = _summoner.position;
+            for (int i = 0; i < _formationUnits.Count; i++)
+            {
+                Vector2 slot = SummonFormationPlanner.GetSlot(center, i, _formationUnits.Count, _formation);
+                Vector3 target = ClampToField(new Vector3(slot.x, slot.y, 0f));
+                if (!_formationUnits[i].MoveTowardFormation(
+                        target,
+                        _formation.ReturnSpeed,
+                        _formation.StoppingDistance))
+                    allArrived = false;
+            }
+            return allArrived;
+        }
+
+        static int CompareFormationUnits(SummonedUnitController first, SummonedUnitController second)
+        {
+            int firstRole = SummonFormationPlanner.GetRolePriority(first.Data.AttackStyle);
+            int secondRole = SummonFormationPlanner.GetRolePriority(second.Data.AttackStyle);
+            int roleComparison = firstRole.CompareTo(secondRole);
+            return roleComparison != 0
+                ? roleComparison
+                : first.Instance.InstanceId.CompareTo(second.Instance.InstanceId);
+        }
+
+        bool ShouldUseFormation(RunPhase phase) =>
+            _formation != null && _formation.Enabled && phase is RunPhase.Prepare or RunPhase.Intermission or
+                RunPhase.TraitChoice or RunPhase.Merchant or RunPhase.Victory;
+
+        void OnPhaseChanged(RunPhase phase)
+        {
+            _formationActive = ShouldUseFormation(phase);
+            if (!_formationActive)
+                StopFormationMotion();
+        }
+
+        void StopFormationMotion()
+        {
+            foreach (var unit in _units)
+                if (unit != null)
+                    unit.StopFormationMotion();
         }
 
         public MonsterController FindTarget(SummonedUnitController unit)
@@ -88,6 +197,7 @@ namespace CrossDefense.Units
                 return FindDensestAreaTarget(unit);
 
             MonsterController best = null;
+            float searchRangeSq = _targetSearchRange * _targetSearchRange;
             float bestValue = unit.Data.TargetPriority switch
             {
                 SummonTargetPriority.LowestHp => float.MaxValue,
@@ -100,6 +210,7 @@ namespace CrossDefense.Units
             foreach (var monster in _monsters)
             {
                 float distanceSq = (monster.transform.position - unit.transform.position).sqrMagnitude;
+                if (distanceSq > searchRangeSq) continue;
                 float value = unit.Data.TargetPriority switch
                 {
                     SummonTargetPriority.LowestHp => monster.CurrentHp,
@@ -126,9 +237,13 @@ namespace CrossDefense.Units
             int bestNeighbors = -1;
             float bestDistanceSq = float.MaxValue;
             float radiusSq = unit.Data.AreaRadius * unit.Data.AreaRadius;
+            float searchRangeSq = _targetSearchRange * _targetSearchRange;
             _monsters.RemoveWhere(monster => monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
             foreach (var candidate in _monsters)
             {
+                float distanceSq = (candidate.transform.position - unit.transform.position).sqrMagnitude;
+                if (distanceSq > searchRangeSq) continue;
+
                 int neighbors = 0;
                 foreach (var nearby in _monsters)
                 {
@@ -136,7 +251,6 @@ namespace CrossDefense.Units
                         neighbors++;
                 }
 
-                float distanceSq = (candidate.transform.position - unit.transform.position).sqrMagnitude;
                 if (neighbors < bestNeighbors || neighbors == bestNeighbors && distanceSq >= bestDistanceSq)
                     continue;
                 best = candidate;
@@ -146,18 +260,62 @@ namespace CrossDefense.Units
             return best;
         }
 
-        public Vector3 CalculateSeparation(SummonedUnitController source)
+        void BuildPbdBodies()
         {
-            Vector3 separation = Vector3.zero;
+            _pbdBodies.Clear();
+            _pbdUnits.Clear();
+            _pbdMonsters.Clear();
+
             foreach (var unit in _units)
             {
-                if (unit == null || unit == source || unit.IsDragging) continue;
-                Vector3 offset = source.transform.position - unit.transform.position;
-                float distanceSq = offset.sqrMagnitude;
-                if (distanceSq <= Mathf.Epsilon || distanceSq >= MinUnitSpacing * MinUnitSpacing) continue;
-                separation += offset.normalized * (1f - Mathf.Sqrt(distanceSq) / MinUnitSpacing);
+                if (unit == null || unit.IsDragging || unit.IsDefeated || !unit.gameObject.activeInHierarchy ||
+                    unit.Data == null)
+                    continue;
+
+                float scale = Mathf.Max(0.1f, unit.Data.ScaleAtRank(unit.Instance.Rank));
+                _pbdUnits.Add(unit);
+                _pbdBodies.Add(new CombatPbdBody(
+                    unit.transform.position,
+                    unit.CombatRadius,
+                    _combatPbd.SummonedUnitInverseMass / scale,
+                    CombatPbdTeam.SummonedUnit,
+                    unit.Data.AttackRange));
             }
-            return separation * 0.75f;
+
+            _monsters.RemoveWhere(monster => monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
+            foreach (var monster in _monsters)
+            {
+                if (monster.Data == null) continue;
+                float scale = Mathf.Max(0.1f, monster.Data.SizeMultiplier);
+                _pbdMonsters.Add(monster);
+                _pbdBodies.Add(new CombatPbdBody(
+                    monster.transform.position,
+                    monster.CombatRadius,
+                    _combatPbd.MonsterInverseMass / scale,
+                    CombatPbdTeam.Monster,
+                    monster.AttackRange));
+            }
+        }
+
+        void ApplyPbdPositions()
+        {
+            int bodyIndex = 0;
+            foreach (var unit in _pbdUnits)
+            {
+                if (unit != null && bodyIndex < _pbdBodies.Count)
+                    unit.transform.position = ClampToField(_pbdBodies[bodyIndex].Position);
+                bodyIndex++;
+            }
+
+            foreach (var monster in _pbdMonsters)
+            {
+                if (monster != null && bodyIndex < _pbdBodies.Count)
+                {
+                    Vector2 position = _pbdBodies[bodyIndex].Position;
+                    monster.transform.position = new Vector3(position.x, position.y, 0f);
+                }
+                bodyIndex++;
+            }
         }
 
         public float GetSupportAttackSpeedMultiplier(SummonedUnitController source)
@@ -174,6 +332,9 @@ namespace CrossDefense.Units
             }
             return multiplier;
         }
+
+        public float ModifySlimeDamage(float baseDamage) =>
+            _gameManager?.ModifySlimeDamage(baseDamage) ?? Mathf.Max(0f, baseDamage);
 
         public void ApplyAreaDamage(Vector3 center, float radius, DamagePacket packet)
         {
@@ -213,6 +374,8 @@ namespace CrossDefense.Units
                 return false;
             }
             _benchPreview.SetDragging(true, UnitOutlineState.ValidPlacement);
+            _formationActive = false;
+            StopFormationMotion();
             return true;
         }
 
@@ -241,6 +404,7 @@ namespace CrossDefense.Units
                 _benchPreview.Initialize(this, taken);
                 _benchPreview.SetDragging(false);
                 _units.Add(_benchPreview);
+                UnitsChanged?.Invoke(_units);
             }
             else
             {
@@ -258,6 +422,8 @@ namespace CrossDefense.Units
             _draggedUnit = unit;
             _dragOrigin = unit.transform.position;
             unit.SetDragging(true);
+            _formationActive = false;
+            StopFormationMotion();
             return true;
         }
 
@@ -277,13 +443,7 @@ namespace CrossDefense.Units
         {
             if (_draggedUnit == null) return false;
             if (!releasedInsideField)
-            {
-                _draggedUnit.transform.position = _dragOrigin;
-                _draggedUnit.SetDragging(false);
-                SetMergeTarget(null);
-                _draggedUnit = null;
-                return true;
-            }
+                return CancelFieldDrag();
 
             UpdateFieldDrag(worldPosition);
             var source = _draggedUnit;
@@ -298,6 +458,16 @@ namespace CrossDefense.Units
                 _mergeTarget = null;
             else
                 SetMergeTarget(null);
+            _draggedUnit = null;
+            return true;
+        }
+
+        public bool CancelFieldDrag()
+        {
+            if (_draggedUnit == null) return false;
+            _draggedUnit.transform.position = _dragOrigin;
+            _draggedUnit.SetDragging(false);
+            SetMergeTarget(null);
             _draggedUnit = null;
             return true;
         }
@@ -360,16 +530,28 @@ namespace CrossDefense.Units
             if (spawned == null) return null;
             var unit = spawned.GetComponent<SummonedUnitController>();
             unit.Initialize(this, instance);
-            if (register) _units.Add(unit);
+            if (register)
+            {
+                _units.Add(unit);
+                UnitsChanged?.Invoke(_units);
+            }
             return unit;
         }
 
         void ReleaseUnit(SummonedUnitController unit)
         {
             if (unit == null) return;
-            _units.Remove(unit);
+            bool removed = _units.Remove(unit);
             unit.ResetForPool();
             RuntimePoolService.Despawn(unit.transform);
+            if (removed)
+                UnitsChanged?.Invoke(_units);
+        }
+
+        public void NotifyUnitDefeated(SummonedUnitController unit)
+        {
+            if (unit == null || !_units.Contains(unit)) return;
+            ReleaseUnit(unit);
         }
 
         static void ReleasePreview(SummonedUnitController unit)
@@ -436,6 +618,7 @@ namespace CrossDefense.Units
             target.SetDragging(false);
             target.Outline?.SetState(UnitOutlineState.MergeTarget);
             StartCoroutine(ClearOutlineAfter(target, 0.45f));
+            UnitsChanged?.Invoke(_units);
             return true;
         }
 
@@ -474,7 +657,11 @@ namespace CrossDefense.Units
         void OnUnitAdded(SummonUnitInstance instance)
         {
             if (_autoDeploy)
-                TryAutoDeploy(instance.InstanceId);
+            {
+                bool deployed = TryAutoDeploy(instance.InstanceId);
+                if (deployed && _gameManager != null && ShouldUseFormation(_gameManager.Phase))
+                    _formationActive = true;
+            }
         }
 
         void OnMonsterSpawned(MonsterController monster, StageWave _, int __)

@@ -1,5 +1,6 @@
 using CrossDefense.Core;
 using CrossDefense.Data;
+using CrossDefense.Units;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -35,6 +36,17 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_data.DamageAtRank(3), Is.EqualTo(55f).Within(0.001f));
             Assert.That(_data.AttacksPerSecondAtRank(3), Is.GreaterThan(_data.AttacksPerSecondAtRank(0)));
             Assert.That(_data.ScaleAtRank(3), Is.GreaterThan(_data.ScaleAtRank(0)));
+            Assert.That(_data.MaxHpAtRank(0), Is.EqualTo(100f).Within(0.001f));
+            Assert.That(_data.MaxHpAtRank(3), Is.EqualTo(350f).Within(0.001f));
+        }
+
+        [TestCase(50f, 100f, 0.5f)]
+        [TestCase(-10f, 100f, 0f)]
+        [TestCase(150f, 100f, 1f)]
+        [TestCase(10f, 0f, 0f)]
+        public void WorldHealthBar_NormalizesHealthSafely(float current, float maximum, float expected)
+        {
+            Assert.That(WorldHealthBar.GetNormalizedHealth(current, maximum), Is.EqualTo(expected).Within(0.001f));
         }
 
         [Test]
@@ -47,6 +59,34 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(instance.TryPromote(), Is.True);
             Assert.That(instance.TryPromote(), Is.False);
             Assert.That(instance.Rank, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void SameUnitInstances_ShareUpgradeState()
+        {
+            var shared = new SummonUnitUpgradeState(_data.UnitId);
+            var first = new SummonUnitInstance(1, _data, 0, shared);
+            var second = new SummonUnitInstance(2, _data, 1, shared);
+
+            Assert.That(shared.Apply(4, 1.6f, 1.2f), Is.True);
+            Assert.That(first.Level, Is.EqualTo(4));
+            Assert.That(second.Level, Is.EqualTo(4));
+            Assert.That(first.DamageMultiplier, Is.EqualTo(1.6f));
+            Assert.That(second.AttackSpeedMultiplier, Is.EqualTo(1.2f));
+        }
+
+        [Test]
+        public void BenchCapacity_CountsSameUnitAndRankAsOneStack()
+        {
+            var manager = new SummonManager(null, new[] { _data }, 0f, 0f, 0, 1, 123);
+
+            Assert.That(manager.ReturnToBench(new SummonUnitInstance(1, _data, 0)), Is.True);
+            Assert.That(manager.ReturnToBench(new SummonUnitInstance(2, _data, 0)), Is.True);
+            Assert.That(manager.ReturnToBench(new SummonUnitInstance(3, _data, 1)), Is.False);
+            Assert.That(manager.Bench.Count, Is.EqualTo(2));
+            Assert.That(manager.BenchStackCount, Is.EqualTo(1));
+            Assert.That(manager.IsBenchFull, Is.True);
+            Assert.That(manager.Bench[0].UpgradeState, Is.SameAs(manager.Bench[1].UpgradeState));
         }
 
         [Test]
@@ -71,6 +111,18 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_data.PierceCount, Is.EqualTo(1));
             Assert.That(_data.SupportAttackSpeedBonus, Is.EqualTo(1f));
             Assert.That(_data.SupportRadius, Is.Zero);
+        }
+
+        [Test]
+        public void PrototypeAnimation_StoresFramesAndClampsFps()
+        {
+            var frames = new Sprite[9];
+
+            _data.ConfigurePrototypeAnimation(frames, 0f);
+
+            Assert.That(_data.MoveFrames, Is.SameAs(frames));
+            Assert.That(_data.MoveFrames.Length, Is.EqualTo(9));
+            Assert.That(_data.MoveAnimationFps, Is.EqualTo(1f));
         }
     }
 }

@@ -9,16 +9,23 @@ namespace CrossDefense.Core
     {
         readonly Transform _parent;
         readonly Camera _camera;
+        readonly SpriteRenderer _gameplayBackground;
         readonly Transform _monsterTemplate;
-        readonly float _spawnMargin;
-        readonly float _spawnDepth;
+        readonly float _minOutsideDistance;
+        readonly float _maxOutsideDistance;
 
-        public MonsterSpawner(Transform parent, Camera camera, float spawnMargin = 1.5f, float spawnDepth = 2f)
+        public MonsterSpawner(
+            Transform parent,
+            Camera camera,
+            SpriteRenderer gameplayBackground,
+            float minOutsideDistance = 0.4f,
+            float maxOutsideDistance = 1.1f)
         {
             _parent = parent;
             _camera = camera != null ? camera : Camera.main;
-            _spawnMargin = Mathf.Max(0.1f, spawnMargin);
-            _spawnDepth = Mathf.Max(0.1f, spawnDepth);
+            _gameplayBackground = gameplayBackground;
+            _minOutsideDistance = Mathf.Max(0.1f, minOutsideDistance);
+            _maxOutsideDistance = Mathf.Max(_minOutsideDistance, maxOutsideDistance);
             _monsterTemplate = RuntimePoolService.GetOrCreateTemplate(
                 "CrossDefenseMonster",
                 gameObject =>
@@ -27,6 +34,7 @@ namespace CrossDefense.Core
                     renderer.sortingOrder = 2;
                     var collider = gameObject.AddComponent<CircleCollider2D>();
                     collider.radius = 0.35f;
+                    gameObject.AddComponent<WorldHealthBar>();
                     gameObject.AddComponent<MonsterController>();
                 },
                 24,
@@ -56,18 +64,36 @@ namespace CrossDefense.Core
 
         Vector3 GetSpawnPosition(SpawnZone zone, System.Random random)
         {
-            if (_camera == null)
+            if (_gameplayBackground == null && _camera == null)
                 return Vector3.right * 8f;
 
-            float height = _camera.orthographicSize;
-            float width = height * _camera.aspect;
-            Vector3 center = _camera.transform.position;
-            float minX = center.x - width;
-            float maxX = center.x + width;
-            float minY = center.y - height;
-            float maxY = center.y + height;
+            float minX;
+            float maxX;
+            float minY;
+            float maxY;
+            if (_gameplayBackground != null && _gameplayBackground.sprite != null)
+            {
+                Bounds bounds = _gameplayBackground.bounds;
+                minX = bounds.min.x;
+                maxX = bounds.max.x;
+                minY = bounds.min.y;
+                maxY = bounds.max.y;
+            }
+            else
+            {
+                float height = _camera.orthographicSize;
+                float width = height * _camera.aspect;
+                Vector3 center = _camera.transform.position;
+                minX = center.x - width;
+                maxX = center.x + width;
+                minY = center.y - height;
+                maxY = center.y + height;
+            }
             float along = (float)random.NextDouble();
-            float depth = _spawnMargin + (float)random.NextDouble() * _spawnDepth;
+            float depth = Mathf.Lerp(
+                _minOutsideDistance,
+                _maxOutsideDistance,
+                (float)random.NextDouble());
 
             return zone switch
             {

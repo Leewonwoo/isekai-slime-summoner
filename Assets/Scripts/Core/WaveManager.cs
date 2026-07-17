@@ -49,11 +49,6 @@ namespace CrossDefense.Core
             _livingMonsters.Remove(monster);
         }
 
-        public void NotifyMonsterReachedCore(MonsterController monster)
-        {
-            _livingMonsters.Remove(monster);
-        }
-
         IEnumerator Run(MonoBehaviour coroutineHost)
         {
             if (_timeline == null || _timeline.WaveCount == 0)
@@ -84,6 +79,15 @@ namespace CrossDefense.Core
                 bool hasNextWave = _waveIndex + 1 < _timeline.WaveCount;
                 if (hasNextWave)
                     _gameManager.GrantWaveClearReward(wave);
+
+                int clearedWave = _waveIndex + 1;
+                if (hasNextWave && _timeline.ShouldOfferRunTrait(clearedWave) &&
+                    _gameManager.BeginRunTraitChoice(clearedWave))
+                {
+                    while (_gameManager.IsRunTraitChoicePending && !_gameManager.IsRunOver)
+                        yield return null;
+                    if (_gameManager.IsRunOver) yield break;
+                }
 
                 _gameManager.SetPhase(RunPhase.Intermission);
                 yield return new WaitForSecondsRealtime(0.5f);
