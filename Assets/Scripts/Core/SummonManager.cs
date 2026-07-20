@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using CrossDefense.Data;
+using CrossDefense.Units;
 using UnityEngine;
 
 namespace CrossDefense.Core
@@ -17,7 +18,8 @@ namespace CrossDefense.Core
         readonly float _directRankOneChance;
         readonly Func<float> _directRankOneChanceProvider;
         readonly int _currencyReward;
-        readonly int _benchCapacity;
+        readonly int _maxCapacity;
+        readonly Func<int> _capacityProvider;
 
         int _nextResultId = 1;
         int _nextInstanceId = 1;
@@ -25,9 +27,14 @@ namespace CrossDefense.Core
         SummonResult _pendingResult;
 
         public IReadOnlyList<SummonUnitInstance> Bench => _bench;
-        public int BenchCapacity => _benchCapacity;
+        public IReadOnlyList<SummonUnitData> Pool => _pool;
+        public int BenchCapacity => Mathf.Clamp(
+            _capacityProvider?.Invoke() ?? _maxCapacity,
+            1,
+            _maxCapacity);
         public int BenchStackCount => CountBenchStacks();
-        public bool IsBenchFull => BenchStackCount >= _benchCapacity;
+        public int TotalOwnedCount => CountTotalOwnedUnits();
+        public bool IsBenchFull => TotalOwnedCount >= BenchCapacity;
         public bool HasPendingResult => _hasPendingResult;
 
         public event Action<IReadOnlyList<SummonUnitInstance>> BenchChanged;
@@ -43,7 +50,8 @@ namespace CrossDefense.Core
             int currencyReward,
             int benchCapacity,
             int randomSeed = 0,
-            Func<float> directRankOneChanceProvider = null)
+            Func<float> directRankOneChanceProvider = null,
+            Func<int> capacityProvider = null)
         {
             _gameManager = gameManager;
             _pool = new List<SummonUnitData>();
@@ -60,14 +68,15 @@ namespace CrossDefense.Core
             _directRankOneChance = Mathf.Clamp01(directRankOneChance);
             _directRankOneChanceProvider = directRankOneChanceProvider;
             _currencyReward = Mathf.Max(0, currencyReward);
-            _benchCapacity = Mathf.Max(1, benchCapacity);
+            _maxCapacity = Mathf.Max(1, benchCapacity);
+            _capacityProvider = capacityProvider;
             _random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
         }
 
         public bool TryBeginSummon(out SummonResult result)
         {
             result = default;
-            if (_gameManager == null || _hasPendingResult)
+            if (_gameManager == null || _hasPendingResult || IsBenchFull)
                 return false;
             if (!_gameManager.TrySpendSummonContract())
                 return false;
@@ -86,9 +95,6 @@ namespace CrossDefense.Core
             }
 
             // 벤치가 가득 찬 상태에서 계약서를 잃지 않도록 소환 결과를 재화 보상으로 전환한다.
-            if (result.IsUnit && !CanAddToBench(result.Unit, result.Rank))
-                result = SummonResult.CurrencyResult(id, _currencyReward);
-
             _pendingResult = result;
             _hasPendingResult = true;
             return true;
@@ -120,6 +126,69 @@ namespace CrossDefense.Core
 
             ResultCommitted?.Invoke(result);
             return true;
+        }
+
+        public bool TryGrantRandomReward(int rank, out SummonResult result, bool preferUnowned = false)
+        {
+            result = default;
+            SummonUnitData unit = PickRewardUnit(SummonRank.Clamp(rank), preferUnowned);
+            return TryGrantRewardUnit(unit, rank, out result);
+        }
+
+        public bool TryGrantJackpotEgg(
+            float rankOneChance,
+            float rankTwoChance,
+            out SummonResult result)
+        {
+            double roll = _random.NextDouble();
+            float safeRankTwoChance = Mathf.Clamp01(rankTwoChance);
+            float safeRankOneChance = Mathf.Clamp01(rankOneChance);
+            int rank = roll < safeRankTwoChance
+                ? 2
+                : roll < safeRankTwoChance + safeRankOneChance
+                    ? 1
+                    : 0;
+            return TryGrantRandomReward(rank, out result);
+        }
+
+        public bool TryGrantRewardUnit(SummonUnitData unit, int rank, out SummonResult result)
+        {
+            result = default;
+            int safeRank = SummonRank.Clamp(rank);
+            if (unit == null || !CanAddToBench(unit, safeRank))
+                return false;
+
+            int id = _nextResultId++;
+            result = SummonResult.RankedUnitResult(id, unit, safeRank);
+            var instance = new SummonUnitInstance(
+                _nextInstanceId++,
+                unit,
+                safeRank,
+                GetUnitUpgradeState(unit.UnitId));
+            _bench.Add(instance);
+            BenchChanged?.Invoke(_bench);
+            UnitAdded?.Invoke(instance);
+            ResultCommitted?.Invoke(result);
+            return true;
+        }
+
+        public int GrantMergeSupport(int amount, List<SummonResult> results)
+        {
+            if (amount <= 0 || results == null)
+                return 0;
+
+            if (!TryFindMergeSupportTarget(out SummonUnitData unit, out int rank))
+                return 0;
+
+            int granted = 0;
+            for (int i = 0; i < amount; i++)
+            {
+                if (!TryGrantRewardUnit(unit, rank, out SummonResult result))
+                    break;
+                results.Add(result);
+                granted++;
+            }
+            return granted;
         }
 
         public void CancelPendingAndRefund()
@@ -220,17 +289,7 @@ namespace CrossDefense.Core
         bool CanAddToBench(SummonUnitData unit, int rank)
         {
             if (unit == null) return false;
-            return HasBenchStack(unit.UnitId, rank) || BenchStackCount < _benchCapacity;
-        }
-
-        bool HasBenchStack(string unitId, int rank)
-        {
-            foreach (var instance in _bench)
-            {
-                if (instance?.Unit != null && instance.Unit.UnitId == unitId && instance.Rank == rank)
-                    return true;
-            }
-            return false;
+            return TotalOwnedCount < BenchCapacity;
         }
 
         int CountBenchStacks()
@@ -242,6 +301,20 @@ namespace CrossDefense.Core
                 keys.Add($"{instance.Unit.UnitId}:{instance.Rank}");
             }
             return keys.Count;
+        }
+
+        int CountTotalOwnedUnits()
+        {
+            int count = _bench.Count;
+            var fieldUnits = _gameManager?.SummonedUnitManager?.Units;
+            if (fieldUnits == null)
+                return count;
+            for (int i = 0; i < fieldUnits.Count; i++)
+            {
+                if (fieldUnits[i]?.Instance != null)
+                    count++;
+            }
+            return count;
         }
 
         SummonUnitData PickUnit(bool jackpot)
@@ -272,6 +345,91 @@ namespace CrossDefense.Core
             }
 
             return candidates[candidates.Count - 1];
+        }
+
+        SummonUnitData PickRewardUnit(int rank, bool preferUnowned)
+        {
+            var candidates = new List<SummonUnitData>();
+            for (int i = 0; i < _pool.Count; i++)
+            {
+                SummonUnitData unit = _pool[i];
+                if (unit == null || !CanAddToBench(unit, rank))
+                    continue;
+                if (preferUnowned && IsOwned(unit))
+                    continue;
+                candidates.Add(unit);
+            }
+
+            if (candidates.Count == 0 && preferUnowned)
+            {
+                for (int i = 0; i < _pool.Count; i++)
+                {
+                    SummonUnitData unit = _pool[i];
+                    if (unit != null && CanAddToBench(unit, rank))
+                        candidates.Add(unit);
+                }
+            }
+            if (candidates.Count == 0)
+                return null;
+
+            int totalWeight = 0;
+            for (int i = 0; i < candidates.Count; i++)
+                totalWeight += Mathf.Max(1, candidates[i].Weight);
+            int roll = _random.Next(Mathf.Max(1, totalWeight));
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                roll -= Mathf.Max(1, candidates[i].Weight);
+                if (roll < 0)
+                    return candidates[i];
+            }
+            return candidates[candidates.Count - 1];
+        }
+
+        bool TryFindMergeSupportTarget(out SummonUnitData unit, out int rank)
+        {
+            unit = null;
+            rank = 0;
+            var counts = new Dictionary<string, int>();
+            var units = new Dictionary<string, SummonUnitData>();
+
+            void Count(SummonUnitInstance instance)
+            {
+                if (instance?.Unit == null || instance.Rank >= SummonRank.MaxInternalRank)
+                    return;
+                string key = $"{instance.Unit.UnitId}:{instance.Rank}";
+                counts[key] = counts.TryGetValue(key, out int current) ? current + 1 : 1;
+                units[key] = instance.Unit;
+            }
+
+            for (int i = 0; i < _bench.Count; i++)
+                Count(_bench[i]);
+            IReadOnlyList<SummonedUnitController> fieldUnits = _gameManager?.SummonedUnitManager?.Units;
+            if (fieldUnits != null)
+            {
+                for (int i = 0; i < fieldUnits.Count; i++)
+                    Count(fieldUnits[i]?.Instance);
+            }
+
+            string bestKey = null;
+            int bestNeed = int.MaxValue;
+            int bestCount = -1;
+            foreach (KeyValuePair<string, int> pair in counts)
+            {
+                int remainder = pair.Value % SummonRank.MergeMaterialCount;
+                int need = remainder == 0
+                    ? SummonRank.MergeMaterialCount
+                    : SummonRank.MergeMaterialCount - remainder;
+                if (need > bestNeed || need == bestNeed && pair.Value <= bestCount)
+                    continue;
+                bestNeed = need;
+                bestCount = pair.Value;
+                bestKey = pair.Key;
+            }
+
+            if (bestKey == null || !units.TryGetValue(bestKey, out unit))
+                return false;
+            int separator = bestKey.LastIndexOf(':');
+            return separator >= 0 && int.TryParse(bestKey[(separator + 1)..], out rank);
         }
 
         bool IsOwned(SummonUnitData unit)

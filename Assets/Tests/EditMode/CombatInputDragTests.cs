@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using CrossDefense.Units;
 using NUnit.Framework;
 using UnityEngine;
@@ -45,3 +46,4 @@ namespace CrossDefense.Tests.EditMode
         }
     }
 }
+#endif

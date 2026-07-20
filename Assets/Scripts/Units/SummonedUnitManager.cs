@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace CrossDefense.Units
 {
-    /// <summary>벤치↔필드 배치, 자유 이동 전투, 재배치와 3머지를 한 인스턴스 ID 기준으로 관리한다.</summary>
+    /// <summary>벤치↔필드 배치, 자유 이동 전투, 재배치와 2머지를 한 인스턴스 ID 기준으로 관리한다.</summary>
     [DisallowMultipleComponent]
     public sealed class SummonedUnitManager : MonoBehaviour
     {
@@ -37,14 +37,22 @@ namespace CrossDefense.Units
         Vector3 _dragOrigin;
         SummonedUnitController _benchPreview;
         SummonUnitInstance _benchDragInstance;
+        float _mergeFrenzyUntil;
 
         public IReadOnlyList<SummonedUnitController> Units => _units;
         public IReadOnlyCollection<MonsterController> Monsters => _monsters;
         public CombatProjectileService Projectiles { get; private set; }
+        public CombatEffectService Effects { get; private set; }
         public bool CanUnitsFight => _gameManager != null && !_gameManager.IsRunOver && _gameManager.Phase == RunPhase.InWave;
+        public bool IsGameplayPaused => _gameManager?.IsGameplayPaused ?? false;
         public bool IsDragging => _draggedUnit != null || _benchPreview != null;
         public float TargetSearchRange => _targetSearchRange;
-        public float SlimeAttackSpeedMultiplier => _gameManager?.SlimeAttackSpeedMultiplier ?? 1f;
+        public float SlimeAttackSpeedMultiplier =>
+            (_gameManager?.SlimeAttackSpeedMultiplier ?? 1f) *
+            (Time.time < _mergeFrenzyUntil
+                ? _gameManager?.RunTraits?.MergeFrenzyAttackSpeedMultiplier ?? 1f
+                : 1f);
+        public float SlimeReviveFraction => _gameManager?.RunTraits?.SlimeReviveFraction ?? 0f;
 
         public event Action<IReadOnlyList<SummonedUnitController>> UnitsChanged;
 
@@ -72,6 +80,7 @@ namespace CrossDefense.Units
             _unitRoot = rootObject.transform;
             _unitRoot.SetParent(transform, false);
             Projectiles = new CombatProjectileService(transform, () => _monsters, () => CanUnitsFight);
+            Effects = new CombatEffectService(transform, () => CanUnitsFight);
             _unitTemplate = RuntimePoolService.GetOrCreateTemplate(
                 "CrossDefenseSummonedUnit",
                 gameObject =>
@@ -82,6 +91,7 @@ namespace CrossDefense.Units
                     collider.radius = 0.38f;
                     gameObject.AddComponent<AnimatedOutlineFeedback>();
                     gameObject.AddComponent<WorldHealthBar>();
+                    gameObject.AddComponent<SupportAuraVisual>();
                     gameObject.AddComponent<SummonedUnitController>();
                 },
                 16,
@@ -107,6 +117,9 @@ namespace CrossDefense.Units
 
         void LateUpdate()
         {
+            if (IsGameplayPaused)
+                return;
+
             if (CanUnitsFight)
             {
                 SolvePbd();
@@ -126,7 +139,7 @@ namespace CrossDefense.Units
             if (_combatPbd == null || !_combatPbd.Enabled) return;
 
             BuildPbdBodies();
-            CombatPbdSolver.Solve(_pbdBodies, _combatPbd, Time.unscaledDeltaTime);
+            CombatPbdSolver.Solve(_pbdBodies, _combatPbd, Time.deltaTime);
             ApplyPbdPositions();
         }
 
@@ -182,6 +195,25 @@ namespace CrossDefense.Units
             _formationActive = ShouldUseFormation(phase);
             if (!_formationActive)
                 StopFormationMotion();
+            if (phase == RunPhase.InWave)
+                PrepareUnitsForWave();
+        }
+
+        void PrepareUnitsForWave()
+        {
+            float shieldFraction = _gameManager?.RunTraits?.SlimeShieldFraction ?? 0f;
+            for (int i = 0; i < _units.Count; i++)
+                _units[i]?.PrepareForWave(shieldFraction);
+        }
+
+        public void ApplyCurrentWaveRunState(SummonedUnitController unit)
+        {
+            if (unit == null)
+                return;
+            float shieldFraction = _gameManager?.Phase == RunPhase.InWave
+                ? _gameManager?.RunTraits?.SlimeShieldFraction ?? 0f
+                : 0f;
+            unit.PrepareForWave(shieldFraction);
         }
 
         void StopFormationMotion()
@@ -279,7 +311,8 @@ namespace CrossDefense.Units
                     unit.CombatRadius,
                     _combatPbd.SummonedUnitInverseMass / scale,
                     CombatPbdTeam.SummonedUnit,
-                    unit.Data.AttackRange));
+                    unit.Data.AttackRange,
+                    unit.PbdPreviousPosition));
             }
 
             _monsters.RemoveWhere(monster => monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
@@ -293,7 +326,8 @@ namespace CrossDefense.Units
                     monster.CombatRadius,
                     _combatPbd.MonsterInverseMass / scale,
                     CombatPbdTeam.Monster,
-                    monster.AttackRange));
+                    monster.AttackRange,
+                    monster.PbdPreviousPosition));
             }
         }
 
@@ -303,7 +337,10 @@ namespace CrossDefense.Units
             foreach (var unit in _pbdUnits)
             {
                 if (unit != null && bodyIndex < _pbdBodies.Count)
+                {
                     unit.transform.position = ClampToField(_pbdBodies[bodyIndex].Position);
+                    unit.SetPbdResolvedPosition(unit.transform.position);
+                }
                 bodyIndex++;
             }
 
@@ -313,6 +350,7 @@ namespace CrossDefense.Units
                 {
                     Vector2 position = _pbdBodies[bodyIndex].Position;
                     monster.transform.position = new Vector3(position.x, position.y, 0f);
+                    monster.SetPbdResolvedPosition(monster.transform.position);
                 }
                 bodyIndex++;
             }
@@ -328,13 +366,205 @@ namespace CrossDefense.Units
                     continue;
                 float radius = unit.Data.SupportRadius;
                 if ((unit.transform.position - source.transform.position).sqrMagnitude <= radius * radius)
-                    multiplier += unit.Data.SupportAttackSpeedBonus * (1f + 0.15f * unit.Instance.Rank);
+                {
+                    float star3Multiplier = unit.IsStar3AuraOverdriveActive
+                        ? unit.Data.Star3SkillStrength
+                        : 1f;
+                    multiplier += unit.Data.SupportAttackSpeedBonus *
+                        (1f + 0.15f * unit.Instance.Rank) *
+                        star3Multiplier;
+                    unit.PresentSupportBuff();
+                }
             }
             return multiplier;
         }
 
+        public bool TryCastStar3Skill(SummonedUnitController unit)
+        {
+            if (unit?.Data == null || unit.Instance == null ||
+                unit.Instance.Rank != SummonRank.MaxInternalRank ||
+                !unit.Data.HasStar3Skill)
+                return false;
+
+            SummonUnitData data = unit.Data;
+            switch (data.Star3SkillModeValue)
+            {
+                case Star3SkillMode.SelfArea:
+                    if (!HasMonsterWithin(unit.transform.position, data.Star3SkillRadius))
+                        return false;
+                    ApplyAreaDamage(
+                        unit.transform.position,
+                        data.Star3SkillRadius,
+                        BuildStar3SkillPacket(unit));
+                    PlayStar3Effect(unit, unit.transform.position);
+                    return true;
+
+                case Star3SkillMode.TargetArea:
+                {
+                    MonsterController target = FindDensestSkillTarget(
+                        unit.transform.position,
+                        _targetSearchRange,
+                        data.Star3SkillRadius);
+                    if (target == null)
+                        return false;
+                    ApplyAreaDamage(
+                        target.transform.position,
+                        data.Star3SkillRadius,
+                        BuildStar3SkillPacket(unit));
+                    PlayStar3Effect(unit, target.transform.position);
+                    return true;
+                }
+
+                case Star3SkillMode.PiercingProjectile:
+                {
+                    MonsterController target = FindFarthestSkillTarget(
+                        unit.transform.position,
+                        _targetSearchRange);
+                    if (target == null)
+                        return false;
+                    PlayStar3Effect(unit, unit.transform.position);
+                    Sprite projectileSprite = data.ProjectileSpriteAtRank(unit.Instance.Rank);
+                    Projectiles.Fire(
+                        unit.transform.position,
+                        target,
+                        projectileSprite != null ? projectileSprite : data.WorldSprite,
+                        BuildStar3SkillPacket(unit),
+                        data.ProjectileSpeed,
+                        0.58f * data.Star3SkillVisualScale,
+                        0f,
+                        data.Star3SkillPierceCount,
+                        linePierce: true);
+                    return true;
+                }
+
+                case Star3SkillMode.AuraOverdrive:
+                    if (!HasAllyWithin(unit, data.SupportRadius))
+                        return false;
+                    unit.ActivateStar3AuraOverdrive(data.Star3SkillDuration);
+                    PlayStar3Effect(unit, unit.transform.position);
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        DamagePacket BuildStar3SkillPacket(SummonedUnitController unit)
+        {
+            SummonUnitData data = unit.Data;
+            float rankDamage = data.DamageAtRank(unit.Instance.Rank) *
+                unit.Instance.DamageMultiplier;
+            return new DamagePacket(
+                unit,
+                ModifySlimeDamage(rankDamage * data.Star3SkillDamageMultiplier),
+                data.Attribute,
+                data.Star3SkillSlowPercent,
+                data.Star3SkillSlowDuration,
+                ModifySlimeDamage(rankDamage * data.Star3SkillDotMultiplier),
+                data.Star3SkillDotDuration);
+        }
+
+        void PlayStar3Effect(SummonedUnitController unit, Vector3 position)
+        {
+            SummonUnitData data = unit.Data;
+            Color color = data.UnitId switch
+            {
+                "watergun-slime" => new Color(0.58f, 0.9f, 1f),
+                "buff-slime" => new Color(1f, 0.82f, 0.42f),
+                _ => Color.white,
+            };
+            float rotation = (unit.Instance.InstanceId * 37) % 360;
+            Effects?.Play(
+                position,
+                data.Star3SkillEffectSprite,
+                color,
+                data.Star3SkillVisualScale,
+                rotation);
+        }
+
+        bool HasMonsterWithin(Vector3 center, float radius)
+        {
+            float radiusSq = Mathf.Max(0f, radius) * Mathf.Max(0f, radius);
+            _monsters.RemoveWhere(monster =>
+                monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
+            foreach (var monster in _monsters)
+            {
+                if ((monster.transform.position - center).sqrMagnitude <= radiusSq)
+                    return true;
+            }
+            return false;
+        }
+
+        bool HasAllyWithin(SummonedUnitController source, float radius)
+        {
+            float radiusSq = Mathf.Max(0f, radius) * Mathf.Max(0f, radius);
+            foreach (var unit in _units)
+            {
+                if (unit == null || unit == source || unit.IsDefeated ||
+                    !unit.gameObject.activeInHierarchy)
+                    continue;
+                if ((unit.transform.position - source.transform.position).sqrMagnitude <= radiusSq)
+                    return true;
+            }
+            return false;
+        }
+
+        MonsterController FindFarthestSkillTarget(Vector3 origin, float range)
+        {
+            MonsterController best = null;
+            float bestDistanceSq = -1f;
+            float rangeSq = range * range;
+            _monsters.RemoveWhere(monster =>
+                monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
+            foreach (var monster in _monsters)
+            {
+                float distanceSq = (monster.transform.position - origin).sqrMagnitude;
+                if (distanceSq > rangeSq || distanceSq <= bestDistanceSq)
+                    continue;
+                best = monster;
+                bestDistanceSq = distanceSq;
+            }
+            return best;
+        }
+
+        MonsterController FindDensestSkillTarget(Vector3 origin, float range, float radius)
+        {
+            MonsterController best = null;
+            int bestNeighbors = -1;
+            float bestDistanceSq = float.MaxValue;
+            float rangeSq = range * range;
+            float radiusSq = radius * radius;
+            _monsters.RemoveWhere(monster =>
+                monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
+            foreach (var candidate in _monsters)
+            {
+                float distanceSq = (candidate.transform.position - origin).sqrMagnitude;
+                if (distanceSq > rangeSq)
+                    continue;
+                int neighbors = 0;
+                foreach (var nearby in _monsters)
+                {
+                    if ((nearby.transform.position - candidate.transform.position).sqrMagnitude <= radiusSq)
+                        neighbors++;
+                }
+                if (neighbors < bestNeighbors ||
+                    neighbors == bestNeighbors && distanceSq >= bestDistanceSq)
+                    continue;
+                best = candidate;
+                bestNeighbors = neighbors;
+                bestDistanceSq = distanceSq;
+            }
+            return best;
+        }
+
         public float ModifySlimeDamage(float baseDamage) =>
             _gameManager?.ModifySlimeDamage(baseDamage) ?? Mathf.Max(0f, baseDamage);
+
+        public void PresentDamageNumber(
+            Vector3 worldPosition,
+            float amount,
+            DamageTextKind kind) =>
+            _gameManager?.PresentDamageNumber(worldPosition, amount, kind);
 
         public void ApplyAreaDamage(Vector3 center, float radius, DamagePacket packet)
         {
@@ -563,63 +793,55 @@ namespace CrossDefense.Units
 
         SummonedUnitController FindMergeTarget(SummonedUnitController source)
         {
-            if (source?.Instance == null || source.Instance.Rank >= 3) return null;
+            if (source?.Instance == null ||
+                source.Instance.Rank >= SummonRank.MaxInternalRank)
+                return null;
             SummonedUnitController nearest = null;
             float bestDistanceSq = MergeDropDistance * MergeDropDistance;
             foreach (var unit in _units)
             {
                 if (unit == null || unit == source || !CanMergePair(source, unit)) continue;
                 float distanceSq = (unit.transform.position - source.transform.position).sqrMagnitude;
-                if (distanceSq > bestDistanceSq || !HasThirdMatch(source, unit)) continue;
+                if (distanceSq > bestDistanceSq) continue;
                 bestDistanceSq = distanceSq;
                 nearest = unit;
             }
             return nearest;
         }
 
-        bool HasThirdMatch(SummonedUnitController source, SummonedUnitController target)
-        {
-            foreach (var unit in _units)
-            {
-                if (unit == null || unit == source || unit == target) continue;
-                if (CanMergePair(source, unit)) return true;
-            }
-            foreach (var candidate in _summonManager.Bench)
-            {
-                if (candidate.Unit != null && candidate.Unit.UnitId == source.Data.UnitId &&
-                    candidate.Rank == source.Instance.Rank)
-                    return true;
-            }
-            return false;
-        }
-
         bool TryMerge(SummonedUnitController source, SummonedUnitController target)
         {
-            if (!CanMergePair(source, target) || source.Instance.Rank >= 3) return false;
-            SummonedUnitController thirdField = null;
-            foreach (var unit in _units)
-            {
-                if (unit == null || unit == source || unit == target) continue;
-                if (CanMergePair(source, unit))
-                {
-                    thirdField = unit;
-                    break;
-                }
-            }
-
-            if (thirdField == null &&
-                !_summonManager.TryRemoveBenchMatch(source.Data.UnitId, source.Instance.Rank, out _))
+            if (!CanMergePair(source, target) ||
+                source.Instance.Rank >= SummonRank.MaxInternalRank)
                 return false;
 
-            if (thirdField != null) ReleaseUnit(thirdField);
             ReleaseUnit(source);
             if (!target.Instance.TryPromote()) return false;
             target.RefreshRankVisual();
             target.SetDragging(false);
             target.Outline?.SetState(UnitOutlineState.MergeTarget);
             StartCoroutine(ClearOutlineAfter(target, 0.45f));
+            ActivateMergeFrenzy();
             UnitsChanged?.Invoke(_units);
             return true;
+        }
+
+        void ActivateMergeFrenzy()
+        {
+            RunTraitProgression runTraits = _gameManager?.RunTraits;
+            float duration = runTraits?.MergeFrenzyDuration ?? 0f;
+            if (duration <= 0f)
+                return;
+            _mergeFrenzyUntil = Mathf.Max(_mergeFrenzyUntil, Time.time + duration);
+            float healFraction = runTraits.MergeFrenzyHealFraction;
+            if (healFraction <= 0f)
+                return;
+            for (int i = 0; i < _units.Count; i++)
+            {
+                SummonedUnitController unit = _units[i];
+                if (unit != null)
+                    unit.Heal(unit.MaxHp * healFraction);
+            }
         }
 
         static bool CanMergePair(SummonedUnitController a, SummonedUnitController b) =>

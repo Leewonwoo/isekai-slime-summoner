@@ -47,6 +47,12 @@ namespace CrossDefense.Units
         void Update()
         {
             if (_camera == null || _unitManager == null) return;
+            if (_gameManager?.IsGameplayPaused == true)
+            {
+                if (_pointerDown)
+                    CancelActivePointer();
+                return;
+            }
 
             if (!_pointerDown)
             {

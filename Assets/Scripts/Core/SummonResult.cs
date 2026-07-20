@@ -33,6 +33,17 @@ namespace CrossDefense.Core
             new(id, jackpot ? SummonResultKind.DirectRankOneUnit : SummonResultKind.Unit,
                 unit, jackpot ? 1 : 0, 0);
 
+        public static SummonResult RankedUnitResult(int id, SummonUnitData unit, int rank)
+        {
+            int safeRank = SummonRank.Clamp(rank);
+            return new SummonResult(
+                id,
+                safeRank == 1 ? SummonResultKind.DirectRankOneUnit : SummonResultKind.Unit,
+                unit,
+                safeRank,
+                0);
+        }
+
         public static SummonResult CurrencyResult(int id, int amount) =>
             new(id, SummonResultKind.Currency, null, 0, amount);
     }
@@ -55,7 +66,7 @@ namespace CrossDefense.Core
         {
             InstanceId = instanceId;
             Unit = unit;
-            Rank = rank;
+            Rank = SummonRank.Clamp(rank);
             UpgradeState = upgradeState != null && upgradeState.UnitId == unit?.UnitId
                 ? upgradeState
                 : new SummonUnitUpgradeState(unit?.UnitId);
@@ -69,7 +80,7 @@ namespace CrossDefense.Core
 
         public bool TryPromote()
         {
-            if (Rank >= 3) return false;
+            if (Rank >= SummonRank.MaxInternalRank) return false;
             Rank++;
             return true;
         }
