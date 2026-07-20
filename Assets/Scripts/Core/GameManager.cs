@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using CrossDefense.Data;
+using CrossDefense.UI;
 using CrossDefense.Units;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,7 +34,7 @@ namespace CrossDefense.Core
         [SerializeField] Transform summoner;
         [Min(1f)] [SerializeField] float maxCoreHp = 100f;
         [Min(0)] [SerializeField] int startingGold = 0;
-        [Min(0)] [SerializeField] int startingSummonContracts = 10;
+        [Min(0)] [SerializeField] int startingSummonContracts = 4;
 
         [Header("Defeat Restart")]
         [SerializeField] bool restartStageOnDefeat = true;
@@ -53,11 +54,40 @@ namespace CrossDefense.Core
         [SerializeField] Sprite runtimePrototypeBuffSprite;
         [SerializeField] Sprite runtimePrototypeExplosionSprite;
         [SerializeField] Sprite runtimePrototypeFreezeSprite;
+        [Header("Summon Rank Sprites")]
+        [SerializeField] Sprite runtimePrototypePunchStar2Sprite;
+        [SerializeField] Sprite runtimePrototypePunchStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeWatergunStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeWatergunStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeFlameStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeFlameStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeIceStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeIceStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeGreenStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeGreenStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeBuffStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeBuffStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeExplosionStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeExplosionStar3Sprite;
+        [SerializeField] Sprite runtimePrototypeFreezeStar2Sprite;
+        [SerializeField] Sprite runtimePrototypeFreezeStar3Sprite;
         [SerializeField] Sprite[] runtimePrototypePunchMoveFrames;
         [Min(1f)] [SerializeField] float runtimePrototypePunchMoveFps = 9f;
         [SerializeField] Sprite runtimePrototypeNeutralProjectileSprite;
         [SerializeField] Sprite runtimePrototypeFireProjectileSprite;
         [SerializeField] Sprite runtimePrototypeIceProjectileSprite;
+        [Header("Rank Projectile Visuals")]
+        [SerializeField] Sprite[] runtimePrototypeWatergunProjectiles;
+        [SerializeField] Sprite[] runtimePrototypeFlameProjectiles;
+        [SerializeField] Sprite[] runtimePrototypeIceProjectiles;
+        [SerializeField] Sprite[] runtimePrototypeGreenProjectiles;
+        [SerializeField] Sprite[] runtimePrototypeExplosionProjectiles;
+        [SerializeField] Sprite[] runtimePrototypeFreezeProjectiles;
+        [Header("Star 3 Skill Effects")]
+        [SerializeField] Sprite runtimeStar3NeutralEffectSprite;
+        [SerializeField] Sprite runtimeStar3FireEffectSprite;
+        [SerializeField] Sprite runtimeStar3IceEffectSprite;
+        [SerializeField] Sprite runtimeStar3NatureEffectSprite;
         [SerializeField] bool autoDeploySummonedUnits = true;
         [Range(0f, 1f)] [SerializeField] float currencyResultChance = 0.18f;
         [Range(0f, 1f)] [SerializeField] float directRankOneChance = 0.05f;
@@ -72,7 +102,10 @@ namespace CrossDefense.Core
         Func<Vector2> _goldScreenPositionProvider;
         StageTimeline _runtimeTimeline;
         GrowthBalanceData _runtimeGrowthBalance;
+        RunRewardCatalog _runtimeRunRewardCatalog;
         WorldHealthBar _summonerHealthBar;
+        SpriteRenderer _summonerRenderer;
+        DamageFloatingTextService _damageFloatingText;
         SummonerProgression _summonerProgression;
         PermanentTraitProgression _permanentTraits;
         RunTraitProgression _runTraits;
@@ -83,6 +116,8 @@ namespace CrossDefense.Core
         int _gold;
         int _summonContracts;
         RunPhase _phase;
+        GameplayPauseReason _gameplayPauseReasons;
+        float _timeScaleBeforeGameplayPause = 1f;
 
         public StageTimeline StageTimeline => stageTimeline;
         public Transform Summoner => summoner;
@@ -98,6 +133,18 @@ namespace CrossDefense.Core
         public RunTraitProgression RunTraits => _runTraits;
         public GrowthManager Growth => _growthManager;
         public GrowthBalanceData GrowthBalance => growthBalance;
+        public int MaxSummonSlotCapacity => Mathf.Max(
+            1,
+            Mathf.Min(summonBenchCapacity, growthBalance?.MaxSummonCapacity ?? summonBenchCapacity));
+        public int SummonSlotCapacity => Mathf.Clamp(
+            (growthBalance?.BaseSummonCapacity ?? summonBenchCapacity) +
+            (_growthManager?.SummonCapacityBonus ?? 0) +
+            (_permanentTraits?.Snapshot.SummonCapacityBonus ?? 0),
+            1,
+            MaxSummonSlotCapacity);
+        public DamageFloatingTextService DamageFloatingText => _damageFloatingText;
+        public bool IsGameplayPaused => _gameplayPauseReasons != GameplayPauseReason.None;
+        public GameplayPauseReason GameplayPauseReasons => _gameplayPauseReasons;
         public float DirectRankOneChance => Mathf.Clamp01(
             directRankOneChance +
             (_summonerProgression?.Snapshot.JackpotChanceBonus ?? 0f) +
@@ -105,12 +152,10 @@ namespace CrossDefense.Core
         public float RunAttackSpeedMultiplier => _growthManager?.RunAttackSpeedMultiplier ?? 1f;
         public float SummonerAttackSpeedMultiplier =>
             RunAttackSpeedMultiplier *
-            (_permanentTraits?.Snapshot.SummonerAttackSpeedMultiplier ?? 1f) *
-            (_runTraits?.Snapshot.AllAttackSpeedMultiplier ?? 1f);
+            (_permanentTraits?.Snapshot.SummonerAttackSpeedMultiplier ?? 1f);
         public float SlimeAttackSpeedMultiplier =>
             RunAttackSpeedMultiplier *
-            (_permanentTraits?.Snapshot.SlimeAttackSpeedMultiplier ?? 1f) *
-            (_runTraits?.Snapshot.AllAttackSpeedMultiplier ?? 1f);
+            (_permanentTraits?.Snapshot.SlimeAttackSpeedMultiplier ?? 1f);
         public bool IsRunTraitChoicePending => _runTraits?.IsChoicePending ?? false;
         public CombatProjectileService Projectiles => _summonedUnitManager?.Projectiles;
         public bool IsRunOver => _phase == RunPhase.Victory || _phase == RunPhase.Defeat;
@@ -130,6 +175,7 @@ namespace CrossDefense.Core
         public event Action<int> LivingMonsterCountChanged;
         public event Action<MonsterController, StageWave, int> MonsterSpawned;
         public event Action<MonsterController> MonsterResolved;
+        public event Action<bool> GameplayPauseChanged;
 
         void OnValidate()
         {
@@ -214,25 +260,35 @@ namespace CrossDefense.Core
                 growthBalance,
                 () => _summonerProgression.Snapshot.Level);
             _permanentTraits.Changed += OnPermanentTraitsChanged;
-            _runTraits = new RunTraitProgression(growthBalance, stageTimeline?.RandomSeed ?? 0);
-            _runTraits.Changed += OnRunTraitsChanged;
+            RunRewardCatalog runRewardCatalog = stageTimeline?.RunRewardCatalog;
+            if (runRewardCatalog == null)
+            {
+                _runtimeRunRewardCatalog = RunRewardCatalog.CreateRuntimeDefault();
+                runRewardCatalog = _runtimeRunRewardCatalog;
+                Debug.LogWarning(
+                    "[CrossDefense] StageTimeline에 RunRewardCatalog가 없어 런타임 기본 보상 카탈로그를 사용합니다.",
+                    this);
+            }
+            _runTraits = new RunTraitProgression(runRewardCatalog, stageTimeline?.RandomSeed ?? 0);
 
             maxCoreHp = Mathf.Max(1f, maxCoreHp);
             _effectiveMaxCoreHp = maxCoreHp *
                                   _summonerProgression.Snapshot.MaxHpMultiplier *
-                                  _permanentTraits.Snapshot.CoreMaxHpMultiplier *
-                                  _runTraits.Snapshot.CoreMaxHpMultiplier;
+                                  _permanentTraits.Snapshot.CoreMaxHpMultiplier;
             _coreHp = _effectiveMaxCoreHp;
             _gold = Mathf.Max(0, startingGold);
             _summonContracts = Mathf.Max(0, startingSummonContracts);
             _phase = RunPhase.Prepare;
 
-            if (summoner != null && summoner.TryGetComponent(out SpriteRenderer summonerRenderer))
+            if (summoner != null && summoner.TryGetComponent(out _summonerRenderer))
             {
                 _summonerHealthBar = WorldHealthBar.GetOrAdd(summoner.gameObject);
-                _summonerHealthBar.Configure(summonerRenderer, WorldHealthBarProfile.Summoner);
+                _summonerHealthBar.Configure(_summonerRenderer, WorldHealthBarProfile.Summoner);
                 _summonerHealthBar.SetHealth(_coreHp, _effectiveMaxCoreHp);
             }
+
+            _damageFloatingText = DamageFloatingTextService.GetOrAdd(gameObject);
+            _damageFloatingText?.Initialize(Camera.main);
 
             _summonManager = new SummonManager(
                 this,
@@ -241,7 +297,8 @@ namespace CrossDefense.Core
                 directRankOneChance,
                 currencyResultGold,
                 summonBenchCapacity,
-                directRankOneChanceProvider: () => DirectRankOneChance);
+                directRankOneChanceProvider: () => DirectRankOneChance,
+                capacityProvider: () => SummonSlotCapacity);
             _growthManager = new GrowthManager(this, _summonManager, growthBalance);
 
             _summonedUnitManager = GetComponent<SummonedUnitManager>();
@@ -299,7 +356,13 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypePunchSprite), MonsterAttribute.None, SummonAttackStyle.Melee,
                 10f, 1.15f, 0.85f, 2.8f,
                 ResolvePrototypeTint(runtimePrototypePunchSprite, new Color(0.82f, 0.9f, 1f)));
+            punch.ConfigurePrototypeRankSprites(
+                runtimePrototypePunchStar2Sprite,
+                runtimePrototypePunchStar3Sprite);
             punch.ConfigurePrototypeAnimation(runtimePrototypePunchMoveFrames, runtimePrototypePunchMoveFps);
+            punch.ConfigurePrototypeStar3Skill(
+                "대지 강타", Star3SkillMode.SelfArea, 9f, 2.2f, 1.35f,
+                0f, 1f, 1, runtimeStar3NeutralEffectSprite, 1.25f);
             yield return punch;
 
             var watergun = SummonUnitData.CreatePrototype(
@@ -307,7 +370,14 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeWatergunSprite), MonsterAttribute.None, SummonAttackStyle.Projectile,
                 7f, 1.35f, 4.5f, 2.35f,
                 ResolvePrototypeTint(runtimePrototypeWatergunSprite, new Color(0.45f, 0.8f, 1f)));
+            watergun.ConfigurePrototypeRankSprites(
+                runtimePrototypeWatergunStar2Sprite,
+                runtimePrototypeWatergunStar3Sprite);
             watergun.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 0f, 0f, 1);
+            watergun.ConfigurePrototypeRankProjectiles(runtimePrototypeWatergunProjectiles);
+            watergun.ConfigurePrototypeStar3Skill(
+                "초압축 수포", Star3SkillMode.PiercingProjectile, 8f, 2.3f, 0f,
+                0f, 1f, 3, runtimeStar3NeutralEffectSprite, 1.4f);
             yield return watergun;
 
             var flame = SummonUnitData.CreatePrototype(
@@ -315,7 +385,15 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeFlameSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
                 8f, 0.85f, 2.1f, 2.2f,
                 ResolvePrototypeTint(runtimePrototypeFlameSprite, new Color(1f, 0.42f, 0.22f)));
+            flame.ConfigurePrototypeRankSprites(
+                runtimePrototypeFlameStar2Sprite,
+                runtimePrototypeFlameStar3Sprite);
             flame.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.15f, 0f, 0f, 0f, 0f, 1);
+            flame.ConfigurePrototypeRankProjectiles(runtimePrototypeFlameProjectiles);
+            flame.ConfigurePrototypeStar3Skill(
+                "작열핵", Star3SkillMode.TargetArea, 10f, 2f, 1.6f,
+                0f, 1f, 1, runtimeStar3FireEffectSprite, 1.45f,
+                skillDotMultiplier: 0.22f, skillDotDuration: 4f);
             yield return flame;
 
             var ice = SummonUnitData.CreatePrototype(
@@ -323,7 +401,15 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeIceSprite), MonsterAttribute.Ice, SummonAttackStyle.Projectile,
                 5.5f, 1f, 4.2f, 2.2f,
                 ResolvePrototypeTint(runtimePrototypeIceSprite, new Color(0.55f, 0.9f, 1f)));
+            ice.ConfigurePrototypeRankSprites(
+                runtimePrototypeIceStar2Sprite,
+                runtimePrototypeIceStar3Sprite);
             ice.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.32f, 2f, 0f, 0f, 1);
+            ice.ConfigurePrototypeRankProjectiles(runtimePrototypeIceProjectiles);
+            ice.ConfigurePrototypeStar3Skill(
+                "빙하 파동", Star3SkillMode.TargetArea, 11f, 1.6f, 1.45f,
+                0f, 1f, 1, runtimeStar3IceEffectSprite, 1.35f,
+                skillSlowPercent: 0.55f, skillSlowDuration: 3f);
             yield return ice;
 
             var green = SummonUnitData.CreatePrototype(
@@ -331,7 +417,15 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeGreenSprite), MonsterAttribute.Nature, SummonAttackStyle.Projectile,
                 4.5f, 1f, 4f, 2.2f,
                 ResolvePrototypeTint(runtimePrototypeGreenSprite, new Color(0.5f, 1f, 0.48f)));
+            green.ConfigurePrototypeRankSprites(
+                runtimePrototypeGreenStar2Sprite,
+                runtimePrototypeGreenStar3Sprite);
             green.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 3f, 2.5f, 1);
+            green.ConfigurePrototypeRankProjectiles(runtimePrototypeGreenProjectiles);
+            green.ConfigurePrototypeStar3Skill(
+                "맹독 개화", Star3SkillMode.TargetArea, 10f, 1.2f, 1.5f,
+                0f, 1f, 1, runtimeStar3NatureEffectSprite, 1.4f,
+                skillDotMultiplier: 0.35f, skillDotDuration: 5f);
             yield return green;
 
             var buff = SummonUnitData.CreatePrototype(
@@ -339,7 +433,13 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeBuffSprite), MonsterAttribute.None, SummonAttackStyle.Support,
                 0.1f, 1f, 0.8f, 2f,
                 ResolvePrototypeTint(runtimePrototypeBuffSprite, new Color(0.78f, 0.55f, 1f)));
+            buff.ConfigurePrototypeRankSprites(
+                runtimePrototypeBuffStar2Sprite,
+                runtimePrototypeBuffStar3Sprite);
             buff.ConfigurePrototypeEffects(null, 0f, 0f, 0f, 0f, 0f, 1, 0.16f, 2.8f);
+            buff.ConfigurePrototypeStar3Skill(
+                "과충전 공명", Star3SkillMode.AuraOverdrive, 12f, 0f, 0f,
+                5f, 2f, 1, runtimeStar3NatureEffectSprite, 1.35f);
             yield return buff;
 
             var explosion = SummonUnitData.CreatePrototype(
@@ -347,7 +447,14 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeExplosionSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
                 15f, 0.55f, 1.1f, 2.7f,
                 ResolvePrototypeTint(runtimePrototypeExplosionSprite, new Color(1f, 0.62f, 0.3f)));
+            explosion.ConfigurePrototypeRankSprites(
+                runtimePrototypeExplosionStar2Sprite,
+                runtimePrototypeExplosionStar3Sprite);
             explosion.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.45f, 0f, 0f, 0f, 0f, 1);
+            explosion.ConfigurePrototypeRankProjectiles(runtimePrototypeExplosionProjectiles);
+            explosion.ConfigurePrototypeStar3Skill(
+                "대폭발", Star3SkillMode.SelfArea, 13f, 3.2f, 1.9f,
+                0f, 1f, 1, runtimeStar3FireEffectSprite, 1.75f);
             yield return explosion;
 
             var freeze = SummonUnitData.CreatePrototype(
@@ -355,7 +462,15 @@ namespace CrossDefense.Core
                 ResolvePrototypeSprite(runtimePrototypeFreezeSprite), MonsterAttribute.Ice, SummonAttackStyle.Piercing,
                 13f, 0.65f, 6f, 1.9f,
                 ResolvePrototypeTint(runtimePrototypeFreezeSprite, new Color(0.65f, 0.72f, 1f)));
+            freeze.ConfigurePrototypeRankSprites(
+                runtimePrototypeFreezeStar2Sprite,
+                runtimePrototypeFreezeStar3Sprite);
             freeze.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.15f, 1f, 0f, 0f, 3);
+            freeze.ConfigurePrototypeRankProjectiles(runtimePrototypeFreezeProjectiles);
+            freeze.ConfigurePrototypeStar3Skill(
+                "절대관통창", Star3SkillMode.PiercingProjectile, 14f, 2.8f, 0f,
+                0f, 1f, 6, runtimeStar3IceEffectSprite, 1.55f,
+                skillSlowPercent: 0.3f, skillSlowDuration: 2f);
             yield return freeze;
         }
 
@@ -380,8 +495,13 @@ namespace CrossDefense.Core
         public void ApplyCoreDamage(int amount)
         {
             if (IsRunOver || amount <= 0) return;
+            float previousHp = _coreHp;
             _coreHp = Mathf.Max(0f, _coreHp - amount);
             _summonerHealthBar?.SetHealth(_coreHp, _effectiveMaxCoreHp);
+            PresentDamageNumber(
+                GetSummonerDamageAnchor(),
+                previousHp - _coreHp,
+                DamageTextKind.Received);
             CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
             if (_coreHp <= 0f)
             {
@@ -425,29 +545,47 @@ namespace CrossDefense.Core
             CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
         }
 
+        public void PresentDamageNumber(
+            Vector3 worldPosition,
+            float amount,
+            DamageTextKind kind)
+        {
+            if (amount <= 0f)
+                return;
+            if (_damageFloatingText == null)
+            {
+                _damageFloatingText = DamageFloatingTextService.GetOrAdd(gameObject);
+                _damageFloatingText?.Initialize(Camera.main);
+            }
+            _damageFloatingText?.Show(worldPosition, amount, kind);
+        }
+
+        Vector3 GetSummonerDamageAnchor()
+        {
+            if (_summonerRenderer != null && _summonerRenderer.sprite != null)
+            {
+                Bounds bounds = _summonerRenderer.bounds;
+                return new Vector3(
+                    bounds.center.x,
+                    Mathf.Lerp(bounds.center.y, bounds.max.y, 0.55f),
+                    transform.position.z);
+            }
+            return summoner != null ? summoner.position + Vector3.up * 0.35f : Vector3.zero;
+        }
+
         public float ModifySlimeDamage(float baseDamage)
         {
             float permanentDamage = Mathf.Max(0f, baseDamage) *
-                                    (_permanentTraits?.Snapshot.SlimeDamageMultiplier ?? 1f) *
-                                    (_runTraits?.Snapshot.AllDamageMultiplier ?? 1f) *
-                                    (_runTraits?.Snapshot.SlimeDamageMultiplier ?? 1f);
-            return _growthManager?.ModifyPlayerDamage(
-                       permanentDamage,
-                       _runTraits?.Snapshot.CriticalChanceBonus ?? 0f) ??
-                   permanentDamage;
+                                    (_permanentTraits?.Snapshot.SlimeDamageMultiplier ?? 1f);
+            return _growthManager?.ModifyPlayerDamage(permanentDamage) ?? permanentDamage;
         }
 
         public float ModifySummonerDamage(float baseDamage)
         {
             float permanentDamage = Mathf.Max(0f, baseDamage) *
                                     (_summonerProgression?.Snapshot.DamageMultiplier ?? 1f) *
-                                    (_permanentTraits?.Snapshot.SummonerDamageMultiplier ?? 1f) *
-                                    (_runTraits?.Snapshot.AllDamageMultiplier ?? 1f) *
-                                    (_runTraits?.Snapshot.SummonerDamageMultiplier ?? 1f);
-            return _growthManager?.ModifyPlayerDamage(
-                       permanentDamage,
-                       _runTraits?.Snapshot.CriticalChanceBonus ?? 0f) ??
-                   permanentDamage;
+                                    (_permanentTraits?.Snapshot.SummonerDamageMultiplier ?? 1f);
+            return _growthManager?.ModifyPlayerDamage(permanentDamage) ?? permanentDamage;
         }
 
         public void RegisterGoldScreenPositionProvider(Func<Vector2> provider)
@@ -485,12 +623,93 @@ namespace CrossDefense.Core
             return true;
         }
 
+        public bool TryChooseRunReward(
+            string rewardId,
+            out IReadOnlyList<SummonResult> summonResults)
+        {
+            var results = new List<SummonResult>(3);
+            summonResults = results;
+            if (_runTraits == null ||
+                !_runTraits.TryChoose(rewardId, out RunRewardDefinition selected))
+                return false;
+            if (selected == null || !selected.IsImmediate || _summonManager == null)
+                return true;
+
+            switch (selected.Effect)
+            {
+                case RunRewardEffect.TripleSummon:
+                    GrantRandomRunRewardUnits(Mathf.Max(1, selected.Count), 0, results);
+                    break;
+                case RunRewardEffect.MergeSupport:
+                    int requested = Mathf.Max(1, selected.Count);
+                    int granted = _summonManager.GrantMergeSupport(requested, results);
+                    if (granted < requested)
+                        GrantRandomRunRewardUnits(requested - granted, 0, results);
+                    break;
+                case RunRewardEffect.JackpotEgg:
+                    if (_summonManager.TryGrantJackpotEgg(
+                            selected.PrimaryValue,
+                            selected.SecondaryValue,
+                            out SummonResult jackpotResult))
+                        results.Add(jackpotResult);
+                    break;
+            }
+            return true;
+        }
+
+        void GrantRandomRunRewardUnits(int amount, int rank, List<SummonResult> results)
+        {
+            for (int i = 0; i < Mathf.Max(0, amount); i++)
+            {
+                if (!_summonManager.TryGrantRandomReward(rank, out SummonResult result))
+                    break;
+                results.Add(result);
+            }
+        }
+
         public void SetPhase(RunPhase phase)
         {
             if (_phase == phase) return;
             _phase = phase;
             PhaseChanged?.Invoke(phase);
             Debug.Log($"[CrossDefense] Phase: {phase}", this);
+        }
+
+        public void SetGameplayPause(GameplayPauseReason reason, bool paused)
+        {
+            if (reason == GameplayPauseReason.None)
+                return;
+
+            GameplayPauseReason previous = _gameplayPauseReasons;
+            _gameplayPauseReasons = paused
+                ? _gameplayPauseReasons | reason
+                : _gameplayPauseReasons & ~reason;
+            if (previous == _gameplayPauseReasons)
+                return;
+
+            if (previous == GameplayPauseReason.None)
+            {
+                _timeScaleBeforeGameplayPause = Time.timeScale;
+                Time.timeScale = 0f;
+                GameplayPauseChanged?.Invoke(true);
+                return;
+            }
+
+            if (_gameplayPauseReasons != GameplayPauseReason.None)
+                return;
+
+            Time.timeScale = _timeScaleBeforeGameplayPause;
+            GameplayPauseChanged?.Invoke(false);
+        }
+
+        void RestoreGameplayTimeScale()
+        {
+            if (_gameplayPauseReasons == GameplayPauseReason.None)
+                return;
+
+            _gameplayPauseReasons = GameplayPauseReason.None;
+            Time.timeScale = _timeScaleBeforeGameplayPause;
+            GameplayPauseChanged?.Invoke(false);
         }
 
         public void SetWave(int current, int total, StageWave wave)
@@ -530,11 +749,6 @@ namespace CrossDefense.Core
             RecalculateEffectiveCoreHp(true);
         }
 
-        void OnRunTraitsChanged(RunTraitSnapshot snapshot)
-        {
-            RecalculateEffectiveCoreHp(true);
-        }
-
         void RecalculateEffectiveCoreHp(bool healAddedMaximum)
         {
             float previousMax = Mathf.Max(1f, _effectiveMaxCoreHp);
@@ -542,8 +756,7 @@ namespace CrossDefense.Core
                 1f,
                 maxCoreHp *
                 (_summonerProgression?.Snapshot.MaxHpMultiplier ?? 1f) *
-                (_permanentTraits?.Snapshot.CoreMaxHpMultiplier ?? 1f) *
-                (_runTraits?.Snapshot.CoreMaxHpMultiplier ?? 1f));
+                (_permanentTraits?.Snapshot.CoreMaxHpMultiplier ?? 1f));
             _effectiveMaxCoreHp = nextMax;
             if (healAddedMaximum && nextMax > previousMax)
                 _coreHp = Mathf.Min(nextMax, _coreHp + nextMax - previousMax);
@@ -555,6 +768,7 @@ namespace CrossDefense.Core
 
         void OnDestroy()
         {
+            RestoreGameplayTimeScale();
             if (_summonerProgression != null)
             {
                 _summonerProgression.Flush();
@@ -565,10 +779,10 @@ namespace CrossDefense.Core
                 _permanentTraits.Flush();
                 _permanentTraits.Changed -= OnPermanentTraitsChanged;
             }
-            if (_runTraits != null)
-                _runTraits.Changed -= OnRunTraitsChanged;
             if (_runtimeGrowthBalance != null)
                 Destroy(_runtimeGrowthBalance);
+            if (_runtimeRunRewardCatalog != null)
+                Destroy(_runtimeRunRewardCatalog);
         }
 
         IEnumerator RestartStageAfterDefeat()

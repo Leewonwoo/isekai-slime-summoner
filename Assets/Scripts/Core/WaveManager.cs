@@ -64,7 +64,9 @@ namespace CrossDefense.Core
 
                 _gameManager.SetWave(_waveIndex + 1, _timeline.WaveCount, wave);
                 _gameManager.SetPhase(RunPhase.Prepare);
-                yield return new WaitForSecondsRealtime(Mathf.Max(0f, wave.PreparationTime));
+                yield return new WaitForSeconds(Mathf.Max(0f, wave.PreparationTime));
+                while (_gameManager.IsGameplayPaused)
+                    yield return null;
                 if (_gameManager.IsRunOver) yield break;
 
                 _gameManager.SetPhase(RunPhase.InWave);
@@ -90,7 +92,7 @@ namespace CrossDefense.Core
                 }
 
                 _gameManager.SetPhase(RunPhase.Intermission);
-                yield return new WaitForSecondsRealtime(0.5f);
+                yield return new WaitForSeconds(0.5f);
             }
 
             if (!_gameManager.IsRunOver)
@@ -104,6 +106,8 @@ namespace CrossDefense.Core
                 if (entry == null || entry.Monster == null) continue;
                 for (int i = 0; i < entry.Count; i++)
                 {
+                    while (_gameManager.IsGameplayPaused)
+                        yield return null;
                     var zone = _timeline.ChooseSpawnZone(wave, _random);
                     var monster = _spawner.Spawn(
                         _gameManager,
@@ -113,10 +117,11 @@ namespace CrossDefense.Core
                         _timeline.GetMonsterHpMultiplier(wave, entry),
                         _timeline.GetMonsterSpeedMultiplier(wave, entry),
                         entry.RewardMultiplier,
+                        entry.SizeMultiplier,
                         _random);
                     _livingMonsters.Add(monster);
                     _gameManager.NotifyMonsterSpawned(monster, wave, _livingMonsters.Count);
-                    yield return new WaitForSecondsRealtime(_timeline.GetSpawnInterval(wave, entry));
+                    yield return new WaitForSeconds(_timeline.GetSpawnInterval(wave, entry));
                     if (_gameManager.IsRunOver) yield break;
                 }
             }

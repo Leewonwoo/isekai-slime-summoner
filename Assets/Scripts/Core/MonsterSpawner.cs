@@ -42,7 +42,8 @@ namespace CrossDefense.Core
         }
 
         public MonsterController Spawn(GameManager gameManager, Transform target, MonsterData data,
-            SpawnZone zone, float hpMultiplier, float speedMultiplier, float rewardMultiplier, System.Random random)
+            SpawnZone zone, float hpMultiplier, float speedMultiplier, float rewardMultiplier,
+            float sizeMultiplier, System.Random random)
         {
             var spawned = RuntimePoolService.Spawn(
                 _monsterTemplate,
@@ -51,7 +52,14 @@ namespace CrossDefense.Core
                 _parent);
             if (spawned == null) return null;
             var monster = spawned.GetComponent<MonsterController>();
-            monster.Initialize(gameManager, target, data, hpMultiplier, speedMultiplier, rewardMultiplier);
+            monster.Initialize(
+                gameManager,
+                target,
+                data,
+                hpMultiplier,
+                speedMultiplier,
+                rewardMultiplier,
+                sizeMultiplier);
             return monster;
         }
 

@@ -118,7 +118,6 @@ namespace CrossDefense.Core
             worldTarget.z = origin.z;
 
             _sequence = DOTween.Sequence()
-                .SetUpdate(true)
                 .Append(transform.DOMove(burstPosition, 0.16f).SetEase(Ease.OutQuad))
                 .AppendInterval(0.05f)
                 .Append(transform.DOMove(worldTarget, 0.48f).SetEase(Ease.InCubic))
