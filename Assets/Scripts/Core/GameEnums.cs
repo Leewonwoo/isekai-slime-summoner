@@ -25,6 +25,12 @@ namespace CrossDefense
         Danger,
     }
 
+    public enum DamageTextKind
+    {
+        Dealt,
+        Received,
+    }
+
     public enum RunPhase
     {
         Prepare,
@@ -34,5 +40,13 @@ namespace CrossDefense
         Merchant,
         Victory,
         Defeat,
+    }
+
+    [System.Flags]
+    public enum GameplayPauseReason
+    {
+        None = 0,
+        TraitChoice = 1 << 0,
+        SummonRoulette = 1 << 1,
     }
 }

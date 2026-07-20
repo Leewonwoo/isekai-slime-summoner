@@ -15,6 +15,7 @@ namespace CrossDefense.Units
     {
         public Vector2 Position;
         public Vector2 ReferencePosition;
+        public Vector2 PreviousPosition;
         public float Radius;
         public float InverseMass;
         public float OpposingContactDistance;
@@ -25,10 +26,12 @@ namespace CrossDefense.Units
             float radius,
             float inverseMass,
             CombatPbdTeam team,
-            float opposingContactDistance = 0f)
+            float opposingContactDistance = 0f,
+            Vector2? previousPosition = null)
         {
             Position = position;
             ReferencePosition = position;
+            PreviousPosition = previousPosition ?? position;
             Radius = Mathf.Max(0f, radius);
             InverseMass = Mathf.Max(0f, inverseMass);
             Team = team;
@@ -48,6 +51,7 @@ namespace CrossDefense.Units
         [Range(0.1f, 1f)] [SerializeField] float opposingSpacingScale = 0.52f;
         [Min(0f)] [SerializeField] float penetrationSlop = 0.06f;
         [Min(0.01f)] [SerializeField] float maxCorrectionSpeed = 0.9f;
+        [SerializeField] bool preventShoving = true;
         [Min(0.01f)] [SerializeField] float summonedUnitInverseMass = 0.65f;
         [Min(0.01f)] [SerializeField] float monsterInverseMass = 1f;
 
@@ -59,6 +63,7 @@ namespace CrossDefense.Units
         public float OpposingSpacingScale => Mathf.Clamp(opposingSpacingScale, 0.1f, 1f);
         public float PenetrationSlop => Mathf.Max(0f, penetrationSlop);
         public float MaxCorrectionSpeed => Mathf.Max(0.01f, maxCorrectionSpeed);
+        public bool PreventShoving => preventShoving;
         public float SummonedUnitInverseMass => Mathf.Max(0.01f, summonedUnitInverseMass);
         public float MonsterInverseMass => Mathf.Max(0.01f, monsterInverseMass);
     }
@@ -88,7 +93,8 @@ namespace CrossDefense.Units
                 settings.MonsterSpacingScale,
                 settings.OpposingSpacingScale,
                 settings.PenetrationSlop,
-                settings.MaxCorrectionSpeed * Mathf.Clamp(deltaTime, 0f, 0.05f));
+                settings.MaxCorrectionSpeed * Mathf.Clamp(deltaTime, 0f, 0.05f),
+                settings.PreventShoving);
         }
 
         public static void Solve(
@@ -117,6 +123,27 @@ namespace CrossDefense.Units
             float opposingSpacingScale,
             float penetrationSlop,
             float maxCorrectionDistance)
+            => Solve(
+                bodies,
+                iterations,
+                correctionStrength,
+                summonedUnitSpacingScale,
+                monsterSpacingScale,
+                opposingSpacingScale,
+                penetrationSlop,
+                maxCorrectionDistance,
+                false);
+
+        public static void Solve(
+            IList<CombatPbdBody> bodies,
+            int iterations,
+            float correctionStrength,
+            float summonedUnitSpacingScale,
+            float monsterSpacingScale,
+            float opposingSpacingScale,
+            float penetrationSlop,
+            float maxCorrectionDistance,
+            bool preventShoving)
         {
             if (bodies == null || bodies.Count < 2) return;
 
@@ -131,7 +158,7 @@ namespace CrossDefense.Units
                     for (int secondIndex = firstIndex + 1; secondIndex < bodies.Count; secondIndex++)
                         SolvePair(bodies, firstIndex, secondIndex, strength,
                             summonedUnitSpacingScale, monsterSpacingScale, opposingSpacingScale,
-                            safeSlop, safeMaxCorrection);
+                            safeSlop, safeMaxCorrection, preventShoving);
                 }
             }
         }
@@ -145,11 +172,20 @@ namespace CrossDefense.Units
             float monsterSpacingScale,
             float opposingSpacingScale,
             float penetrationSlop,
-            float maxCorrectionDistance)
+            float maxCorrectionDistance,
+            bool preventShoving)
         {
             CombatPbdBody first = bodies[firstIndex];
             CombatPbdBody second = bodies[secondIndex];
-            float inverseMassSum = first.InverseMass + second.InverseMass;
+            float firstMotionBudget = Vector2.Distance(first.ReferencePosition, first.PreviousPosition);
+            float secondMotionBudget = Vector2.Distance(second.ReferencePosition, second.PreviousPosition);
+            float firstInverseMass = preventShoving && firstMotionBudget <= MinimumDistance
+                ? 0f
+                : first.InverseMass;
+            float secondInverseMass = preventShoving && secondMotionBudget <= MinimumDistance
+                ? 0f
+                : second.InverseMass;
+            float inverseMassSum = firstInverseMass + secondInverseMass;
             if (inverseMassSum <= Mathf.Epsilon) return;
 
             float targetDistance = GetTargetDistance(first, second,
@@ -165,10 +201,21 @@ namespace CrossDefense.Units
                 ? delta / distance
                 : GetDeterministicFallbackNormal(firstIndex, secondIndex);
             Vector2 correction = normal * (penetration * strength / inverseMassSum);
-            first.Position -= correction * first.InverseMass;
-            second.Position += correction * second.InverseMass;
+            first.Position -= correction * firstInverseMass;
+            second.Position += correction * secondInverseMass;
             first.Position = ClampCorrection(first.Position, first.ReferencePosition, maxCorrectionDistance);
             second.Position = ClampCorrection(second.Position, second.ReferencePosition, maxCorrectionDistance);
+            if (preventShoving)
+            {
+                first.Position = ClampToMotionEnvelope(
+                    first.Position,
+                    first.PreviousPosition,
+                    firstMotionBudget);
+                second.Position = ClampToMotionEnvelope(
+                    second.Position,
+                    second.PreviousPosition,
+                    secondMotionBudget);
+            }
             bodies[firstIndex] = first;
             bodies[secondIndex] = second;
         }
@@ -180,6 +227,15 @@ namespace CrossDefense.Units
             float max = Mathf.Max(0f, maxDistance);
             return offset.sqrMagnitude > max * max
                 ? reference + offset.normalized * max
+                : position;
+        }
+
+        static Vector2 ClampToMotionEnvelope(Vector2 position, Vector2 previous, float motionBudget)
+        {
+            float safeBudget = Mathf.Max(0f, motionBudget);
+            Vector2 offset = position - previous;
+            return offset.sqrMagnitude > safeBudget * safeBudget
+                ? previous + offset.normalized * safeBudget
                 : position;
         }
 

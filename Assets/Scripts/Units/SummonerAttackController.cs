@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using CrossDefense.Core;
 using CrossDefense.Data;
@@ -6,22 +7,15 @@ using UnityEngine;
 
 namespace CrossDefense.Units
 {
-    public enum SummonerProjectileType
-    {
-        EnergyBolt,
-        Fireball,
-        Iceball,
-    }
-
-    /// <summary>가장 가까운 몬스터를 자동 조준해 선택한 속성 투사체를 발사한다.</summary>
+    /// <summary>런 보상으로 각성한 주 공격을 자동 조준·클릭 방향 공격에 함께 적용한다.</summary>
     [DisallowMultipleComponent]
     public sealed class SummonerAttackController : MonoBehaviour
     {
-        [Header("Projectile Choice")]
-        [SerializeField] SummonerProjectileType selectedProjectile = SummonerProjectileType.EnergyBolt;
+        [Header("Projectile Visuals")]
         [SerializeField] Sprite energyBoltSprite;
         [SerializeField] Sprite fireballSprite;
         [SerializeField] Sprite iceballSprite;
+        [SerializeField] Sprite lightningOrbSprite;
 
         [Header("Balance")]
         [Min(0.1f)] [SerializeField] float attackDamage = 12f;
@@ -38,6 +32,7 @@ namespace CrossDefense.Units
         [SerializeField] Transform firePosition;
         [Min(0f)] [SerializeField] float spawnOffset = 0.4f;
         [Min(0.01f)] [SerializeField] float projectileScale = 0.65f;
+        [Min(0.01f)] [SerializeField] float volleyShotDelay = 0.09f;
 
         [Header("Animation")]
         [SerializeField] Sprite[] idleFrames;
@@ -46,6 +41,8 @@ namespace CrossDefense.Units
         [Min(1f)] [SerializeField] float attackAnimationFps = 18f;
 
         readonly HashSet<MonsterController> _targets = new();
+        readonly List<MonsterController> _volleyTargets = new(4);
+        readonly List<MonsterController> _volleyCandidates = new(32);
         GameManager _gameManager;
         SpriteRenderer _renderer;
         WorldHealthBar _healthBar;
@@ -53,9 +50,9 @@ namespace CrossDefense.Units
         float _nextClickAttackTime;
         float _idleAnimationElapsed;
         float _attackAnimationElapsed;
+        int _attackSequence;
         bool _isAttackAnimating;
 
-        public SummonerProjectileType SelectedProjectile => selectedProjectile;
         public float AttackDamage => attackDamage;
         public float AttacksPerSecond => attacksPerSecond;
         public float AttackRange => attackRange;
@@ -63,8 +60,6 @@ namespace CrossDefense.Units
         public int IdleFrameCount => idleFrames?.Length ?? 0;
         public int AttackFrameCount => attackFrames?.Length ?? 0;
         public bool IsAttackAnimating => _isAttackAnimating;
-
-        public event Action<SummonerProjectileType> ProjectileTypeChanged;
 
         void Awake()
         {
@@ -86,6 +81,7 @@ namespace CrossDefense.Units
         {
             _idleAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
+            _attackSequence = 0;
             _isAttackAnimating = false;
             ApplyAnimationFrame(GetFrame(idleFrames, 0));
 
@@ -107,73 +103,75 @@ namespace CrossDefense.Units
 
         void Update()
         {
-            TickAnimation(Time.unscaledDeltaTime);
-
-            if (_gameManager == null || _gameManager.IsRunOver || _gameManager.Phase != RunPhase.InWave)
+            if (_gameManager == null || _gameManager.IsGameplayPaused)
                 return;
-            if (Time.unscaledTime < _nextAttackTime)
+
+            TickAnimation(Time.deltaTime);
+
+            if (_gameManager.IsRunOver || _gameManager.Phase != RunPhase.InWave)
+                return;
+            if (Time.time < _nextAttackTime)
                 return;
 
             var target = FindNearestTarget();
             if (target == null)
                 return;
 
-            FireAt(target);
-            _nextAttackTime = Time.unscaledTime + 1f /
+            FireAt(target, GetAttackProfile());
+            _nextAttackTime = Time.time + 1f /
                 Mathf.Max(0.1f, attacksPerSecond * _gameManager.SummonerAttackSpeedMultiplier);
-        }
-
-        public void SetProjectileType(SummonerProjectileType projectileType)
-        {
-            if (selectedProjectile == projectileType) return;
-            selectedProjectile = projectileType;
-            ProjectileTypeChanged?.Invoke(projectileType);
         }
 
         public bool TryClickAttack(Vector3 worldPoint, MonsterController preferredTarget = null)
         {
-            if (_gameManager == null || _gameManager.IsRunOver || _gameManager.Phase != RunPhase.InWave ||
-                _gameManager.Projectiles == null || Time.unscaledTime < _nextClickAttackTime)
+            if (_gameManager == null || _gameManager.IsRunOver || _gameManager.IsGameplayPaused ||
+                _gameManager.Phase != RunPhase.InWave ||
+                _gameManager.Projectiles == null || Time.time < _nextClickAttackTime)
                 return false;
 
-            Sprite sprite = GetProjectileSprite(selectedProjectile);
+            SummonerRunAttackProfile profile = GetAttackProfile();
+            Sprite sprite = GetProjectileSprite(profile.Archetype);
             if (sprite == null) return false;
             Vector3 origin = firePosition != null ? firePosition.position : transform.position;
-            var packet = new DamagePacket(
-                this,
-                _gameManager.ModifySummonerDamage(clickAttackDamage),
-                GetAttackAttribute(selectedProjectile));
+            bool empowered = IsEmpoweredAttack(profile);
 
             bool preferredTargetInRange = preferredTarget != null &&
                 !preferredTarget.IsResolved &&
                 (preferredTarget.transform.position - origin).sqrMagnitude <= attackRange * attackRange;
             if (preferredTargetInRange)
             {
-                _gameManager.Projectiles.Fire(
+                FireVolley(
                     origin,
                     preferredTarget,
                     sprite,
-                    packet,
-                    projectileSpeed,
-                    projectileScale);
+                    profile,
+                    clickAttackDamage,
+                    empowered);
             }
             else
             {
                 Vector3 direction = worldPoint - origin;
                 if (direction.sqrMagnitude <= 0.01f) return false;
-                Vector3 destination = origin + direction.normalized * attackRange;
-                _gameManager.Projectiles.FireToPoint(
+                float radius = profile.Archetype switch
+                {
+                    SummonerAttackArchetype.Fireball => Mathf.Max(clickHitRadius, profile.AreaRadius),
+                    SummonerAttackArchetype.ThunderSlash => Mathf.Max(clickHitRadius, 0.9f),
+                    _ => clickHitRadius,
+                };
+                if (empowered)
+                    radius = Mathf.Max(radius, profile.EmpoweredAreaRadius);
+
+                StartCoroutine(FirePointVolleyRoutine(
                     origin,
-                    destination,
+                    direction.normalized,
                     sprite,
-                    packet,
-                    projectileSpeed,
-                    projectileScale,
-                    clickHitRadius);
+                    profile,
+                    clickAttackDamage,
+                    empowered,
+                    radius));
             }
 
-            PlayAttackAnimation();
-            _nextClickAttackTime = Time.unscaledTime + 1f /
+            _nextClickAttackTime = Time.time + 1f /
                 Mathf.Max(0.1f, clickAttacksPerSecond * _gameManager.SummonerAttackSpeedMultiplier);
             return true;
         }
@@ -218,12 +216,12 @@ namespace CrossDefense.Units
             return monster == null || !monster.gameObject.activeInHierarchy || monster.CurrentHp <= 0f;
         }
 
-        bool FireAt(MonsterController target)
+        bool FireAt(MonsterController target, SummonerRunAttackProfile profile)
         {
-            Sprite sprite = GetProjectileSprite(selectedProjectile);
+            Sprite sprite = GetProjectileSprite(profile.Archetype);
             if (sprite == null)
             {
-                Debug.LogWarning($"[CrossDefense] {selectedProjectile} 투사체 스프라이트가 비어 있습니다.", this);
+                Debug.LogWarning($"[CrossDefense] {profile.Archetype} 투사체 스프라이트가 비어 있습니다.", this);
                 return false;
             }
 
@@ -232,18 +230,199 @@ namespace CrossDefense.Units
             if (firePosition == null)
                 origin += direction * spawnOffset;
             if (_gameManager.Projectiles == null) return false;
-            _gameManager.Projectiles.Fire(
-                origin,
-                target,
-                sprite,
-                new DamagePacket(
-                    this,
-                    _gameManager.ModifySummonerDamage(attackDamage),
-                    GetAttackAttribute(selectedProjectile)),
-                projectileSpeed,
-                projectileScale);
-            PlayAttackAnimation();
+            FireVolley(origin, target, sprite, profile, attackDamage, IsEmpoweredAttack(profile));
             return true;
+        }
+
+        void FireVolley(
+            Vector3 origin,
+            MonsterController primaryTarget,
+            Sprite sprite,
+            SummonerRunAttackProfile profile,
+            float baseDamage,
+            bool empowered)
+        {
+            BuildVolleyTargets(primaryTarget, profile.ProjectileCount);
+            var volleyTargets = new List<MonsterController>(_volleyTargets);
+            float areaRadius = empowered
+                ? Mathf.Max(profile.AreaRadius, profile.EmpoweredAreaRadius)
+                : profile.AreaRadius;
+            StartCoroutine(FireTargetVolleyRoutine(
+                origin,
+                volleyTargets,
+                sprite,
+                profile,
+                baseDamage,
+                empowered,
+                areaRadius));
+        }
+
+        IEnumerator FireTargetVolleyRoutine(
+            Vector3 origin,
+            IReadOnlyList<MonsterController> volleyTargets,
+            Sprite sprite,
+            SummonerRunAttackProfile profile,
+            float baseDamage,
+            bool empowered,
+            float areaRadius)
+        {
+            for (int i = 0; i < volleyTargets.Count; i++)
+            {
+                if (!CanContinueVolley())
+                    yield break;
+                MonsterController target = volleyTargets[i];
+                if (IsInvalidTarget(target))
+                    target = FindNearestTarget();
+                if (target == null)
+                    yield break;
+
+                float damageScale = (i == 0 ? 1f : profile.AdditionalProjectileDamageMultiplier) *
+                                    (empowered ? profile.EmpoweredDamageMultiplier : 1f);
+                _gameManager.Projectiles.Fire(
+                    origin,
+                    target,
+                    sprite,
+                    BuildDamagePacket(baseDamage * damageScale, profile),
+                    projectileSpeed,
+                    ProjectileScale(profile),
+                    areaRadius,
+                    profile.PierceCount,
+                    profile.ChainDamageMultiplier);
+                PlayAttackAnimation();
+                if (i + 1 < volleyTargets.Count)
+                    yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
+            }
+        }
+
+        IEnumerator FirePointVolleyRoutine(
+            Vector3 origin,
+            Vector3 centerDirection,
+            Sprite sprite,
+            SummonerRunAttackProfile profile,
+            float baseDamage,
+            bool empowered,
+            float hitRadius)
+        {
+            for (int i = 0; i < profile.ProjectileCount; i++)
+            {
+                if (!CanContinueVolley())
+                    yield break;
+                float angle = i == 0
+                    ? 0f
+                    : (i % 2 == 0 ? -1f : 1f) * (4f + 3f * ((i - 1) / 2));
+                Vector3 destination = origin + Rotate(centerDirection, angle) * attackRange;
+                float damageScale = (i == 0 ? 1f : profile.AdditionalProjectileDamageMultiplier) *
+                                    (empowered ? profile.EmpoweredDamageMultiplier : 1f);
+                _gameManager.Projectiles.FireToPoint(
+                    origin,
+                    destination,
+                    sprite,
+                    BuildDamagePacket(baseDamage * damageScale, profile),
+                    projectileSpeed,
+                    ProjectileScale(profile),
+                    hitRadius,
+                    profile.Archetype is SummonerAttackArchetype.Fireball or
+                        SummonerAttackArchetype.ThunderSlash);
+                PlayAttackAnimation();
+                if (i + 1 < profile.ProjectileCount)
+                    yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
+            }
+        }
+
+        bool CanContinueVolley() =>
+            _gameManager != null &&
+            !_gameManager.IsRunOver &&
+            _gameManager.Phase == RunPhase.InWave &&
+            _gameManager.Projectiles != null;
+
+        DamagePacket BuildDamagePacket(float baseDamage, SummonerRunAttackProfile profile)
+        {
+            return new DamagePacket(
+                this,
+                _gameManager.ModifySummonerDamage(baseDamage),
+                profile.Attribute,
+                profile.SlowPercent,
+                profile.SlowDuration,
+                profile.DamageOverTime,
+                profile.DamageOverTimeDuration);
+        }
+
+        void BuildVolleyTargets(MonsterController primary, int count)
+        {
+            _volleyTargets.Clear();
+            if (primary == null || count <= 0)
+                return;
+            _volleyTargets.Add(primary);
+            if (count == 1)
+                return;
+
+            _volleyCandidates.Clear();
+            foreach (MonsterController candidate in _targets)
+            {
+                if (IsInvalidTarget(candidate) || candidate == primary)
+                    continue;
+                if ((candidate.transform.position - transform.position).sqrMagnitude > attackRange * attackRange)
+                    continue;
+                _volleyCandidates.Add(candidate);
+            }
+            _volleyCandidates.Sort((a, b) =>
+                Vector3.SqrMagnitude(a.transform.position - primary.transform.position)
+                    .CompareTo(Vector3.SqrMagnitude(b.transform.position - primary.transform.position)));
+            for (int i = 0; i < _volleyCandidates.Count && _volleyTargets.Count < count; i++)
+                _volleyTargets.Add(_volleyCandidates[i]);
+            while (_volleyTargets.Count < count)
+                _volleyTargets.Add(primary);
+        }
+
+        bool IsEmpoweredAttack(SummonerRunAttackProfile profile)
+        {
+            _attackSequence++;
+            return profile.EmpoweredShotInterval > 0 &&
+                   _attackSequence % profile.EmpoweredShotInterval == 0;
+        }
+
+        SummonerRunAttackProfile GetAttackProfile()
+        {
+            if (_gameManager?.RunTraits != null)
+                return _gameManager.RunTraits.BuildAttackProfile();
+            return new SummonerRunAttackProfile(
+                SummonerAttackArchetype.EnergyBolt,
+                MonsterAttribute.None,
+                1,
+                0.65f,
+                0f,
+                1,
+                1f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0,
+                0f,
+                1f);
+        }
+
+        float ProjectileScale(SummonerRunAttackProfile profile)
+        {
+            float multiplier = profile.Archetype switch
+            {
+                SummonerAttackArchetype.Fireball => 1.2f,
+                SummonerAttackArchetype.IceLance => 0.95f,
+                SummonerAttackArchetype.ThunderSlash => 1.08f,
+                _ => 1f,
+            };
+            return Mathf.Max(0.01f, projectileScale * multiplier);
+        }
+
+        static Vector3 Rotate(Vector3 direction, float degrees)
+        {
+            float radians = degrees * Mathf.Deg2Rad;
+            float sin = Mathf.Sin(radians);
+            float cos = Mathf.Cos(radians);
+            return new Vector3(
+                direction.x * cos - direction.y * sin,
+                direction.x * sin + direction.y * cos,
+                0f);
         }
 
         void PlayAttackAnimation()
@@ -307,25 +486,18 @@ namespace CrossDefense.Units
             return null;
         }
 
-        Sprite GetProjectileSprite(SummonerProjectileType projectileType)
+        Sprite GetProjectileSprite(SummonerAttackArchetype archetype)
         {
-            return projectileType switch
+            return archetype switch
             {
-                SummonerProjectileType.Fireball => fireballSprite,
-                SummonerProjectileType.Iceball => iceballSprite,
+                SummonerAttackArchetype.Fireball => fireballSprite != null ? fireballSprite : energyBoltSprite,
+                SummonerAttackArchetype.IceLance => iceballSprite != null ? iceballSprite : energyBoltSprite,
+                SummonerAttackArchetype.ThunderSlash =>
+                    lightningOrbSprite != null ? lightningOrbSprite : energyBoltSprite,
                 _ => energyBoltSprite,
             };
         }
 
-        static MonsterAttribute GetAttackAttribute(SummonerProjectileType projectileType)
-        {
-            return projectileType switch
-            {
-                SummonerProjectileType.Fireball => MonsterAttribute.Fire,
-                SummonerProjectileType.Iceball => MonsterAttribute.Ice,
-                _ => MonsterAttribute.None,
-            };
-        }
     }
 
 }

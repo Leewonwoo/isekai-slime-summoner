@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using CrossDefense.Units;
 using NUnit.Framework;
@@ -102,5 +103,37 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(Vector2.Distance(Vector2.zero, bodies[1].Position),
                 Is.LessThanOrEqualTo(0.0201f));
         }
+
+        [Test]
+        public void StationaryOverlappingBodies_AreNotPushedApart()
+        {
+            var bodies = new List<CombatPbdBody>
+            {
+                new(Vector2.zero, 0.5f, 1f, CombatPbdTeam.SummonedUnit),
+                new(new Vector2(0.5f, 0f), 0.5f, 1f, CombatPbdTeam.SummonedUnit),
+            };
+
+            CombatPbdSolver.Solve(bodies, 1, 1f, 1f, 1f, 1f, 0f, 1f, true);
+
+            Assert.That(bodies[0].Position, Is.EqualTo(Vector2.zero));
+            Assert.That(bodies[1].Position, Is.EqualTo(new Vector2(0.5f, 0f)));
+        }
+
+        [Test]
+        public void MovingBodyYields_WithoutPushingStationaryBody()
+        {
+            var bodies = new List<CombatPbdBody>
+            {
+                new(Vector2.zero, 0.5f, 1f, CombatPbdTeam.SummonedUnit),
+                new(new Vector2(0.5f, 0f), 0.5f, 1f, CombatPbdTeam.SummonedUnit,
+                    previousPosition: new Vector2(1.2f, 0f)),
+            };
+
+            CombatPbdSolver.Solve(bodies, 1, 1f, 1f, 1f, 1f, 0f, 1f, true);
+
+            Assert.That(bodies[0].Position, Is.EqualTo(Vector2.zero));
+            Assert.That(bodies[1].Position.x, Is.GreaterThanOrEqualTo(0.999f));
+        }
     }
 }
+#endif

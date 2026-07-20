@@ -33,5 +33,15 @@ namespace CrossDefense.Core
 
         public float ResolveDamage(MonsterAttribute defense) =>
             BaseDamage * ElementalMatchup.GetDamageMultiplier(Attribute, defense);
+
+        public DamagePacket Scaled(float multiplier) =>
+            new(
+                Source,
+                BaseDamage * Mathf.Max(0f, multiplier),
+                Attribute,
+                SlowPercent,
+                SlowDuration,
+                DamageOverTime * Mathf.Max(0f, multiplier),
+                DamageOverTimeDuration);
     }
 }

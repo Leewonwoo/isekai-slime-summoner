@@ -45,7 +45,9 @@ namespace CrossDefense.Core
             float speed,
             float scale,
             float areaRadius = 0f,
-            int pierceCount = 1)
+            int pierceCount = 1,
+            float chainedDamageMultiplier = 1f,
+            bool linePierce = false)
         {
             if (target == null || target.IsResolved) return;
             var spawned = RuntimePoolService.Spawn(_template, origin, Quaternion.identity, _root);
@@ -58,7 +60,9 @@ namespace CrossDefense.Core
                 speed,
                 scale,
                 areaRadius,
-                pierceCount);
+                pierceCount,
+                chainedDamageMultiplier,
+                linePierce);
         }
 
         public void FireToPoint(
@@ -68,7 +72,8 @@ namespace CrossDefense.Core
             DamagePacket packet,
             float speed,
             float scale,
-            float hitRadius = 0.55f)
+            float hitRadius = 0.55f,
+            bool hitAllInRadius = false)
         {
             var spawned = RuntimePoolService.Spawn(_template, origin, Quaternion.identity, _root);
             if (spawned == null) return;
@@ -79,7 +84,8 @@ namespace CrossDefense.Core
                 packet,
                 speed,
                 scale,
-                hitRadius);
+                hitRadius,
+                hitAllInRadius);
         }
 
         internal void ResolveImpact(
@@ -87,7 +93,10 @@ namespace CrossDefense.Core
             MonsterController primary,
             DamagePacket packet,
             float areaRadius,
-            int pierceCount)
+            int pierceCount,
+            float chainedDamageMultiplier,
+            bool linePierce,
+            Vector3 launchOrigin)
         {
             if (primary == null)
             {
@@ -109,9 +118,20 @@ namespace CrossDefense.Core
             }
             else
             {
-                primary.ApplyDamage(packet);
-                if (pierceCount > 1 && monsters != null)
-                    ResolvePierce(primary, packet, pierceCount - 1, monsters);
+                if (linePierce && pierceCount > 1 && monsters != null)
+                    ResolveLinePierce(
+                        launchOrigin,
+                        primary,
+                        packet,
+                        pierceCount,
+                        monsters,
+                        chainedDamageMultiplier);
+                else
+                {
+                    primary.ApplyDamage(packet);
+                }
+                if (!linePierce && pierceCount > 1 && monsters != null)
+                    ResolvePierce(primary, packet, pierceCount - 1, monsters, chainedDamageMultiplier);
             }
 
             Release(projectile);
@@ -128,22 +148,31 @@ namespace CrossDefense.Core
             CombatProjectileController projectile,
             Vector3 point,
             DamagePacket packet,
-            float radius)
+            float radius,
+            bool hitAllInRadius)
         {
             var monsters = _monsterProvider?.Invoke();
             if (monsters != null)
             {
+                float radiusSq = Mathf.Max(0.1f, radius) * Mathf.Max(0.1f, radius);
                 MonsterController nearest = null;
-                float nearestSq = Mathf.Max(0.1f, radius) * Mathf.Max(0.1f, radius);
+                float nearestSq = radiusSq;
                 foreach (var monster in monsters)
                 {
                     if (!IsValid(monster)) continue;
                     float distanceSq = (monster.transform.position - point).sqrMagnitude;
+                    if (distanceSq > radiusSq) continue;
+                    if (hitAllInRadius)
+                    {
+                        monster.ApplyDamage(packet);
+                        continue;
+                    }
                     if (distanceSq > nearestSq) continue;
                     nearestSq = distanceSq;
                     nearest = monster;
                 }
-                nearest?.ApplyDamage(packet);
+                if (!hitAllInRadius)
+                    nearest?.ApplyDamage(packet);
             }
             Release(projectile);
         }
@@ -152,7 +181,8 @@ namespace CrossDefense.Core
             MonsterController primary,
             DamagePacket packet,
             int remaining,
-            IReadOnlyCollection<MonsterController> monsters)
+            IReadOnlyCollection<MonsterController> monsters,
+            float chainedDamageMultiplier)
         {
             var candidates = new List<MonsterController>();
             foreach (var monster in monsters)
@@ -166,8 +196,51 @@ namespace CrossDefense.Core
                 Vector3.SqrMagnitude(a.transform.position - primary.transform.position)
                     .CompareTo(Vector3.SqrMagnitude(b.transform.position - primary.transform.position)));
 
+            float retainedDamage = Mathf.Clamp(chainedDamageMultiplier, 0.05f, 1f);
             for (int i = 0; i < Mathf.Min(remaining, candidates.Count); i++)
-                candidates[i].ApplyDamage(packet);
+                candidates[i].ApplyDamage(packet.Scaled(Mathf.Pow(retainedDamage, i + 1)));
+        }
+
+        static void ResolveLinePierce(
+            Vector3 origin,
+            MonsterController primary,
+            DamagePacket packet,
+            int hitCount,
+            IReadOnlyCollection<MonsterController> monsters,
+            float retainedDamageMultiplier)
+        {
+            Vector3 toPrimary = primary.transform.position - origin;
+            float primaryDistance = toPrimary.magnitude;
+            if (primaryDistance <= Mathf.Epsilon)
+            {
+                primary.ApplyDamage(packet);
+                return;
+            }
+
+            Vector3 direction = toPrimary / primaryDistance;
+            float corridorRadiusSq = 0.45f * 0.45f;
+            float maxProjection = primaryDistance + 0.6f;
+            var candidates = new List<(MonsterController monster, float projection)>();
+            foreach (var monster in monsters)
+            {
+                if (!IsValid(monster))
+                    continue;
+                Vector3 relative = monster.transform.position - origin;
+                float projection = Vector3.Dot(relative, direction);
+                if (projection < 0f || projection > maxProjection)
+                    continue;
+                float perpendicularSq = Mathf.Max(
+                    0f,
+                    relative.sqrMagnitude - projection * projection);
+                if (perpendicularSq > corridorRadiusSq)
+                    continue;
+                candidates.Add((monster, projection));
+            }
+
+            candidates.Sort((first, second) => first.projection.CompareTo(second.projection));
+            float retained = Mathf.Clamp(retainedDamageMultiplier, 0.05f, 1f);
+            for (int i = 0; i < Mathf.Min(hitCount, candidates.Count); i++)
+                candidates[i].monster.ApplyDamage(packet.Scaled(Mathf.Pow(retained, i)));
         }
 
         static bool IsValid(MonsterController monster) =>
@@ -190,6 +263,10 @@ namespace CrossDefense.Core
         float _remainingLifetime;
         float _areaRadius;
         int _pierceCount;
+        float _chainedDamageMultiplier;
+        bool _hitAllInRadius;
+        bool _linePierce;
+        Vector3 _launchOrigin;
         bool _inFlight;
 
         void Awake() => _renderer = GetComponent<SpriteRenderer>();
@@ -202,7 +279,9 @@ namespace CrossDefense.Core
             float speed,
             float scale,
             float areaRadius,
-            int pierceCount)
+            int pierceCount,
+            float chainedDamageMultiplier,
+            bool linePierce)
         {
             _service = service;
             _target = target;
@@ -212,6 +291,10 @@ namespace CrossDefense.Core
             _remainingLifetime = MaxLifetime;
             _areaRadius = Mathf.Max(0f, areaRadius);
             _pierceCount = Mathf.Max(1, pierceCount);
+            _chainedDamageMultiplier = Mathf.Clamp(chainedDamageMultiplier, 0.05f, 1f);
+            _hitAllInRadius = false;
+            _linePierce = linePierce;
+            _launchOrigin = transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
             _renderer.sprite = sprite;
@@ -232,7 +315,8 @@ namespace CrossDefense.Core
             DamagePacket packet,
             float speed,
             float scale,
-            float hitRadius)
+            float hitRadius,
+            bool hitAllInRadius)
         {
             _service = service;
             _target = null;
@@ -243,22 +327,28 @@ namespace CrossDefense.Core
             _remainingLifetime = MaxLifetime;
             _areaRadius = Mathf.Max(0.1f, hitRadius);
             _pierceCount = 1;
+            _chainedDamageMultiplier = 1f;
+            _hitAllInRadius = hitAllInRadius;
+            _linePierce = false;
+            _launchOrigin = transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
             _renderer.sprite = sprite;
-            _renderer.color = Color.white;
+            _renderer.color = AttributeColor(packet.Attribute);
             FaceDirection(_pointTarget - transform.position);
         }
 
         void Update()
         {
             if (!_inFlight) return;
+            if (Time.timeScale <= 0f)
+                return;
             if (_service == null || !_service.CanResolve)
             {
                 _service?.Release(this);
                 return;
             }
-            _remainingLifetime -= Time.unscaledDeltaTime;
+            _remainingLifetime -= Time.deltaTime;
             if (_remainingLifetime <= 0f || (!_usesPointTarget && !IsValidTarget()))
             {
                 _service?.Release(this);
@@ -267,14 +357,22 @@ namespace CrossDefense.Core
 
             Vector3 destination = _usesPointTarget ? _pointTarget : _target.transform.position;
             Vector3 offset = destination - transform.position;
-            float travel = _speed * Time.unscaledDeltaTime;
+            float travel = _speed * Time.deltaTime;
             if (offset.sqrMagnitude <= Mathf.Max(HitDistance * HitDistance, travel * travel))
             {
                 _inFlight = false;
                 if (_usesPointTarget)
-                    _service.ResolvePointImpact(this, _pointTarget, _packet, _areaRadius);
+                    _service.ResolvePointImpact(this, _pointTarget, _packet, _areaRadius, _hitAllInRadius);
                 else
-                    _service.ResolveImpact(this, _target, _packet, _areaRadius, _pierceCount);
+                    _service.ResolveImpact(
+                        this,
+                        _target,
+                        _packet,
+                        _areaRadius,
+                        _pierceCount,
+                        _chainedDamageMultiplier,
+                        _linePierce,
+                        _launchOrigin);
                 return;
             }
 
@@ -292,6 +390,10 @@ namespace CrossDefense.Core
             _remainingLifetime = 0f;
             _areaRadius = 0f;
             _pierceCount = 1;
+            _chainedDamageMultiplier = 1f;
+            _hitAllInRadius = false;
+            _linePierce = false;
+            _launchOrigin = Vector3.zero;
             if (_renderer != null)
                 _renderer.sprite = null;
         }
@@ -309,6 +411,17 @@ namespace CrossDefense.Core
         {
             if (direction.sqrMagnitude <= Mathf.Epsilon) return;
             transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+        }
+
+        static Color AttributeColor(CrossDefense.Data.MonsterAttribute attribute)
+        {
+            return attribute switch
+            {
+                CrossDefense.Data.MonsterAttribute.Fire => new Color(1f, 0.45f, 0.2f),
+                CrossDefense.Data.MonsterAttribute.Ice => new Color(0.4f, 0.8f, 1f),
+                CrossDefense.Data.MonsterAttribute.Nature => new Color(0.45f, 1f, 0.5f),
+                _ => Color.white,
+            };
         }
     }
 }

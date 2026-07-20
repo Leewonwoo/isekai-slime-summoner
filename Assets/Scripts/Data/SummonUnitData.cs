@@ -26,6 +26,29 @@ namespace CrossDefense.Data
         Farthest,
     }
 
+    public enum Star3SkillMode
+    {
+        None,
+        SelfArea,
+        TargetArea,
+        PiercingProjectile,
+        AuraOverdrive,
+    }
+
+    /// <summary>
+    /// 저장되는 내부 등급은 0부터 시작하지만 플레이어에게는 ★1부터 표시한다.
+    /// </summary>
+    public static class SummonRank
+    {
+        public const int MinInternalRank = 0;
+        public const int MaxInternalRank = 2;
+        public const int MergeMaterialCount = 2;
+
+        public static int Clamp(int rank) => Mathf.Clamp(rank, MinInternalRank, MaxInternalRank);
+        public static int ToStarCount(int rank) => Clamp(rank) + 1;
+        public static string FormatStars(int rank) => $"★{ToStarCount(rank)}";
+    }
+
     /// <summary>소환 확률과 필드 전투를 함께 정의하는 아군 슬라임 데이터.</summary>
     [CreateAssetMenu(fileName = "SummonUnitData", menuName = "Cross Defense/Data/Summon Unit", order = 20)]
     public sealed class SummonUnitData : ScriptableObject
@@ -67,11 +90,30 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float supportRadius = 2.5f;
 
         [Header("Rank")]
-        [SerializeField] float[] rankHpMultipliers = { 1f, 1.5f, 2.25f, 3.5f };
-        [SerializeField] float[] rankDamageMultipliers = { 1f, 1.8f, 3.25f, 5.5f };
-        [SerializeField] float[] rankAttackSpeedMultipliers = { 1f, 1.08f, 1.16f, 1.25f };
-        [SerializeField] float[] rankScaleMultipliers = { 1f, 1.08f, 1.16f, 1.25f };
-        [SerializeField] string[] rankNames = { "기본", "★1", "★2", "★3" };
+        [SerializeField] Sprite[] rankWorldSprites;
+        [SerializeField] float[] rankHpMultipliers = { 1f, 1.5f, 2.25f };
+        [SerializeField] float[] rankDamageMultipliers = { 1f, 1.8f, 3.25f };
+        [SerializeField] float[] rankAttackSpeedMultipliers = { 1f, 1.08f, 1.16f };
+        [SerializeField] float[] rankScaleMultipliers = { 1f, 1.2f, 1.4f };
+        [SerializeField] Sprite[] rankProjectileSprites;
+        [SerializeField] float[] rankProjectileScaleMultipliers = { 1f, 1.15f, 1.3f };
+        [SerializeField] string[] rankNames = { "★1", "★2", "★3" };
+
+        [Header("Star 3 Skill")]
+        [SerializeField] string star3SkillName;
+        [SerializeField] Star3SkillMode star3SkillMode;
+        [Min(0.1f)] [SerializeField] float star3SkillCooldown = 10f;
+        [Min(0f)] [SerializeField] float star3SkillDamageMultiplier = 1f;
+        [Min(0f)] [SerializeField] float star3SkillRadius = 1f;
+        [Min(0f)] [SerializeField] float star3SkillDuration;
+        [Min(0f)] [SerializeField] float star3SkillStrength = 1f;
+        [Min(1)] [SerializeField] int star3SkillPierceCount = 1;
+        [Range(0f, 0.95f)] [SerializeField] float star3SkillSlowPercent;
+        [Min(0f)] [SerializeField] float star3SkillSlowDuration;
+        [Min(0f)] [SerializeField] float star3SkillDotMultiplier;
+        [Min(0f)] [SerializeField] float star3SkillDotDuration;
+        [Min(0.1f)] [SerializeField] float star3SkillVisualScale = 1f;
+        [SerializeField] Sprite star3SkillEffectSprite;
 
         public string UnitId => unitId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -101,16 +143,61 @@ namespace CrossDefense.Data
         public int PierceCount => pierceCount;
         public float SupportAttackSpeedBonus => supportAttackSpeedBonus;
         public float SupportRadius => supportRadius;
+        public string Star3SkillName => star3SkillName;
+        public Star3SkillMode Star3SkillModeValue => star3SkillMode;
+        public float Star3SkillCooldown => star3SkillCooldown;
+        public float Star3SkillDamageMultiplier => star3SkillDamageMultiplier;
+        public float Star3SkillRadius => star3SkillRadius;
+        public float Star3SkillDuration => star3SkillDuration;
+        public float Star3SkillStrength => star3SkillStrength;
+        public int Star3SkillPierceCount => star3SkillPierceCount;
+        public float Star3SkillSlowPercent => star3SkillSlowPercent;
+        public float Star3SkillSlowDuration => star3SkillSlowDuration;
+        public float Star3SkillDotMultiplier => star3SkillDotMultiplier;
+        public float Star3SkillDotDuration => star3SkillDotDuration;
+        public float Star3SkillVisualScale => star3SkillVisualScale;
+        public Sprite Star3SkillEffectSprite => star3SkillEffectSprite;
+        public bool HasStar3Skill => star3SkillMode != Star3SkillMode.None;
+
+        public Sprite WorldSpriteAtRank(int rank)
+        {
+            int clamped = SummonRank.Clamp(rank);
+            if (rankWorldSprites != null &&
+                clamped < rankWorldSprites.Length &&
+                rankWorldSprites[clamped] != null)
+            {
+                return rankWorldSprites[clamped];
+            }
+
+            return WorldSprite;
+        }
+
+        public Sprite ProjectileSpriteAtRank(int rank)
+        {
+            int clamped = SummonRank.Clamp(rank);
+            if (rankProjectileSprites != null &&
+                clamped < rankProjectileSprites.Length &&
+                rankProjectileSprites[clamped] != null)
+            {
+                return rankProjectileSprites[clamped];
+            }
+
+            return projectileSprite;
+        }
 
         public float MaxHpAtRank(int rank) => baseMaxHp * RankValue(rankHpMultipliers, rank, 1f);
         public float DamageAtRank(int rank) => baseDamage * RankValue(rankDamageMultipliers, rank, 1f);
         public float AttacksPerSecondAtRank(int rank) => attacksPerSecond * RankValue(rankAttackSpeedMultipliers, rank, 1f);
         public float ScaleAtRank(int rank) => RankValue(rankScaleMultipliers, rank, 1f);
+        public float ProjectileScaleAtRank(int rank) =>
+            RankValue(rankProjectileScaleMultipliers, rank, 1f);
         public string NameAtRank(int rank)
         {
-            int clamped = Mathf.Clamp(rank, 0, 3);
-            string suffix = rankNames != null && clamped < rankNames.Length ? rankNames[clamped] : $"★{clamped}";
-            return clamped == 0 ? DisplayName : $"{DisplayName} {suffix}";
+            int clamped = SummonRank.Clamp(rank);
+            string suffix = rankNames != null && clamped < rankNames.Length
+                ? rankNames[clamped]
+                : SummonRank.FormatStars(clamped);
+            return $"{DisplayName} {suffix}";
         }
 
         public static SummonUnitData CreatePrototype(
@@ -176,10 +263,65 @@ namespace CrossDefense.Data
             moveAnimationFps = Mathf.Max(1f, framesPerSecond);
         }
 
+        public void ConfigurePrototypeRankSprites(Sprite star2Sprite, Sprite star3Sprite)
+        {
+            rankWorldSprites = new[]
+            {
+                WorldSprite,
+                star2Sprite,
+                star3Sprite,
+            };
+        }
+
+        public void ConfigurePrototypeRankProjectiles(Sprite[] projectiles)
+        {
+            rankProjectileSprites = new Sprite[SummonRank.MaxInternalRank + 1];
+            for (int rank = SummonRank.MinInternalRank; rank <= SummonRank.MaxInternalRank; rank++)
+            {
+                rankProjectileSprites[rank] =
+                    projectiles != null && rank < projectiles.Length && projectiles[rank] != null
+                        ? projectiles[rank]
+                        : projectileSprite;
+            }
+        }
+
+        public void ConfigurePrototypeStar3Skill(
+            string skillName,
+            Star3SkillMode mode,
+            float cooldown,
+            float damageMultiplier,
+            float radius,
+            float duration,
+            float strength,
+            int pierce,
+            Sprite effectSprite,
+            float visualScale = 1f,
+            float skillSlowPercent = 0f,
+            float skillSlowDuration = 0f,
+            float skillDotMultiplier = 0f,
+            float skillDotDuration = 0f)
+        {
+            star3SkillName = skillName ?? string.Empty;
+            star3SkillMode = mode;
+            star3SkillCooldown = Mathf.Max(0.1f, cooldown);
+            star3SkillDamageMultiplier = Mathf.Max(0f, damageMultiplier);
+            star3SkillRadius = Mathf.Max(0f, radius);
+            star3SkillDuration = Mathf.Max(0f, duration);
+            star3SkillStrength = Mathf.Max(0f, strength);
+            star3SkillPierceCount = Mathf.Max(1, pierce);
+            star3SkillEffectSprite = effectSprite;
+            star3SkillVisualScale = Mathf.Max(0.1f, visualScale);
+            star3SkillSlowPercent = Mathf.Clamp(skillSlowPercent, 0f, 0.95f);
+            star3SkillSlowDuration = Mathf.Max(0f, skillSlowDuration);
+            star3SkillDotMultiplier = Mathf.Max(0f, skillDotMultiplier);
+            star3SkillDotDuration = Mathf.Max(0f, skillDotDuration);
+        }
+
         static float RankValue(float[] values, int rank, float fallback)
         {
             if (values == null || values.Length == 0) return fallback;
-            return values[Mathf.Clamp(rank, 0, Mathf.Min(3, values.Length - 1))];
+            return values[Mathf.Clamp(rank, SummonRank.MinInternalRank,
+                Mathf.Min(SummonRank.MaxInternalRank, values.Length - 1))];
         }
     }
 }
