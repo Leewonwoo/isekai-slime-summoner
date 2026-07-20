@@ -36,6 +36,7 @@ namespace CrossDefense.Core
         public float SlimeDamageMultiplier { get; }
         public float SlimeAttackSpeedMultiplier { get; }
         public float JackpotChanceBonus { get; }
+        public int SummonCapacityBonus { get; }
 
         public PermanentTraitSnapshot(
             int totalChoiceCount,
@@ -45,7 +46,8 @@ namespace CrossDefense.Core
             float coreMaxHpMultiplier,
             float slimeDamageMultiplier,
             float slimeAttackSpeedMultiplier,
-            float jackpotChanceBonus)
+            float jackpotChanceBonus,
+            int summonCapacityBonus)
         {
             TotalChoiceCount = totalChoiceCount;
             PendingChoiceCount = pendingChoiceCount;
@@ -55,6 +57,7 @@ namespace CrossDefense.Core
             SlimeDamageMultiplier = slimeDamageMultiplier;
             SlimeAttackSpeedMultiplier = slimeAttackSpeedMultiplier;
             JackpotChanceBonus = jackpotChanceBonus;
+            SummonCapacityBonus = Mathf.Max(0, summonCapacityBonus);
         }
     }
 
@@ -87,6 +90,7 @@ namespace CrossDefense.Core
             PermanentTraitType.SlimePower,
             PermanentTraitType.SlimeHaste,
             PermanentTraitType.LuckySummon,
+            PermanentTraitType.SummonCapacity,
         };
 
         readonly GrowthBalanceData _balance;
@@ -150,17 +154,28 @@ namespace CrossDefense.Core
             if (PendingChoiceCount <= 0)
                 return Array.Empty<PermanentTraitChoice>();
 
-            var shuffled = (PermanentTraitType[])AllTypes.Clone();
+            var available = new List<PermanentTraitType>(AllTypes.Length);
+            for (int i = 0; i < AllTypes.Length; i++)
+            {
+                PermanentTraitType type = AllTypes[i];
+                if (type == PermanentTraitType.SummonCapacity &&
+                    GetLevel(type) >= _balance.PermanentSummonCapacityMaxLevel)
+                    continue;
+                available.Add(type);
+            }
+            if (available.Count < 3)
+                return Array.Empty<PermanentTraitChoice>();
+
             var random = new System.Random(unchecked(0x5F3759DF + TotalChoiceCount * 7919));
-            for (int i = shuffled.Length - 1; i > 0; i--)
+            for (int i = available.Count - 1; i > 0; i--)
             {
                 int swapIndex = random.Next(i + 1);
-                (shuffled[i], shuffled[swapIndex]) = (shuffled[swapIndex], shuffled[i]);
+                (available[i], available[swapIndex]) = (available[swapIndex], available[i]);
             }
 
             var choices = new PermanentTraitChoice[3];
             for (int i = 0; i < choices.Length; i++)
-                choices[i] = BuildChoice(shuffled[i]);
+                choices[i] = BuildChoice(available[i]);
             return choices;
         }
 
@@ -196,6 +211,7 @@ namespace CrossDefense.Core
                 PermanentTraitType.SlimePower => "용병단 화력",
                 PermanentTraitType.SlimeHaste => "용병단 기민함",
                 PermanentTraitType.LuckySummon => "계약의 행운",
+                PermanentTraitType.SummonCapacity => "지휘 확장",
                 _ => "알 수 없는 특성",
             };
         }
@@ -203,9 +219,11 @@ namespace CrossDefense.Core
         public string GetCurrentEffect(PermanentTraitType type)
         {
             int level = GetLevel(type);
+            if (type == PermanentTraitType.SummonCapacity)
+                return $"슬라임 슬롯 +{_balance.PermanentSummonCapacityBonus(level):N0}";
             float total = _balance.PermanentTraitValuePerLevel(type) * Mathf.Max(0, level) * 100f;
             return type == PermanentTraitType.LuckySummon
-                ? $"★1 직행 +{total:0.#}%p"
+                ? $"★2 직행 +{total:0.#}%p"
                 : $"{EffectTarget(type)} +{total:0.#}%";
         }
 
@@ -234,6 +252,16 @@ namespace CrossDefense.Core
         PermanentTraitChoice BuildChoice(PermanentTraitType type)
         {
             int currentLevel = GetLevel(type);
+            if (type == PermanentTraitType.SummonCapacity)
+            {
+                int slotIncrease = _balance.PermanentSummonCapacityBonus(currentLevel + 1) -
+                                   _balance.PermanentSummonCapacityBonus(currentLevel);
+                return new PermanentTraitChoice(
+                    type,
+                    GetDisplayName(type),
+                    $"슬라임 슬롯 +{slotIncrease:N0} · 선택 시 Lv.{currentLevel + 1:N0}",
+                    currentLevel);
+            }
             float increase = _balance.PermanentTraitValuePerLevel(type) * 100f;
             string increaseText = type == PermanentTraitType.LuckySummon
                 ? $"+{increase:0.#}%p"
@@ -254,7 +282,8 @@ namespace CrossDefense.Core
                 PermanentTraitType.CoreVitality => "소환사 최대 HP",
                 PermanentTraitType.SlimePower => "모든 슬라임 공격력",
                 PermanentTraitType.SlimeHaste => "모든 슬라임 공격속도",
-                PermanentTraitType.LuckySummon => "★1 직행 확률",
+                PermanentTraitType.LuckySummon => "★2 직행 확률",
+                PermanentTraitType.SummonCapacity => "슬라임 슬롯",
                 _ => "효과",
             };
         }
@@ -315,7 +344,9 @@ namespace CrossDefense.Core
                     GetLevel(PermanentTraitType.SlimeHaste)),
                 _balance.PermanentTraitChanceBonus(
                     PermanentTraitType.LuckySummon,
-                    GetLevel(PermanentTraitType.LuckySummon)));
+                    GetLevel(PermanentTraitType.LuckySummon)),
+                _balance.PermanentSummonCapacityBonus(
+                    GetLevel(PermanentTraitType.SummonCapacity)));
         }
     }
 }

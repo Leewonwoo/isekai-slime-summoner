@@ -9,6 +9,7 @@ namespace CrossDefense.Data
         AttackSpeed,
         CoreRecovery,
         CriticalChance,
+        SummonCapacity,
     }
 
     public enum PermanentTraitType
@@ -19,16 +20,7 @@ namespace CrossDefense.Data
         SlimePower,
         SlimeHaste,
         LuckySummon,
-    }
-
-    public enum RunTraitType
-    {
-        AllDamage,
-        AllAttackSpeed,
-        SummonerPower,
-        SlimePower,
-        CoreVitality,
-        CriticalFocus,
+        SummonCapacity,
     }
 
     /// <summary>
@@ -55,14 +47,8 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float traitSlimeDamagePerLevel = 0.06f;
         [Min(0f)] [SerializeField] float traitSlimeAttackSpeedPerLevel = 0.04f;
         [Range(0f, 0.1f)] [SerializeField] float traitJackpotChancePerLevel = 0.005f;
-
-        [Header("Wave Run Traits")]
-        [Min(0f)] [SerializeField] float runTraitAllDamagePerLevel = 0.1f;
-        [Min(0f)] [SerializeField] float runTraitAllAttackSpeedPerLevel = 0.08f;
-        [Min(0f)] [SerializeField] float runTraitSummonerDamagePerLevel = 0.2f;
-        [Min(0f)] [SerializeField] float runTraitSlimeDamagePerLevel = 0.15f;
-        [Min(0f)] [SerializeField] float runTraitCoreMaxHpPerLevel = 0.2f;
-        [Range(0f, 0.25f)] [SerializeField] float runTraitCriticalChancePerLevel = 0.05f;
+        [Min(1)] [SerializeField] int traitSummonCapacityPerLevel = 1;
+        [Min(1)] [SerializeField] int traitSummonCapacityMaxLevel = 4;
 
         [Header("Instant Slime Level")]
         [Min(2)] [SerializeField] int slimeMaxLevel = 30;
@@ -86,10 +72,21 @@ namespace CrossDefense.Data
         [Min(1f)] [SerializeField] float coreRecoveryBaseAmount = 15f;
         [Min(0f)] [SerializeField] float coreRecoveryPerLevel = 5f;
 
+        [Header("Summon Capacity")]
+        [Min(1)] [SerializeField] int baseSummonCapacity = 8;
+        [Min(1)] [SerializeField] int maxSummonCapacity = 12;
+        [Min(1)] [SerializeField] int runSummonCapacityMaxLevel = 4;
+        [Min(1)] [SerializeField] int runSummonCapacityBaseCost = 80;
+        [Min(1f)] [SerializeField] float runSummonCapacityCostGrowth = 1.75f;
+        [Min(1)] [SerializeField] int runSummonCapacityPerLevel = 1;
+
         public int SummonerMaxLevel => summonerMaxLevel;
         public int SlimeMaxLevel => slimeMaxLevel;
         public int RunUpgradeMaxLevel => runUpgradeMaxLevel;
         public float CriticalDamageMultiplier => criticalDamageMultiplier;
+        public int BaseSummonCapacity => Mathf.Max(1, baseSummonCapacity);
+        public int MaxSummonCapacity => Mathf.Max(BaseSummonCapacity, maxSummonCapacity);
+        public int PermanentSummonCapacityMaxLevel => Mathf.Max(1, traitSummonCapacityMaxLevel);
 
         public int ExperienceToNextSummonerLevel(int level)
         {
@@ -127,35 +124,20 @@ namespace CrossDefense.Data
                 PermanentTraitType.SlimePower => traitSlimeDamagePerLevel,
                 PermanentTraitType.SlimeHaste => traitSlimeAttackSpeedPerLevel,
                 PermanentTraitType.LuckySummon => traitJackpotChancePerLevel,
+                PermanentTraitType.SummonCapacity => traitSummonCapacityPerLevel,
                 _ => 0f,
             };
         }
+
+        public int PermanentSummonCapacityBonus(int level) =>
+            Mathf.Clamp(level, 0, PermanentSummonCapacityMaxLevel) *
+            Mathf.Max(1, traitSummonCapacityPerLevel);
 
         public float PermanentTraitMultiplier(PermanentTraitType type, int level) =>
             1f + Mathf.Max(0, level) * PermanentTraitValuePerLevel(type);
 
         public float PermanentTraitChanceBonus(PermanentTraitType type, int level) =>
             Mathf.Max(0, level) * PermanentTraitValuePerLevel(type);
-
-        public float RunTraitValuePerLevel(RunTraitType type)
-        {
-            return type switch
-            {
-                RunTraitType.AllDamage => runTraitAllDamagePerLevel,
-                RunTraitType.AllAttackSpeed => runTraitAllAttackSpeedPerLevel,
-                RunTraitType.SummonerPower => runTraitSummonerDamagePerLevel,
-                RunTraitType.SlimePower => runTraitSlimeDamagePerLevel,
-                RunTraitType.CoreVitality => runTraitCoreMaxHpPerLevel,
-                RunTraitType.CriticalFocus => runTraitCriticalChancePerLevel,
-                _ => 0f,
-            };
-        }
-
-        public float RunTraitMultiplier(RunTraitType type, int level) =>
-            1f + Mathf.Max(0, level) * RunTraitValuePerLevel(type);
-
-        public float RunTraitChanceBonus(RunTraitType type, int level) =>
-            Mathf.Max(0, level) * RunTraitValuePerLevel(type);
 
         public int SlimeLevelUpCost(int currentLevel) =>
             GrowthCost(slimeBaseLevelUpCost, slimeLevelUpCostGrowth, Mathf.Max(1, currentLevel) - 1);
@@ -167,7 +149,18 @@ namespace CrossDefense.Data
             1f + Mathf.Max(0, level - 1) * slimeAttackSpeedPerLevel;
 
         public int RunUpgradeCost(RunUpgradeType type, int currentLevel) =>
-            GrowthCost(RunUpgradeBaseCost(type), runUpgradeCostGrowth, Mathf.Max(0, currentLevel));
+            type == RunUpgradeType.SummonCapacity
+                ? GrowthCost(runSummonCapacityBaseCost, runSummonCapacityCostGrowth, Mathf.Max(0, currentLevel))
+                : GrowthCost(RunUpgradeBaseCost(type), runUpgradeCostGrowth, Mathf.Max(0, currentLevel));
+
+        public int RunUpgradeMaxLevelFor(RunUpgradeType type) =>
+            type == RunUpgradeType.SummonCapacity
+                ? Mathf.Max(1, runSummonCapacityMaxLevel)
+                : runUpgradeMaxLevel;
+
+        public int RunSummonCapacityBonus(int level) =>
+            Mathf.Clamp(level, 0, Mathf.Max(1, runSummonCapacityMaxLevel)) *
+            Mathf.Max(1, runSummonCapacityPerLevel);
 
         public float RunAttackPowerMultiplier(int level) =>
             1f + Mathf.Max(0, level) * attackPowerPerLevel;
@@ -196,6 +189,7 @@ namespace CrossDefense.Data
                 RunUpgradeType.AttackSpeed => attackSpeedBaseCost,
                 RunUpgradeType.CoreRecovery => coreRecoveryBaseCost,
                 RunUpgradeType.CriticalChance => criticalChanceBaseCost,
+                RunUpgradeType.SummonCapacity => runSummonCapacityBaseCost,
                 _ => attackPowerBaseCost,
             };
         }

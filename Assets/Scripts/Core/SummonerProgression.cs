@@ -18,7 +18,6 @@ namespace CrossDefense.Core
         public float NextJackpotChanceBonus { get; }
 
         public bool IsMaxLevel => Level >= MaxLevel;
-        public bool CanLevelUp => !IsMaxLevel && Experience >= ExperienceToNext;
         public float ExperienceProgress =>
             IsMaxLevel ? 1f : Mathf.Clamp01(ExperienceToNext > 0 ? Experience / (float)ExperienceToNext : 0f);
 
@@ -55,7 +54,7 @@ namespace CrossDefense.Core
         public int experience;
     }
 
-    /// <summary>런을 넘어 유지되는 소환사 레벨과 EXP를 관리한다.</summary>
+    /// <summary>런을 넘어 유지되는 소환사 EXP와 자동 레벨업을 관리한다.</summary>
     public sealed class SummonerProgression
     {
         public const string DefaultPlayerPrefsKey = "CrossDefense.SummonerProgression.v1";
@@ -100,21 +99,8 @@ namespace CrossDefense.Core
         {
             if (amount <= 0 || _level >= _balance.SummonerMaxLevel) return;
             _experience = Mathf.Max(0, _experience + amount);
-            PersistAndNotify(false);
-        }
-
-        public bool TryLevelUp()
-        {
-            int required = _balance.ExperienceToNextSummonerLevel(_level);
-            if (_level >= _balance.SummonerMaxLevel || required <= 0 || _experience < required)
-                return false;
-
-            _experience -= required;
-            _level++;
-            if (_level >= _balance.SummonerMaxLevel)
-                _experience = 0;
-            PersistAndNotify(true);
-            return true;
+            bool leveledUp = ApplyAvailableLevelUps();
+            PersistAndNotify(leveledUp);
         }
 
         public void Flush()
@@ -141,12 +127,35 @@ namespace CrossDefense.Core
                 _experience = _level >= _balance.SummonerMaxLevel
                     ? 0
                     : Mathf.Max(0, data.experience);
+                if (ApplyAvailableLevelUps())
+                {
+                    _saveJson?.Invoke(ToJson());
+                    _flush?.Invoke();
+                }
             }
             catch (ArgumentException)
             {
                 _level = 1;
                 _experience = 0;
             }
+        }
+
+        bool ApplyAvailableLevelUps()
+        {
+            bool leveledUp = false;
+            while (_level < _balance.SummonerMaxLevel)
+            {
+                int required = _balance.ExperienceToNextSummonerLevel(_level);
+                if (required <= 0 || _experience < required)
+                    break;
+                _experience -= required;
+                _level++;
+                leveledUp = true;
+            }
+
+            if (_level >= _balance.SummonerMaxLevel)
+                _experience = 0;
+            return leveledUp;
         }
 
         void PersistAndNotify(bool flush)

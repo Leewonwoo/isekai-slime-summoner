@@ -27,12 +27,8 @@ MonoBehaviour:
   traitSlimeDamagePerLevel: 0.06
   traitSlimeAttackSpeedPerLevel: 0.04
   traitJackpotChancePerLevel: 0.005
-  runTraitAllDamagePerLevel: 0.1
-  runTraitAllAttackSpeedPerLevel: 0.08
-  runTraitSummonerDamagePerLevel: 0.2
-  runTraitSlimeDamagePerLevel: 0.15
-  runTraitCoreMaxHpPerLevel: 0.2
-  runTraitCriticalChancePerLevel: 0.05
+  traitSummonCapacityPerLevel: 1
+  traitSummonCapacityMaxLevel: 4
   slimeMaxLevel: 30
   slimeBaseLevelUpCost: 25
   slimeLevelUpCostGrowth: 1.28
@@ -51,3 +47,9 @@ MonoBehaviour:
   criticalDamageMultiplier: 2
   coreRecoveryBaseAmount: 15
   coreRecoveryPerLevel: 5
+  baseSummonCapacity: 8
+  maxSummonCapacity: 12
+  runSummonCapacityMaxLevel: 4
+  runSummonCapacityBaseCost: 80
+  runSummonCapacityCostGrowth: 1.75
+  runSummonCapacityPerLevel: 1

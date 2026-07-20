@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using CrossDefense.Core;
 using CrossDefense.Data;
 using NUnit.Framework;
@@ -8,11 +9,13 @@ namespace CrossDefense.Tests.EditMode
     public sealed class GrowthSystemTests
     {
         GrowthBalanceData _balance;
+        RunRewardCatalog _runRewards;
 
         [SetUp]
         public void SetUp()
         {
             _balance = GrowthBalanceData.CreateRuntimeDefault();
+            _runRewards = RunRewardCatalog.CreateRuntimeDefault();
         }
 
         [TearDown]
@@ -20,10 +23,12 @@ namespace CrossDefense.Tests.EditMode
         {
             if (_balance != null)
                 Object.DestroyImmediate(_balance);
+            if (_runRewards != null)
+                Object.DestroyImmediate(_runRewards);
         }
 
         [Test]
-        public void SummonerProgression_LevelUpPersistsLevelAndRemainingExperience()
+        public void SummonerProgression_ExperienceAutomaticallyLevelsAndPersistsRemainder()
         {
             string savedJson = null;
             var progression = new SummonerProgression(
@@ -34,8 +39,6 @@ namespace CrossDefense.Tests.EditMode
 
             progression.AddExperience(required + 5);
 
-            Assert.That(progression.Snapshot.CanLevelUp, Is.True);
-            Assert.That(progression.TryLevelUp(), Is.True);
             Assert.That(progression.Snapshot.Level, Is.EqualTo(2));
             Assert.That(progression.Snapshot.Experience, Is.EqualTo(5));
             Assert.That(savedJson, Is.Not.Empty);
@@ -62,7 +65,6 @@ namespace CrossDefense.Tests.EditMode
             var progression = new SummonerProgression(_balance);
             int required = progression.Snapshot.ExperienceToNext;
             progression.AddExperience(required);
-            Assert.That(progression.TryLevelUp(), Is.True);
 
             SummonerProgressionSnapshot snapshot = progression.Snapshot;
             Assert.That(snapshot.DamageMultiplier, Is.GreaterThan(1f));
@@ -181,48 +183,39 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void RunTraits_BeginChoiceOffersThreeAndAppliesOneStack()
+        public void RunRewards_FirstChoiceOffersThreeAwakeningsAndAppliesOne()
         {
-            var traits = new RunTraitProgression(_balance, 2026);
+            var traits = new RunTraitProgression(_runRewards, 2026);
 
             Assert.That(traits.BeginChoice(5), Is.True);
             Assert.That(traits.IsChoicePending, Is.True);
             var choices = traits.GetCurrentChoices();
             Assert.That(choices.Count, Is.EqualTo(3));
+            Assert.That(choices[0].Category, Is.EqualTo(RunRewardCategory.Awakening));
 
-            RunTraitType selected = choices[0].Type;
-            Assert.That(traits.TryChoose(selected), Is.True);
+            string selected = choices[0].RewardId;
+            Assert.That(traits.TryChoose(selected, out RunRewardDefinition reward), Is.True);
             Assert.That(traits.IsChoicePending, Is.False);
             Assert.That(traits.GetLevel(selected), Is.EqualTo(1));
-
-            RunTraitSnapshot snapshot = traits.Snapshot;
-            float appliedValue = selected switch
-            {
-                RunTraitType.AllDamage => snapshot.AllDamageMultiplier - 1f,
-                RunTraitType.AllAttackSpeed => snapshot.AllAttackSpeedMultiplier - 1f,
-                RunTraitType.SummonerPower => snapshot.SummonerDamageMultiplier - 1f,
-                RunTraitType.SlimePower => snapshot.SlimeDamageMultiplier - 1f,
-                RunTraitType.CoreVitality => snapshot.CoreMaxHpMultiplier - 1f,
-                RunTraitType.CriticalFocus => snapshot.CriticalChanceBonus,
-                _ => 0f,
-            };
-            Assert.That(appliedValue, Is.GreaterThan(0f));
+            Assert.That(reward, Is.Not.Null);
+            Assert.That(traits.AttackArchetype, Is.Not.EqualTo(SummonerAttackArchetype.EnergyBolt));
         }
 
         [Test]
-        public void RunTraits_NewRunStartsWithoutPreviousStacks()
+        public void RunRewards_NewRunStartsWithoutPreviousChoices()
         {
-            var firstRun = new RunTraitProgression(_balance, 2026);
+            var firstRun = new RunTraitProgression(_runRewards, 2026);
             firstRun.BeginChoice(5);
-            Assert.That(firstRun.TryChoose(firstRun.GetCurrentChoices()[0].Type), Is.True);
+            Assert.That(
+                firstRun.TryChoose(firstRun.GetCurrentChoices()[0].RewardId, out _),
+                Is.True);
             Assert.That(firstRun.TotalChoiceCount, Is.EqualTo(1));
 
-            var nextRun = new RunTraitProgression(_balance, 2026);
+            var nextRun = new RunTraitProgression(_runRewards, 2026);
             Assert.That(nextRun.TotalChoiceCount, Is.Zero);
             Assert.That(nextRun.IsChoicePending, Is.False);
-            Assert.That(nextRun.Snapshot.AllDamageMultiplier, Is.EqualTo(1f));
-            Assert.That(nextRun.Snapshot.AllAttackSpeedMultiplier, Is.EqualTo(1f));
-            Assert.That(nextRun.Snapshot.CriticalChanceBonus, Is.Zero);
+            Assert.That(nextRun.AttackArchetype, Is.EqualTo(SummonerAttackArchetype.EnergyBolt));
         }
     }
 }
+#endif

@@ -20,6 +20,8 @@ namespace CrossDefense.Core
             _balance.RunAttackSpeedMultiplier(GetRunUpgradeLevel(RunUpgradeType.AttackSpeed));
         public float CriticalChance =>
             _balance.RunCriticalChance(GetRunUpgradeLevel(RunUpgradeType.CriticalChance));
+        public int SummonCapacityBonus =>
+            _balance.RunSummonCapacityBonus(GetRunUpgradeLevel(RunUpgradeType.SummonCapacity));
 
         public event Action Changed;
 
@@ -41,10 +43,18 @@ namespace CrossDefense.Core
         public int GetRunUpgradeCost(RunUpgradeType type) =>
             _balance.RunUpgradeCost(type, GetRunUpgradeLevel(type));
 
+        public bool IsRunUpgradeMaxed(RunUpgradeType type)
+        {
+            if (GetRunUpgradeLevel(type) >= _balance.RunUpgradeMaxLevelFor(type))
+                return true;
+            return type == RunUpgradeType.SummonCapacity &&
+                   _gameManager != null &&
+                   _gameManager.SummonSlotCapacity >= _gameManager.MaxSummonSlotCapacity;
+        }
+
         public bool CanPurchaseRunUpgrade(RunUpgradeType type)
         {
-            int level = GetRunUpgradeLevel(type);
-            if (_gameManager == null || level >= _balance.RunUpgradeMaxLevel ||
+            if (_gameManager == null || IsRunUpgradeMaxed(type) ||
                 _gameManager.Gold < GetRunUpgradeCost(type))
                 return false;
             return type != RunUpgradeType.CoreRecovery ||
