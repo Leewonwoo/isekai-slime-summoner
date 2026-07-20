@@ -122,6 +122,29 @@
     flex-grow: 1;
 }
 
+/* ── 강화 탭 ───────────────────────── */
+.upgrade-tab {
+    flex-grow: 1;
+}
+
+.upgrade-tab__title {
+    margin-top: var(--gap-sm);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.upgrade-tab__description {
+    margin-top: var(--gap-xs);
+    margin-left: var(--gap-md);
+    margin-right: var(--gap-md);
+    margin-bottom: var(--gap-sm);
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
 /* ── 소환 탭 ───────────────────────── */
 .summon-tab {
     flex-grow: 1;
@@ -166,33 +189,33 @@
     flex-grow: 1;
 }
 
-.bench-scroll .unity-scroll-view__horizontal-scroller {
+.panel-scroll .unity-scroll-view__horizontal-scroller {
     display: none;
 }
 
-.bench-scroll .unity-scroll-view__vertical-scroller {
-    width: var(--summon-scrollbar-width);
+.panel-scroll .unity-scroll-view__vertical-scroller {
+    width: var(--panel-scrollbar-width);
     margin-left: var(--gap-sm);
     background-color: var(--color-transparent);
 }
 
-.bench-scroll .unity-scroller__low-button,
-.bench-scroll .unity-scroller__high-button {
+.panel-scroll .unity-scroller__low-button,
+.panel-scroll .unity-scroller__high-button {
     display: none;
 }
 
-.bench-scroll .unity-base-slider__tracker {
+.panel-scroll .unity-base-slider__tracker {
     background-color: var(--color-panel-deep);
     border-width: 0;
     border-radius: var(--radius-sm);
 }
 
-.bench-scroll .unity-base-slider__dragger-border {
+.panel-scroll .unity-base-slider__dragger-border {
     background-color: var(--color-transparent);
     border-width: 0;
 }
 
-.bench-scroll .unity-base-slider__dragger {
+.panel-scroll .unity-base-slider__dragger {
     background-color: var(--color-surface-deep);
     border-width: 2px;
     border-color: var(--color-border);
@@ -457,17 +480,63 @@
     -unity-font-style: bold;
 }
 
+.summoner-tab__level {
+    margin-top: var(--gap-xs);
+    color: var(--color-gold);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.summoner-tab__exp-text {
+    margin-top: var(--gap-xs);
+    color: var(--color-text-dim);
+    font-size: var(--font-small);
+}
+
 .summoner-tab__exp {
     margin-top: var(--gap-sm);
 }
 
-.summoner-tab__upgrade-button {
-    margin-left: var(--gap-md);
+.summoner-tab__scroll {
+    flex-grow: 1;
+    margin-top: var(--gap-sm);
 }
 
-.summoner-tab__meta-button {
-    margin-top: var(--gap-sm);
-    margin-bottom: var(--gap-md);
+.summoner-tab__section {
     margin-left: var(--gap-md);
     margin-right: var(--gap-md);
+    margin-bottom: var(--gap-lg);
+}
+
+.summoner-tab__section-title {
+    color: var(--color-gold);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.summoner-tab__stat-line {
+    min-height: var(--summoner-stat-line-height);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-panel);
+}
+
+.summoner-tab__stat-name {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
+.summoner-tab__stat-value {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.summoner-tab__trait-text {
+    margin-top: var(--gap-sm);
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    white-space: normal;
 }

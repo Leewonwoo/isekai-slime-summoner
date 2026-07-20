@@ -1,5 +1,6 @@
 using System;
 using CrossDefense.Core;
+using CrossDefense.Data;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -29,6 +30,7 @@ namespace CrossDefense.UI
 
         Tween _moveTween;
         Tween _finishTween;
+        Tween _hideTween;
         Action _onComplete;
         SummonResult _result;
         VisualElement _finalCard;
@@ -65,6 +67,7 @@ namespace CrossDefense.UI
             _onComplete = onComplete;
             _moveTween?.Kill();
             _finishTween?.Kill();
+            _hideTween?.Kill();
             _strip.Clear();
             _strip.style.translate = new Translate(0f, 0f, 0f);
             _finalCard = null;
@@ -105,6 +108,7 @@ namespace CrossDefense.UI
                     targetX,
                     1.35f)
                 .SetEase(Ease.OutCubic)
+                .SetUpdate(true)
                 .OnComplete(FinishRoll);
         }
 
@@ -154,13 +158,14 @@ namespace CrossDefense.UI
             }
 
             _finishTween = _finalCard == null
-                ? DOVirtual.DelayedCall(0.05f, Complete)
+                ? DOVirtual.DelayedCall(0.05f, Complete).SetUpdate(true)
                 : DOTween.To(
                     () => (Vector2)_finalCard.resolvedStyle.scale.value,
                     value => _finalCard.style.scale = new Scale(value),
                     new Vector2(1.08f, 1.08f),
                     0.12f)
                     .SetEase(Ease.OutBack)
+                    .SetUpdate(true)
                     .SetLoops(2, LoopType.Yoyo)
                     .OnComplete(Complete);
         }
@@ -172,7 +177,34 @@ namespace CrossDefense.UI
             var callback = _onComplete;
             _onComplete = null;
             callback?.Invoke();
-            DOVirtual.DelayedCall(0.35f, () => _rouletteRoot?.AddToClassList("hidden"));
+            if (_isPlaying)
+                return;
+            _hideTween?.Kill();
+            _hideTween = DOVirtual.DelayedCall(
+                    0.35f,
+                    () => _rouletteRoot?.AddToClassList("hidden"))
+                .SetUpdate(true);
+        }
+
+        public void Dispose()
+        {
+            _moveTween?.Kill();
+            _finishTween?.Kill();
+            _hideTween?.Kill();
+            _moveTween = null;
+            _finishTween = null;
+            _hideTween = null;
+
+            bool wasPlaying = _isPlaying;
+            _isPlaying = false;
+            var callback = _onComplete;
+            _onComplete = null;
+            if (wasPlaying)
+                callback?.Invoke();
+
+            _rouletteRoot?.AddToClassList("hidden");
+            if (_skipButton != null)
+                _skipButton.clicked -= Skip;
         }
 
         static VisualElement CreateCard(string title, string subtitle, bool final)
@@ -201,14 +233,16 @@ namespace CrossDefense.UI
         {
             if (result.Kind == SummonResultKind.Currency)
                 return $"+{result.CurrencyAmount} G";
-            return result.IsJackpot ? "★1 직행 잭팟" : "기본 유닛";
+            return result.Rank > SummonRank.MinInternalRank
+                ? $"{SummonRank.FormatStars(result.Rank)} 직행 보상"
+                : "★1 기본 소환";
         }
 
         static string GetResultSummary(SummonResult result) =>
             result.Kind == SummonResultKind.Currency
                 ? $"재화 보상 +{result.CurrencyAmount} G"
-                : result.IsJackpot
-                    ? $"잭팟! {result.Unit.DisplayName} ★1"
-                    : $"{result.Unit.DisplayName} 기본 유닛 획득";
+                : result.Rank > SummonRank.MinInternalRank
+                    ? $"대박! {result.Unit.DisplayName} {SummonRank.FormatStars(result.Rank)}"
+                    : $"{result.Unit.DisplayName} ★1 획득";
     }
 }

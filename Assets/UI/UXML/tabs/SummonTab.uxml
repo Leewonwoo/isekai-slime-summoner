@@ -5,7 +5,7 @@
                 <Label class="summon-tab__inventory-title" text="보유 용병" />
                 <Label name="bench-count" class="summon-tab__inventory-count" text="보유 슬롯 0/12 · 총 0개" />
             </VisualElement>
-            <ScrollView name="bench-scroll" class="bench-scroll" mode="Vertical">
+            <ScrollView name="bench-scroll" class="bench-scroll panel-scroll" mode="Vertical">
                 <VisualElement name="bench" class="bench" />
             </ScrollView>
         </VisualElement>
@@ -15,7 +15,7 @@
                 <Label name="summon-contract-count" class="summon-tab__contracts-value" text="0장" />
             </VisualElement>
             <Label class="summon-tab__pool" text="해금된 슬라임 8종 중 무작위" />
-            <Label name="summon-prob" class="summon-tab__prob" text="★1 직행 잭팟 5.0%" />
+            <Label name="summon-prob" class="summon-tab__prob" text="★2 직행 잭팟 5.0%" />
             <Button name="summon-button" class="btn btn--primary summon-tab__button" text="소환 ×1" />
         </VisualElement>
     </VisualElement>

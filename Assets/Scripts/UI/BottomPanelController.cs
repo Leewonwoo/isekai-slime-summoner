@@ -7,19 +7,10 @@ using UnityEngine.UIElements;
 
 namespace CrossDefense.UI
 {
-    public enum GrowthRowKind
-    {
-        RunUpgrade,
-        SlimeLevel,
-        ReadOnly,
-    }
-
     public readonly struct GrowthRowModel
     {
         public string Key { get; }
-        public GrowthRowKind Kind { get; }
         public RunUpgradeType RunUpgradeType { get; }
-        public string UnitId { get; }
         public string Name { get; }
         public string Values { get; }
         public string ActionText { get; }
@@ -28,24 +19,61 @@ namespace CrossDefense.UI
 
         public GrowthRowModel(
             string key,
-            GrowthRowKind kind,
             string name,
             string values,
             string actionText,
             string iconClass,
             bool canPurchase,
-            RunUpgradeType runUpgradeType = RunUpgradeType.AttackPower,
-            string unitId = null)
+            RunUpgradeType runUpgradeType = RunUpgradeType.AttackPower)
         {
             Key = key;
-            Kind = kind;
             RunUpgradeType = runUpgradeType;
-            UnitId = unitId;
             Name = name;
             Values = values;
             ActionText = actionText;
             IconClass = iconClass;
             CanPurchase = canPurchase;
+        }
+    }
+
+    public readonly struct SummonerInfoModel
+    {
+        public string Name { get; }
+        public string Level { get; }
+        public string Experience { get; }
+        public float ExperienceProgress { get; }
+        public string Damage { get; }
+        public string AttackSpeed { get; }
+        public string MaxHp { get; }
+        public string CriticalChance { get; }
+        public string JackpotChance { get; }
+        public string PermanentTraits { get; }
+        public string RunTraits { get; }
+
+        public SummonerInfoModel(
+            string name,
+            string level,
+            string experience,
+            float experienceProgress,
+            string damage,
+            string attackSpeed,
+            string maxHp,
+            string criticalChance,
+            string jackpotChance,
+            string permanentTraits,
+            string runTraits)
+        {
+            Name = name;
+            Level = level;
+            Experience = experience;
+            ExperienceProgress = Mathf.Clamp01(experienceProgress);
+            Damage = damage;
+            AttackSpeed = attackSpeed;
+            MaxHp = maxHp;
+            CriticalChance = criticalChance;
+            JackpotChance = jackpotChance;
+            PermanentTraits = permanentTraits;
+            RunTraits = runTraits;
         }
     }
 
@@ -65,17 +93,25 @@ namespace CrossDefense.UI
         readonly List<VisualElement> _benchSlots = new();
         readonly VisualTreeAsset _upgradeRowTemplate;
         readonly ScrollView _upgradeList;
-        readonly ScrollView _summonerList;
         readonly Dictionary<string, GrowthRowBinding> _upgradeRows = new();
-        readonly Dictionary<string, GrowthRowBinding> _summonerRows = new();
         readonly Label _benchCount;
         readonly Label _summonContractCount;
         readonly Label _summonProbability;
         readonly Button _summonButton;
+        readonly Label _summonerTabName;
         readonly Label _summonerTabLevel;
+        readonly Label _summonerExpText;
         readonly VisualElement _summonerExpFill;
-        readonly Button _summonerUpgradeButton;
+        readonly Label _summonerDamage;
+        readonly Label _summonerAttackSpeed;
+        readonly Label _summonerMaxHp;
+        readonly Label _summonerCriticalChance;
+        readonly Label _summonerJackpotChance;
+        readonly Label _summonerPermanentTraits;
+        readonly Label _summonerRunTraits;
         int _summonContracts;
+        int _summonCapacity = BenchSlotCount;
+        int _ownedUnitCount;
         bool _isSummonAnimating;
 
         public event Action SummonRequested;
@@ -84,8 +120,6 @@ namespace CrossDefense.UI
         public event Action<SummonUnitInstance, Vector2> BenchDragMoved;
         public event Action<SummonUnitInstance, Vector2> BenchDragEnded;
         public event Action<RunUpgradeType> RunUpgradeRequested;
-        public event Action<string> SlimeLevelUpRequested;
-        public event Action SummonerLevelUpRequested;
         public bool IsSummonAnimating => _isSummonAnimating;
 
         public BottomPanelController(VisualElement root, VisualTreeAsset upgradeRowTemplate)
@@ -110,12 +144,18 @@ namespace CrossDefense.UI
             _summonButton = root.Q<Button>("summon-button");
             _summonButton.clicked += () => SummonRequested?.Invoke();
             _upgradeList = root.Q<ScrollView>("upgrade-list");
-            _summonerList = root.Q<ScrollView>("summoner-list");
+            _summonerTabName = root.Q<Label>("summoner-tab-name");
             _summonerTabLevel = root.Q<Label>("summoner-tab-level");
+            _summonerExpText = root.Q<Label>("summoner-exp-text");
             _summonerExpFill = root.Q<VisualElement>("summoner-exp-fill");
-            _summonerUpgradeButton = root.Q<Button>("summoner-upgrade-button");
-            _summonerUpgradeButton.clicked += () => SummonerLevelUpRequested?.Invoke();
-            SetBenchUsage(0, 0);
+            _summonerDamage = root.Q<Label>("summoner-stat-damage");
+            _summonerAttackSpeed = root.Q<Label>("summoner-stat-attack-speed");
+            _summonerMaxHp = root.Q<Label>("summoner-stat-max-hp");
+            _summonerCriticalChance = root.Q<Label>("summoner-stat-critical");
+            _summonerJackpotChance = root.Q<Label>("summoner-stat-jackpot");
+            _summonerPermanentTraits = root.Q<Label>("summoner-permanent-traits");
+            _summonerRunTraits = root.Q<Label>("summoner-run-traits");
+            SetBenchUsage(0, 0, BenchSlotCount);
             SetSummonContracts(0);
 
             BuildDummyRows(root.Q<ScrollView>("skill-list"), upgradeRowTemplate,
@@ -125,7 +165,6 @@ namespace CrossDefense.UI
         public void Dispose()
         {
             DisposeRows(_upgradeRows);
-            DisposeRows(_summonerRows);
         }
 
         public void SelectTab(string key)
@@ -141,8 +180,13 @@ namespace CrossDefense.UI
         public void SetRedDot(string tabKey, bool on) =>
             _root.Q<VisualElement>($"reddot-{tabKey}")?.EnableInClassList("hidden", !on);
 
-        public void SetBenchUsage(int usedStacks, int totalUnits) =>
-            _benchCount.text = UIFormat.StackedCapacity(usedStacks, BenchSlotCount, totalUnits);
+        public void SetBenchUsage(int usedStacks, int totalUnits, int capacity)
+        {
+            _summonCapacity = Mathf.Clamp(capacity, 1, BenchSlotCount);
+            _ownedUnitCount = Mathf.Max(0, totalUnits);
+            _benchCount.text = UIFormat.StackedCapacity(usedStacks, _summonCapacity, _ownedUnitCount);
+            UpdateSummonButtonState();
+        }
 
         public void SetSummonContracts(int amount)
         {
@@ -152,7 +196,7 @@ namespace CrossDefense.UI
         }
 
         public void SetDirectRankOneChance(float chance) =>
-            _summonProbability.text = $"★1 직행 잭팟 {Mathf.Clamp01(chance) * 100f:0.0}%";
+            _summonProbability.text = $"★2 직행 잭팟 {Mathf.Clamp01(chance) * 100f:0.0}%";
 
         public void SetSummonAnimationState(bool isAnimating)
         {
@@ -163,28 +207,31 @@ namespace CrossDefense.UI
         public void SetGrowthRows(IReadOnlyList<GrowthRowModel> rows) =>
             SyncGrowthRows(_upgradeList, _upgradeRows, rows);
 
-        public void SetSummonerProgression(
-            SummonerProgressionSnapshot snapshot,
-            IReadOnlyList<GrowthRowModel> rows)
+        public void SetSummonerInfo(SummonerInfoModel model)
         {
-            _summonerTabLevel.text = $"소환사 Lv.{snapshot.Level:N0}";
-            _summonerExpFill.style.width = Length.Percent(snapshot.ExperienceProgress * 100f);
-            _summonerUpgradeButton.text = snapshot.IsMaxLevel
-                ? "MAX"
-                : $"레벨업 {snapshot.Experience:N0}/{snapshot.ExperienceToNext:N0}";
-            _summonerUpgradeButton.SetEnabled(snapshot.CanLevelUp);
-            _summonerUpgradeButton.EnableInClassList("btn--disabled", !snapshot.CanLevelUp);
-            SyncGrowthRows(_summonerList, _summonerRows, rows);
+            _summonerTabName.text = model.Name;
+            _summonerTabLevel.text = model.Level;
+            _summonerExpText.text = model.Experience;
+            _summonerExpFill.style.width = Length.Percent(model.ExperienceProgress * 100f);
+            _summonerDamage.text = model.Damage;
+            _summonerAttackSpeed.text = model.AttackSpeed;
+            _summonerMaxHp.text = model.MaxHp;
+            _summonerCriticalChance.text = model.CriticalChance;
+            _summonerJackpotChance.text = model.JackpotChance;
+            _summonerPermanentTraits.text = model.PermanentTraits;
+            _summonerRunTraits.text = model.RunTraits;
         }
 
         public void SetOwnedUnits(
             IReadOnlyList<SummonUnitInstance> benchUnits,
-            IReadOnlyList<SummonUnitInstance> deployedUnits)
+            IReadOnlyList<SummonUnitInstance> deployedUnits,
+            int capacity)
         {
             var stacks = BuildOwnedStacks(benchUnits, deployedUnits);
             for (int i = 0; i < _benchSlots.Count; i++)
             {
                 var slot = _benchSlots[i];
+                slot.EnableInClassList("hidden", i >= capacity);
                 slot.Clear();
                 SetSlotState(slot, null, false);
                 if (i >= stacks.Count)
@@ -192,7 +239,9 @@ namespace CrossDefense.UI
 
                 var stack = stacks[i];
                 var instance = stack.Representative;
-                bool mergeable = instance.Rank < 3 && stack.Quantity >= 3;
+                bool mergeable =
+                    instance.Rank < SummonRank.MaxInternalRank &&
+                    stack.Quantity >= SummonRank.MergeMaterialCount;
                 SetSlotState(slot, instance, mergeable);
                 var card = new VisualElement();
                 card.AddToClassList("bench-card");
@@ -200,7 +249,7 @@ namespace CrossDefense.UI
 
                 var icon = new Image
                 {
-                    sprite = instance.Unit == null ? null : instance.Unit.Icon ?? instance.Unit.WorldSprite,
+                    sprite = instance.Unit?.WorldSpriteAtRank(instance.Rank),
                     scaleMode = ScaleMode.ScaleToFit,
                     pickingMode = PickingMode.Ignore,
                 };
@@ -236,7 +285,7 @@ namespace CrossDefense.UI
             int totalUnits = 0;
             for (int i = 0; i < stacks.Count; i++)
                 totalUnits += stacks[i].Quantity;
-            SetBenchUsage(stacks.Count, totalUnits);
+            SetBenchUsage(stacks.Count, totalUnits, capacity);
         }
 
         void RegisterOwnedCardInteraction(
@@ -316,7 +365,7 @@ namespace CrossDefense.UI
 
         static string StackKey(SummonUnitInstance instance) => $"{instance.Unit.UnitId}:{instance.Rank}";
 
-        static string FormatRank(int rank) => rank <= 0 ? "기본" : $"★{rank}";
+        static string FormatRank(int rank) => SummonRank.FormatStars(rank);
 
         static void SetSlotState(VisualElement slot, SummonUnitInstance instance, bool mergeable)
         {
@@ -362,7 +411,10 @@ namespace CrossDefense.UI
 
         void UpdateSummonButtonState()
         {
-            bool canSummon = _summonContracts > 0 && !_isSummonAnimating;
+            bool canSummon =
+                _summonContracts > 0 &&
+                !_isSummonAnimating &&
+                _ownedUnitCount < _summonCapacity;
             _summonButton.SetEnabled(canSummon);
             _summonButton.EnableInClassList("btn--disabled", !canSummon);
         }
@@ -408,10 +460,9 @@ namespace CrossDefense.UI
                     binding = new GrowthRowBinding(_upgradeRowTemplate.Instantiate());
                     bindings.Add(model.Key, binding);
                     list.Add(binding.Root);
-                    if (model.Kind != GrowthRowKind.ReadOnly)
-                        binding.Repeater = new LongPressRepeater(
-                            binding.View.ActionButton,
-                            () => InvokeGrowthAction(binding));
+                    binding.Repeater = new LongPressRepeater(
+                        binding.View.ActionButton,
+                        () => InvokeGrowthAction(binding));
                 }
 
                 binding.Model = model;
@@ -438,10 +489,7 @@ namespace CrossDefense.UI
         {
             GrowthRowModel model = binding.Model;
             if (!model.CanPurchase) return;
-            if (model.Kind == GrowthRowKind.RunUpgrade)
-                RunUpgradeRequested?.Invoke(model.RunUpgradeType);
-            else if (model.Kind == GrowthRowKind.SlimeLevel)
-                SlimeLevelUpRequested?.Invoke(model.UnitId);
+            RunUpgradeRequested?.Invoke(model.RunUpgradeType);
         }
 
         static void DisposeRows(Dictionary<string, GrowthRowBinding> rows)

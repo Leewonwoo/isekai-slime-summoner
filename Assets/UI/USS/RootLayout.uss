@@ -301,6 +301,42 @@
     -unity-font-style: bold;
 }
 
+.unit-detail__upgrade {
+    width: 100%;
+    min-height: var(--row-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--gap-lg);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    border-width: 3px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+}
+
+.unit-detail__upgrade-info {
+    flex-grow: 1;
+    margin-right: var(--gap-md);
+}
+
+.unit-detail__upgrade-level {
+    color: var(--color-ink);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.unit-detail__upgrade-values {
+    margin-top: var(--gap-xs);
+    color: var(--color-ink-dim);
+    font-size: var(--font-caption);
+}
+
+.unit-detail__upgrade-button {
+    min-width: var(--unit-detail-upgrade-button-width);
+}
+
 .unit-detail__hint {
     margin-top: var(--gap-md);
     color: var(--color-text-disabled);

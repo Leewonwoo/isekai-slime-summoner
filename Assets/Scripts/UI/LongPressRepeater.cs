@@ -19,6 +19,7 @@ namespace CrossDefense.UI
         {
             _button = button;
             _action = action;
+            _button.clicked += OnClicked;
             _button.RegisterCallback<PointerDownEvent>(OnPointerDown);
             _button.RegisterCallback<PointerUpEvent>(OnPointerUp);
             _button.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
@@ -28,6 +29,7 @@ namespace CrossDefense.UI
         public void Dispose()
         {
             Stop();
+            _button.clicked -= OnClicked;
             _button.UnregisterCallback<PointerDownEvent>(OnPointerDown);
             _button.UnregisterCallback<PointerUpEvent>(OnPointerUp);
             _button.UnregisterCallback<PointerCancelEvent>(OnPointerCancel);
@@ -46,20 +48,26 @@ namespace CrossDefense.UI
         void OnPointerUp(PointerUpEvent evt)
         {
             if (!_pressed || evt.button != 0) return;
-            bool invokeSingle = !_repeated && _button.enabledSelf;
             Stop();
-            if (invokeSingle)
-                _action?.Invoke();
         }
 
-        void OnPointerCancel(PointerCancelEvent _) => Stop();
-
-        void OnPointerCaptureOut(PointerCaptureOutEvent _)
+        void OnClicked()
         {
-            if (_pressed && !_repeated && _button.enabledSelf)
+            if (_repeated)
+            {
+                _repeated = false;
+                return;
+            }
+            if (_button.enabledSelf)
                 _action?.Invoke();
-            Stop();
         }
+
+        void OnPointerCancel(PointerCancelEvent _)
+        {
+            CancelPress();
+        }
+
+        void OnPointerCaptureOut(PointerCaptureOutEvent _) => CancelPress();
 
         void Repeat()
         {
@@ -70,6 +78,12 @@ namespace CrossDefense.UI
             }
             _repeated = true;
             _action?.Invoke();
+        }
+
+        void CancelPress()
+        {
+            Stop();
+            _repeated = false;
         }
 
         void Stop()

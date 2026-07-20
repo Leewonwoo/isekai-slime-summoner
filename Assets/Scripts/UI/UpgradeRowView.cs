@@ -2,7 +2,7 @@ using UnityEngine.UIElements;
 
 namespace CrossDefense.UI
 {
-    /// <summary>UpgradeRow.uxml 템플릿 1개 인스턴스의 뷰 — 강화/스킬/소환사 3탭 공용</summary>
+    /// <summary>UpgradeRow.uxml 템플릿 1개 인스턴스의 뷰 — 강화/스킬 탭 공용</summary>
     public class UpgradeRowView
     {
         readonly Label _name;

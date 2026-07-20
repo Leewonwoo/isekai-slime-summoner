@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace CrossDefense.UI
 {
-    /// <summary>소환사 레벨업으로 받은 영구 특성 3택을 표시하는 유일한 uGUI 팝업.</summary>
+    /// <summary>소환사 영구 특성과 5웨이브 런 보상 3택을 표시하는 유일한 uGUI 팝업.</summary>
     [DisallowMultipleComponent]
     public sealed class TraitChoicePopupController : MonoBehaviour
     {
@@ -68,7 +68,7 @@ namespace CrossDefense.UI
         public void Show(
             IReadOnlyList<RunTraitChoice> choices,
             int clearedWave,
-            Action<RunTraitType> onConfirmed)
+            Action<string> onConfirmed)
         {
             if (choices == null || choices.Count != _cards.Length)
             {
@@ -76,21 +76,38 @@ namespace CrossDefense.UI
                 return;
             }
 
-            var types = new RunTraitType[3];
+            var rewardIds = new string[3];
             var names = new string[3];
             var descriptions = new string[3];
+            bool awakening = true;
             for (int i = 0; i < choices.Count; i++)
             {
-                types[i] = choices[i].Type;
+                rewardIds[i] = choices[i].RewardId;
                 names[i] = choices[i].DisplayName;
-                descriptions[i] = choices[i].Description;
+                descriptions[i] =
+                    $"{CategoryLabel(choices[i].Category)} · {choices[i].StatusLabel}\n{choices[i].Description}";
+                awakening &= choices[i].Category == RunRewardCategory.Awakening;
             }
             ShowCards(
-                "런 특성 선택",
-                $"WAVE {Mathf.Max(1, clearedWave):N0} 클리어 · 사망 시 소멸",
+                awakening ? "소환사 속성 각성" : "웨이브 보상 선택",
+                awakening
+                    ? $"WAVE {Mathf.Max(1, clearedWave):N0} 클리어 · 이번 런의 주 공격 선택"
+                    : $"WAVE {Mathf.Max(1, clearedWave):N0} 클리어 · 사망 시 소멸",
                 names,
                 descriptions,
-                index => onConfirmed?.Invoke(types[index]));
+                index => onConfirmed?.Invoke(rewardIds[index]));
+        }
+
+        static string CategoryLabel(RunRewardCategory category)
+        {
+            return category switch
+            {
+                RunRewardCategory.Awakening => "소환사 각성",
+                RunRewardCategory.SummonerEvolution => "공격 진화",
+                RunRewardCategory.SlimeArmy => "슬라임 군단",
+                RunRewardCategory.Summon => "운명의 소환",
+                _ => "런 보상",
+            };
         }
 
         void ShowCards(

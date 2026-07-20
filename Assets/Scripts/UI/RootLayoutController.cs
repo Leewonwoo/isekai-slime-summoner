@@ -22,7 +22,8 @@ namespace CrossDefense.UI
         VisualElement _root;
         readonly List<SummonUnitInstance> _deployedUnitBuffer = new();
         readonly List<GrowthRowModel> _growthRowBuffer = new();
-        readonly List<GrowthRowModel> _summonerRowBuffer = new();
+        IReadOnlyList<SummonResult> _runRewardSummonResults;
+        int _runRewardSummonResultIndex;
 
         public TopHUDController TopHUD { get; private set; }
         public FieldOverlayController FieldOverlay { get; private set; }
@@ -39,6 +40,7 @@ namespace CrossDefense.UI
             BottomPanel = new BottomPanelController(_root, upgradeRowTemplate);
             SummonRoulette = new SummonRouletteView(_root);
             SummonUnitDetail = new SummonUnitDetailView(_root);
+            SummonUnitDetail.LevelUpRequested += OnSlimeLevelUpRequested;
             _gameManager = FindFirstObjectByType<GameManager>();
             if (_gameManager == null)
                 ApplyScaffoldDemoState();
@@ -55,6 +57,9 @@ namespace CrossDefense.UI
 
         void OnDisable()
         {
+            _runRewardSummonResults = null;
+            _runRewardSummonResultIndex = 0;
+            SummonRoulette?.Dispose();
             if (_gameManager != null)
             {
                 _gameManager.WaveChanged -= OnWaveChanged;
@@ -78,6 +83,8 @@ namespace CrossDefense.UI
                 if (_gameManager.RunTraits != null)
                     _gameManager.RunTraits.Changed -= OnRunTraitsChanged;
                 _gameManager.RegisterGoldScreenPositionProvider(null);
+                _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
             }
             if (BottomPanel != null)
             {
@@ -87,13 +94,15 @@ namespace CrossDefense.UI
                 BottomPanel.BenchDragMoved -= OnBenchDragMoved;
                 BottomPanel.BenchDragEnded -= OnBenchDragEnded;
                 BottomPanel.RunUpgradeRequested -= OnRunUpgradeRequested;
-                BottomPanel.SlimeLevelUpRequested -= OnSlimeLevelUpRequested;
-                BottomPanel.SummonerLevelUpRequested -= OnSummonerLevelUpRequested;
                 BottomPanel.Dispose();
             }
             _traitChoicePopupOpen = false;
             _traitChoicePopup?.Hide();
-            SummonUnitDetail?.Dispose();
+            if (SummonUnitDetail != null)
+            {
+                SummonUnitDetail.LevelUpRequested -= OnSlimeLevelUpRequested;
+                SummonUnitDetail.Dispose();
+            }
             TopHUD?.Dispose();
         }
 
@@ -125,8 +134,6 @@ namespace CrossDefense.UI
             BottomPanel.BenchDragMoved += OnBenchDragMoved;
             BottomPanel.BenchDragEnded += OnBenchDragEnded;
             BottomPanel.RunUpgradeRequested += OnRunUpgradeRequested;
-            BottomPanel.SlimeLevelUpRequested += OnSlimeLevelUpRequested;
-            BottomPanel.SummonerLevelUpRequested += OnSummonerLevelUpRequested;
             _gameManager.RegisterGoldScreenPositionProvider(TopHUD.GetGoldScreenPosition);
             if (_gameManager.StageTimeline != null)
                 TopHUD.SetStageName(_gameManager.StageTimeline.DisplayName);
@@ -146,6 +153,7 @@ namespace CrossDefense.UI
         {
             TopHUD.SetGold(amount);
             RefreshGrowthUI();
+            RefreshOpenUnitDetail();
         }
         void OnSummonContractsChanged(int amount) => BottomPanel.SetSummonContracts(amount);
         void OnCoreHpChanged(float _, float __) => RefreshGrowthUI();
@@ -159,8 +167,18 @@ namespace CrossDefense.UI
             RefreshOwnedUnits();
             RefreshGrowthUI();
         }
-        void OnUnitUpgradeChanged(SummonUnitUpgradeState _) => RefreshGrowthUI();
-        void OnGrowthChanged() => RefreshGrowthUI();
+        void OnUnitUpgradeChanged(SummonUnitUpgradeState _)
+        {
+            RefreshGrowthUI();
+            RefreshOpenUnitDetail();
+        }
+        void OnGrowthChanged()
+        {
+            RefreshOwnedUnits();
+            RefreshGrowthUI();
+            if (_gameManager?.SummonerProgression != null)
+                RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
+        }
 
         void OnSummonerProgressionChanged(SummonerProgressionSnapshot snapshot)
         {
@@ -173,6 +191,7 @@ namespace CrossDefense.UI
         void OnPermanentTraitsChanged(PermanentTraitSnapshot snapshot)
         {
             BottomPanel.SetDirectRankOneChance(_gameManager.DirectRankOneChance);
+            RefreshOwnedUnits();
             RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
         }
 
@@ -196,44 +215,23 @@ namespace CrossDefense.UI
                         _deployedUnitBuffer.Add(instance);
                 }
             }
-            BottomPanel?.SetOwnedUnits(_gameManager?.SummonManager?.Bench, _deployedUnitBuffer);
+            BottomPanel?.SetOwnedUnits(
+                _gameManager?.SummonManager?.Bench,
+                _deployedUnitBuffer,
+                _gameManager?.SummonSlotCapacity ?? 12);
         }
 
         void RefreshGrowthUI()
         {
             var growth = _gameManager?.Growth;
-            var summonManager = _gameManager?.SummonManager;
-            if (growth == null || summonManager == null || BottomPanel == null) return;
+            if (growth == null || BottomPanel == null) return;
 
             _growthRowBuffer.Clear();
             AddRunUpgradeRow(RunUpgradeType.AttackPower, "전체 공격력", "row__icon--atk");
             AddRunUpgradeRow(RunUpgradeType.AttackSpeed, "전체 공격 속도", "row__icon--aspd");
             AddRunUpgradeRow(RunUpgradeType.CoreRecovery, "소환사 HP 회복", "row__icon--hp");
             AddRunUpgradeRow(RunUpgradeType.CriticalChance, "치명타 확률", "row__icon--crit");
-
-            var ownedById = new Dictionary<string, SummonUnitInstance>();
-            AddOwnedUnitTypes(summonManager.Bench, ownedById);
-            AddOwnedUnitTypes(_deployedUnitBuffer, ownedById);
-            foreach (var pair in ownedById.OrderBy(pair => pair.Value.Unit.DisplayName))
-            {
-                var instance = pair.Value;
-                var state = summonManager.GetUnitUpgradeState(pair.Key);
-                bool maxed = state.Level >= growth.Balance.SlimeMaxLevel;
-                int nextLevel = maxed ? state.Level : state.Level + 1;
-                int cost = growth.GetSlimeLevelUpCost(pair.Key);
-                string values =
-                    $"공격 {UIFormat.PercentDelta(state.DamageMultiplier, growth.Balance.SlimeDamageMultiplier(nextLevel))}" +
-                    $" · 공속 {UIFormat.PercentDelta(state.AttackSpeedMultiplier, growth.Balance.SlimeAttackSpeedMultiplier(nextLevel))}";
-                _growthRowBuffer.Add(new GrowthRowModel(
-                    $"slime:{pair.Key}",
-                    GrowthRowKind.SlimeLevel,
-                    $"{instance.Unit.DisplayName} Lv.{state.Level:N0}",
-                    values,
-                    maxed ? "MAX" : $"{cost:N0} G",
-                    "row__icon--atk",
-                    !maxed && growth.CanLevelUpSlime(pair.Key),
-                    unitId: pair.Key));
-            }
+            AddRunUpgradeRow(RunUpgradeType.SummonCapacity, "슬라임 슬롯", "row__icon--hp");
 
             BottomPanel.SetGrowthRows(_growthRowBuffer);
             BottomPanel.SetRedDot("upgrade", _growthRowBuffer.Any(row => row.CanPurchase));
@@ -243,7 +241,7 @@ namespace CrossDefense.UI
         {
             GrowthManager growth = _gameManager.Growth;
             int level = growth.GetRunUpgradeLevel(type);
-            bool maxed = level >= growth.Balance.RunUpgradeMaxLevel;
+            bool maxed = growth.IsRunUpgradeMaxed(type);
             int nextLevel = maxed ? level : level + 1;
             string values = type switch
             {
@@ -259,12 +257,14 @@ namespace CrossDefense.UI
                 RunUpgradeType.CriticalChance => UIFormat.ChanceDelta(
                     growth.Balance.RunCriticalChance(level),
                     growth.Balance.RunCriticalChance(nextLevel)),
+                RunUpgradeType.SummonCapacity =>
+                    $"{_gameManager.SummonSlotCapacity:N0}칸 → " +
+                    $"{Mathf.Min(_gameManager.MaxSummonSlotCapacity, _gameManager.SummonSlotCapacity + 1):N0}칸",
                 _ => string.Empty,
             };
             int cost = growth.GetRunUpgradeCost(type);
             _growthRowBuffer.Add(new GrowthRowModel(
                 $"run:{type}",
-                GrowthRowKind.RunUpgrade,
                 $"{name} Lv.{level:N0}",
                 values,
                 maxed ? "MAX" : $"{cost:N0} G",
@@ -276,120 +276,90 @@ namespace CrossDefense.UI
         void RefreshSummonerUI(SummonerProgressionSnapshot snapshot)
         {
             if (_gameManager == null || BottomPanel == null) return;
-            float currentJackpot = _gameManager.DirectRankOneChance;
-            float baseJackpot = currentJackpot - snapshot.JackpotChanceBonus;
-            float nextJackpot = Mathf.Clamp01(baseJackpot + snapshot.NextJackpotChanceBonus);
-            _summonerRowBuffer.Clear();
-            _summonerRowBuffer.Add(ReadOnlySummonerRow(
-                "summoner:damage",
-                "영구 공격력",
-                UIFormat.PercentDelta(snapshot.DamageMultiplier, snapshot.NextDamageMultiplier),
-                "row__icon--atk"));
-            _summonerRowBuffer.Add(ReadOnlySummonerRow(
-                "summoner:hp",
-                "영구 최대 HP",
-                UIFormat.PercentDelta(snapshot.MaxHpMultiplier, snapshot.NextMaxHpMultiplier),
-                "row__icon--hp"));
-            _summonerRowBuffer.Add(ReadOnlySummonerRow(
-                "summoner:jackpot",
-                "★1 직행 확률",
-                UIFormat.ChanceDelta(currentJackpot, nextJackpot),
-                "row__icon--crit"));
-
             PermanentTraitProgression traits = _gameManager.PermanentTraits;
-            if (traits != null)
-            {
-                foreach (PermanentTraitType type in System.Enum.GetValues(typeof(PermanentTraitType)))
-                {
-                    int level = traits.GetLevel(type);
-                    if (level <= 0) continue;
-                    _summonerRowBuffer.Add(ReadOnlySummonerRow(
-                        $"trait:{type}",
-                        $"{traits.GetDisplayName(type)} Lv.{level:N0}",
-                        traits.GetCurrentEffect(type),
-                        TraitIconClass(type)));
-                }
-            }
-
             RunTraitProgression runTraits = _gameManager.RunTraits;
-            if (runTraits != null)
-            {
-                foreach (RunTraitType type in System.Enum.GetValues(typeof(RunTraitType)))
-                {
-                    int level = runTraits.GetLevel(type);
-                    if (level <= 0) continue;
-                    _summonerRowBuffer.Add(ReadOnlySummonerRow(
-                        $"run-trait:{type}",
-                        $"{runTraits.GetDisplayName(type)} Lv.{level:N0}",
-                        runTraits.GetCurrentEffect(type),
-                        RunTraitIconClass(type),
-                        "이번 런"));
-                }
-            }
-            BottomPanel.SetSummonerProgression(snapshot, _summonerRowBuffer);
+            float damageMultiplier =
+                snapshot.DamageMultiplier *
+                (traits?.Snapshot.SummonerDamageMultiplier ?? 1f) *
+                (_gameManager.Growth?.RunDamageMultiplier ?? 1f);
+            float criticalChance = Mathf.Clamp01(_gameManager.Growth?.CriticalChance ?? 0f);
+            string experience = snapshot.IsMaxLevel
+                ? "EXP MAX"
+                : $"EXP {snapshot.Experience:N0} / {snapshot.ExperienceToNext:N0}";
+            BottomPanel.SetSummonerInfo(new SummonerInfoModel(
+                "위대한 소환사",
+                $"Lv.{snapshot.Level:N0}",
+                experience,
+                snapshot.ExperienceProgress,
+                $"x{damageMultiplier:0.##}",
+                $"x{_gameManager.SummonerAttackSpeedMultiplier:0.##}",
+                $"{_gameManager.MaxCoreHp:0.#}",
+                $"{criticalChance * 100f:0.#}%",
+                $"{_gameManager.DirectRankOneChance * 100f:0.#}%",
+                BuildPermanentTraitText(traits),
+                BuildRunTraitText(runTraits)));
             BottomPanel.SetRedDot(
                 "summoner",
-                snapshot.CanLevelUp || (_gameManager.PermanentTraits?.PendingChoiceCount ?? 0) > 0);
+                (_gameManager.PermanentTraits?.PendingChoiceCount ?? 0) > 0);
         }
 
-        static string TraitIconClass(PermanentTraitType type) =>
-            type switch
-            {
-                PermanentTraitType.CoreVitality => "row__icon--hp",
-                PermanentTraitType.LuckySummon => "row__icon--crit",
-                PermanentTraitType.SummonerHaste or PermanentTraitType.SlimeHaste => "row__icon--aspd",
-                _ => "row__icon--atk",
-            };
-
-        static string RunTraitIconClass(RunTraitType type) =>
-            type switch
-            {
-                RunTraitType.CoreVitality => "row__icon--hp",
-                RunTraitType.CriticalFocus => "row__icon--crit",
-                RunTraitType.AllAttackSpeed => "row__icon--aspd",
-                _ => "row__icon--atk",
-            };
-
-        static GrowthRowModel ReadOnlySummonerRow(
-            string key,
-            string name,
-            string values,
-            string iconClass,
-            string actionText = "영구") =>
-            new(key, GrowthRowKind.ReadOnly, name, values, actionText, iconClass, false);
-
-        static void AddOwnedUnitTypes(
-            IReadOnlyList<SummonUnitInstance> units,
-            Dictionary<string, SummonUnitInstance> output)
+        static string BuildPermanentTraitText(PermanentTraitProgression traits)
         {
-            if (units == null) return;
-            for (int i = 0; i < units.Count; i++)
+            if (traits == null)
+                return "획득한 영구 특성이 없습니다.";
+            var lines = new List<string>();
+            foreach (PermanentTraitType type in System.Enum.GetValues(typeof(PermanentTraitType)))
             {
-                SummonUnitInstance instance = units[i];
-                if (instance?.Unit == null || string.IsNullOrWhiteSpace(instance.Unit.UnitId) ||
-                    output.ContainsKey(instance.Unit.UnitId))
-                    continue;
-                output.Add(instance.Unit.UnitId, instance);
+                int level = traits.GetLevel(type);
+                if (level > 0)
+                    lines.Add($"• {traits.GetDisplayName(type)} Lv.{level:N0} — {traits.GetCurrentEffect(type)}");
             }
+            return lines.Count == 0
+                ? "획득한 영구 특성이 없습니다."
+                : string.Join("\n", lines);
         }
 
-        void OnRunUpgradeRequested(RunUpgradeType type) =>
-            _gameManager?.Growth?.TryPurchaseRunUpgrade(type);
+        static string BuildRunTraitText(RunTraitProgression traits)
+        {
+            if (traits == null)
+                return "획득한 런 특성이 없습니다.";
+            var lines = new List<string>();
+            IReadOnlyList<RunRewardDefinition> rewards = traits.GetAcquiredRewards();
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                RunRewardDefinition reward = rewards[i];
+                int level = traits.GetLevel(reward.RewardId);
+                if (level > 0)
+                    lines.Add($"• {reward.DisplayName} Lv.{level:N0} — {traits.GetCurrentEffect(reward)}");
+            }
+            return lines.Count == 0
+                ? "획득한 런 특성이 없습니다."
+                : string.Join("\n", lines);
+        }
 
-        void OnSlimeLevelUpRequested(string unitId) =>
-            _gameManager?.Growth?.TryLevelUpSlime(unitId);
+        void OnRunUpgradeRequested(RunUpgradeType type)
+        {
+            if (_gameManager?.Growth == null) return;
+            _gameManager.Growth.TryPurchaseRunUpgrade(type);
+            RefreshGrowthUI();
+        }
 
-        void OnSummonerLevelUpRequested() =>
-            _gameManager?.SummonerProgression?.TryLevelUp();
+        void OnSlimeLevelUpRequested(string unitId)
+        {
+            if (_gameManager?.Growth == null) return;
+            _gameManager.Growth.TryLevelUpSlime(unitId);
+            RefreshGrowthUI();
+            RefreshOpenUnitDetail();
+        }
 
-        void TryShowTraitChoice()
+        bool TryShowTraitChoice()
         {
             if (_traitChoicePopupOpen || _gameManager == null)
-                return;
+                return false;
             if (traitChoicePopupPrefab == null)
             {
                 Debug.LogWarning("[CrossDefense] TraitChoicePopup prefab reference is missing.", this);
-                return;
+                return false;
             }
 
             if (_traitChoicePopup == null)
@@ -400,50 +370,134 @@ namespace CrossDefense.UI
             {
                 IReadOnlyList<RunTraitChoice> runChoices = runTraits.GetCurrentChoices();
                 if (runChoices.Count != 3)
-                    return;
+                    return false;
                 _traitChoicePopupOpen = true;
+                _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, true);
                 _traitChoicePopup.Show(
                     runChoices,
                     runTraits.ClearedWave,
                     OnRunTraitChoiceConfirmed);
-                return;
+                return true;
             }
 
             PermanentTraitProgression traits = _gameManager.PermanentTraits;
             if (traits == null || traits.PendingChoiceCount <= 0)
-                return;
+                return false;
             IReadOnlyList<PermanentTraitChoice> choices = traits.GetCurrentChoices();
             if (choices.Count != 3)
-                return;
+                return false;
             _traitChoicePopupOpen = true;
+            _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, true);
             _traitChoicePopup.Show(choices, traits.PendingChoiceCount, OnTraitChoiceConfirmed);
+            return true;
         }
 
         void OnTraitChoiceConfirmed(PermanentTraitType type)
         {
             _traitChoicePopupOpen = false;
             if (_gameManager?.PermanentTraits?.TryChoose(type) != true)
+            {
+                _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 return;
+            }
             StartCoroutine(ShowNextTraitChoiceNextFrame());
         }
 
-        void OnRunTraitChoiceConfirmed(RunTraitType type)
+        void OnRunTraitChoiceConfirmed(string rewardId)
         {
             _traitChoicePopupOpen = false;
-            if (_gameManager?.RunTraits?.TryChoose(type) != true)
+            if (_gameManager?.TryChooseRunReward(
+                    rewardId,
+                    out IReadOnlyList<SummonResult> summonResults) != true)
+            {
+                _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 return;
+            }
+
+            if (summonResults != null && summonResults.Count > 0)
+            {
+                _runRewardSummonResults = summonResults;
+                _runRewardSummonResultIndex = 0;
+                BottomPanel?.SetSummonAnimationState(true);
+                _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, true);
+                PlayNextRunRewardSummon();
+                return;
+            }
             StartCoroutine(ShowNextTraitChoiceNextFrame());
+        }
+
+        void PlayNextRunRewardSummon()
+        {
+            if (_runRewardSummonResults == null ||
+                _runRewardSummonResultIndex >= _runRewardSummonResults.Count ||
+                SummonRoulette == null)
+            {
+                FinishRunRewardSummonSequence();
+                return;
+            }
+
+            SummonResult result = _runRewardSummonResults[_runRewardSummonResultIndex++];
+            SummonRoulette.Play(result, PlayNextRunRewardSummon);
+        }
+
+        void FinishRunRewardSummonSequence()
+        {
+            _runRewardSummonResults = null;
+            _runRewardSummonResultIndex = 0;
+            BottomPanel?.SetSummonAnimationState(false);
+            _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+            if (isActiveAndEnabled)
+                StartCoroutine(ShowNextTraitChoiceNextFrame());
         }
 
         IEnumerator ShowNextTraitChoiceNextFrame()
         {
             yield return null;
-            if (isActiveAndEnabled)
-                TryShowTraitChoice();
+            if (!isActiveAndEnabled)
+                yield break;
+            if (!TryShowTraitChoice())
+                _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
         }
 
-        void OnBenchSlotSelected(SummonUnitInstance instance, int quantity) =>
-            SummonUnitDetail?.Show(instance, quantity);
+        void OnBenchSlotSelected(SummonUnitInstance instance, int quantity)
+        {
+            if (SummonUnitDetail == null || instance?.Unit == null)
+                return;
+            SummonUnitDetail.Show(instance, quantity, CreateSlimeLevelUpModel(instance));
+        }
+
+        void RefreshOpenUnitDetail()
+        {
+            if (SummonUnitDetail?.IsOpen != true || SummonUnitDetail.CurrentInstance?.Unit == null)
+                return;
+            SummonUnitInstance instance = SummonUnitDetail.CurrentInstance;
+            SummonUnitDetail.Show(
+                instance,
+                SummonUnitDetail.CurrentQuantity,
+                CreateSlimeLevelUpModel(instance));
+        }
+
+        SlimeLevelUpViewModel CreateSlimeLevelUpModel(SummonUnitInstance instance)
+        {
+            GrowthManager growth = _gameManager?.Growth;
+            SummonManager summonManager = _gameManager?.SummonManager;
+            string unitId = instance?.Unit?.UnitId;
+            if (growth == null || summonManager == null || string.IsNullOrWhiteSpace(unitId))
+                return default;
+
+            SummonUnitUpgradeState state = summonManager.GetUnitUpgradeState(unitId);
+            bool maxed = state.Level >= growth.Balance.SlimeMaxLevel;
+            int nextLevel = maxed ? state.Level : state.Level + 1;
+            return new SlimeLevelUpViewModel(
+                state.Level,
+                growth.Balance.SlimeMaxLevel,
+                growth.GetSlimeLevelUpCost(unitId),
+                state.DamageMultiplier,
+                maxed ? state.DamageMultiplier : growth.Balance.SlimeDamageMultiplier(nextLevel),
+                state.AttackSpeedMultiplier,
+                maxed ? state.AttackSpeedMultiplier : growth.Balance.SlimeAttackSpeedMultiplier(nextLevel),
+                !maxed && growth.CanLevelUpSlime(unitId));
+        }
 
         void OnBenchDragStarted(SummonUnitInstance instance, Vector2 panelPosition)
         {
@@ -480,12 +534,20 @@ namespace CrossDefense.UI
                 return;
 
             BottomPanel.SetSummonAnimationState(true);
+            _gameManager.SetGameplayPause(GameplayPauseReason.SummonRoulette, true);
             SummonRoulette.Play(
                 result,
                 () =>
                 {
-                    _gameManager.SummonManager.CommitPending(result);
-                    BottomPanel.SetSummonAnimationState(false);
+                    try
+                    {
+                        _gameManager?.SummonManager?.CommitPending(result);
+                    }
+                    finally
+                    {
+                        BottomPanel?.SetSummonAnimationState(false);
+                        _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+                    }
                 });
         }
 

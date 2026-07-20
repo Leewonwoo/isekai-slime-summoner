@@ -53,6 +53,17 @@
                         <Label class="unit-detail__stat-name" text="이동 속도" />
                         <Label name="unit-detail-move-speed" class="unit-detail__stat-value" text="0" />
                     </VisualElement>
+                    <VisualElement class="unit-detail__stat-row">
+                        <Label class="unit-detail__stat-name" text="★3 스킬" />
+                        <Label name="unit-detail-star3-skill" class="unit-detail__stat-value" text="해금 예정" />
+                    </VisualElement>
+                </VisualElement>
+                <VisualElement name="unit-detail-upgrade" class="unit-detail__upgrade">
+                    <VisualElement class="unit-detail__upgrade-info" picking-mode="Ignore">
+                        <Label name="unit-detail-upgrade-level" class="unit-detail__upgrade-level" text="슬라임 Lv.1" />
+                        <Label name="unit-detail-upgrade-values" class="unit-detail__upgrade-values" text="공격 100% → 108% · 공속 100% → 103%" />
+                    </VisualElement>
+                    <Button name="unit-detail-upgrade-button" class="btn btn--primary unit-detail__upgrade-button" text="25 G" />
                 </VisualElement>
                 <Label class="unit-detail__hint" text="슬롯을 길게 끌어 필드에 배치할 수 있습니다." picking-mode="Ignore" />
             </VisualElement>

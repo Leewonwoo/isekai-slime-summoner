@@ -5,14 +5,46 @@
                 <VisualElement name="summoner-tab-portrait" class="summoner-tab__portrait" />
             </VisualElement>
             <VisualElement class="summoner-tab__profile-info">
-                <Label name="summoner-tab-level" class="summoner-tab__name" text="소환사 Lv.1" />
+                <Label name="summoner-tab-name" class="summoner-tab__name" text="위대한 소환사" />
+                <Label name="summoner-tab-level" class="summoner-tab__level" text="Lv.1" />
+                <Label name="summoner-exp-text" class="summoner-tab__exp-text" text="EXP 0 / 20" />
                 <VisualElement class="gauge summoner-tab__exp">
                     <VisualElement name="summoner-exp-fill" class="gauge__fill gauge__fill--exp" />
                 </VisualElement>
             </VisualElement>
-            <Button name="summoner-upgrade-button" class="btn summoner-tab__upgrade-button" text="강화" />
         </VisualElement>
-        <ScrollView name="summoner-list" class="row-list" />
-        <Button name="meta-tree-button" class="btn summoner-tab__meta-button" text="메타 진행 트리 (3주차 구현)" />
+        <ScrollView name="summoner-info-scroll" class="summoner-tab__scroll panel-scroll" mode="Vertical">
+            <VisualElement class="summoner-tab__section" picking-mode="Ignore">
+                <Label class="summoner-tab__section-title" text="소환사 능력치" />
+                <VisualElement class="summoner-tab__stat-line">
+                    <Label class="summoner-tab__stat-name" text="공격력 배율" />
+                    <Label name="summoner-stat-damage" class="summoner-tab__stat-value" text="x1" />
+                </VisualElement>
+                <VisualElement class="summoner-tab__stat-line">
+                    <Label class="summoner-tab__stat-name" text="공격속도 배율" />
+                    <Label name="summoner-stat-attack-speed" class="summoner-tab__stat-value" text="x1" />
+                </VisualElement>
+                <VisualElement class="summoner-tab__stat-line">
+                    <Label class="summoner-tab__stat-name" text="최대 HP" />
+                    <Label name="summoner-stat-max-hp" class="summoner-tab__stat-value" text="100" />
+                </VisualElement>
+                <VisualElement class="summoner-tab__stat-line">
+                    <Label class="summoner-tab__stat-name" text="치명타 확률" />
+                    <Label name="summoner-stat-critical" class="summoner-tab__stat-value" text="0%" />
+                </VisualElement>
+                <VisualElement class="summoner-tab__stat-line">
+                    <Label class="summoner-tab__stat-name" text="★2 직행 확률" />
+                    <Label name="summoner-stat-jackpot" class="summoner-tab__stat-value" text="5%" />
+                </VisualElement>
+            </VisualElement>
+            <VisualElement class="summoner-tab__section" picking-mode="Ignore">
+                <Label class="summoner-tab__section-title" text="영구 특성" />
+                <Label name="summoner-permanent-traits" class="summoner-tab__trait-text" text="획득한 영구 특성이 없습니다." />
+            </VisualElement>
+            <VisualElement class="summoner-tab__section" picking-mode="Ignore">
+                <Label class="summoner-tab__section-title" text="이번 런 특성" />
+                <Label name="summoner-run-traits" class="summoner-tab__trait-text" text="획득한 런 특성이 없습니다." />
+            </VisualElement>
+        </ScrollView>
     </VisualElement>
 </UXML>

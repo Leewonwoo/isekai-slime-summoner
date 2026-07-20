@@ -61,7 +61,8 @@
     --tab-frame-slice-x: 56px;
     --tab-frame-slice-y: 48px;
     --tab-frame-slice-scale: 0.35;
-    --summoner-tab-profile-height: 140px;
+    --summoner-tab-profile-height: 180px;
+    --summoner-stat-line-height: 64px;
 
     /* TopHUD 구조 (1080 기준) */
     --top-hud-profile-width: 264px;
@@ -86,14 +87,15 @@
     --summon-grid-slot-height: 210px;
     --summon-grid-icon-size: 112px;
     --summon-merge-badge-height: 36px;
-    --summon-scrollbar-width: 16px;
+    --panel-scrollbar-width: 16px;
     --summon-side-width: 320px;
     --summon-contract-panel-height: 96px;
     --unit-detail-width: 760px;
-    --unit-detail-height: 920px;
+    --unit-detail-height: 1120px;
     --unit-detail-icon-size: 200px;
     --unit-detail-stat-row-height: 72px;
     --unit-detail-content-inset: 72px;
+    --unit-detail-upgrade-button-width: 220px;
     --summon-modal-width: 84%;
     --summon-modal-height: 52%;
     --summon-modal-content-inset: 72px;

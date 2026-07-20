@@ -1,4 +1,4 @@
-/* 공용 리스트 행 — 강화/스킬/소환사 3탭 공용 (SPEC §4.3)
+/* 공용 리스트 행 — 강화/스킬 탭 공용 (SPEC §4.3)
    나무 판재 플레이트 + 잉크 텍스트 (9-slice 판재 스프라이트 적용 전 플랫 근사) */
 .row {
     height: var(--row-height);
@@ -74,4 +74,10 @@
 
 .row__button {
     min-width: 200px;
+}
+
+/* 입력은 비활성으로 유지하되 필요 골드/MAX 라벨은 읽을 수 있어야 한다. */
+.row__button.btn--disabled {
+    color: var(--color-text-dim);
+    opacity: 1;
 }

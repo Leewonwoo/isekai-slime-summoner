@@ -16,7 +16,7 @@ namespace CrossDefense.UI
         public static string Capacity(int current, int total) => $"{current:N0} / {total:N0}";
 
         public static string StackedCapacity(int stacks, int capacity, int totalUnits) =>
-            $"보유 슬롯 {stacks:N0}/{capacity:N0} · 총 {totalUnits:N0}개";
+            $"보유 {totalUnits:N0}/{capacity:N0} · 슬롯 {stacks:N0}개";
 
         /// <summary>"현재 → 다음" 변화량 표기 (SPEC §4.5)</summary>
         public static string Delta(float current, float next) => $"{Num(current)} → {Num(next)}";
