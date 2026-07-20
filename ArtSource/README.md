@@ -30,6 +30,7 @@ Unity 임포트 기본값:
 | 일러스트 | `illustrations/` | `illust_title.png`, `illust_loading.png` |
 
 - 버전이 생기면 `_v2` 접미사 (`unit_frost_archer_v2.png`) — 최종 채택본만 Assets/Art로
+- 성급 전용 이미지는 버전과 구분해 `_star2`, `_star3` 접미사를 사용한다 (`unit_punch_slime_star2.png`).
 - 등급별 색 변형은 이미지로 만들지 않는다 (Unity 틴트 처리, SPEC §2.3)
 
 ## 대응하는 게임용 폴더 (가공 완료본)
