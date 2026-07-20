@@ -28,9 +28,20 @@ MonoBehaviour:
   - {fileID: -237650918436205781, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
   - {fileID: 746318205974103682, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
   moveAnimationFps: 9
+  attackFrames:
+  - {fileID: 905318247610492735, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: -416205938174620583, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: 582730419865102374, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: -739184205630971426, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: 267510938461720598, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: -528603194872150963, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: 641972305816420537, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: -183750462931680245, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  - {fileID: 794206531847920316, guid: c84ea1d6f0234b5e9a7d2183fc604927, type: 3}
+  attackAnimationFps: 18
   baseHp: 100
   moveSpeed: 1
-  contactDamage: 1
+  contactDamage: 5
   attacksPerSecond: 1
   attackRange: 0.55
   rewardGold: 2

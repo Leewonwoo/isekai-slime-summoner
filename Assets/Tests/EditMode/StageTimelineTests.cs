@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using CrossDefense.Data;
 using NUnit.Framework;
 using UnityEngine;
@@ -86,6 +87,53 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void SpawnEntry_SizeMultiplier_IsIndependentFromMonsterBaseSize()
+        {
+            var monster = MonsterData.CreatePrototype(
+                "size-probe",
+                "Size Probe",
+                MonsterShape.Grunt,
+                MonsterAttribute.None,
+                100,
+                1f,
+                5,
+                1,
+                sizeMultiplier: 0.9f);
+            var entry = MonsterSpawnEntry.CreatePrototype(monster, 1, 0.5f, 3f);
+
+            Assert.That(monster.SizeMultiplier, Is.EqualTo(0.9f));
+            Assert.That(entry.SizeMultiplier, Is.EqualTo(3f));
+
+            Object.DestroyImmediate(monster);
+        }
+
+        [Test]
+        public void MonsterController_PreservesSpriteColorAndCombinesBaseAndSpawnSize()
+        {
+            var monster = MonsterData.CreatePrototype(
+                "boss-size-probe",
+                "Boss Size Probe",
+                MonsterShape.Grunt,
+                MonsterAttribute.Fire,
+                100,
+                1f,
+                5,
+                1,
+                sizeMultiplier: 0.9f);
+            var gameObject = new GameObject("Boss Size Probe");
+            gameObject.AddComponent<SpriteRenderer>();
+            var controller = gameObject.AddComponent<CrossDefense.Units.MonsterController>();
+
+            controller.Initialize(null, null, monster, 1f, 1f, 1f, 3f);
+
+            Assert.That(controller.transform.localScale.x, Is.EqualTo(0.9f * 3f).Within(0.001f));
+            Assert.That(gameObject.GetComponent<SpriteRenderer>().color, Is.EqualTo(Color.white));
+
+            Object.DestroyImmediate(gameObject);
+            Object.DestroyImmediate(monster);
+        }
+
+        [Test]
         public void SpawnZoneSelection_IsDeterministicForSameSeed()
         {
             var timeline = StageTimeline.CreatePrototype(1);
@@ -100,3 +148,4 @@ namespace CrossDefense.Tests.EditMode
         }
     }
 }
+#endif

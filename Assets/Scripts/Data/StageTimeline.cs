@@ -82,6 +82,7 @@ namespace CrossDefense.Data
         [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
         [Min(0.01f)] [SerializeField] float speedMultiplier = 1f;
         [Min(0.01f)] [SerializeField] float rewardMultiplier = 1f;
+        [Min(0.1f)] [SerializeField] float sizeMultiplier = 1f;
 
         public MonsterData Monster => monster;
         public int Count => count;
@@ -89,14 +90,20 @@ namespace CrossDefense.Data
         public float HpMultiplier => hpMultiplier;
         public float SpeedMultiplier => speedMultiplier;
         public float RewardMultiplier => rewardMultiplier;
+        public float SizeMultiplier => sizeMultiplier;
 
-        public static MonsterSpawnEntry CreatePrototype(MonsterData monster, int count, float interval)
+        public static MonsterSpawnEntry CreatePrototype(
+            MonsterData monster,
+            int count,
+            float interval,
+            float sizeMultiplier = 1f)
         {
             return new MonsterSpawnEntry
             {
                 monster = monster,
                 count = count,
                 spawnInterval = interval,
+                sizeMultiplier = Mathf.Max(0.1f, sizeMultiplier),
             };
         }
     }
@@ -109,7 +116,7 @@ namespace CrossDefense.Data
         [Min(0)] [SerializeField] float preparationTime = 5f;
         [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
         [Min(0.01f)] [SerializeField] float speedMultiplier = 1f;
-        [Min(0)] [SerializeField] int summonContractReward = 6;
+        [Min(0)] [SerializeField] int summonContractReward = 1;
         [SerializeField] SpawnZoneWeightSet spawnZoneWeights = new();
         // 기존 에셋 호환용. 새 런타임은 spawnZoneWeights를 우선 사용한다.
         [SerializeField] DirectionWeightSet directionWeights = new();
@@ -143,7 +150,7 @@ namespace CrossDefense.Data
                 label = label,
                 isBoss = isBoss,
                 preparationTime = 1f,
-                summonContractReward = isBoss ? 12 : 6,
+                summonContractReward = isBoss ? 2 : 1,
                 monsterSpawns = new List<MonsterSpawnEntry>
                 {
                     MonsterSpawnEntry.CreatePrototype(monster, count, 0.35f),
@@ -170,6 +177,7 @@ namespace CrossDefense.Data
 
         [Header("Timeline")]
         [Min(1)] [SerializeField] int runTraitInterval = 5;
+        [SerializeField] RunRewardCatalog runRewardCatalog;
         [SerializeField] List<StageWave> waves = new();
 
         public string StageId => stageId;
@@ -179,6 +187,7 @@ namespace CrossDefense.Data
         public bool RandomizeDirectionWeights => randomizeDirectionWeights;
         public float DirectionWeightJitter => directionWeightJitter;
         public int RunTraitInterval => Mathf.Max(1, runTraitInterval);
+        public RunRewardCatalog RunRewardCatalog => runRewardCatalog;
         public IReadOnlyList<StageWave> Waves => waves;
         public int WaveCount => waves.Count;
 
@@ -205,6 +214,7 @@ namespace CrossDefense.Data
             timeline.displayName = "Runtime Prototype";
             timeline.randomSeed = 20260714;
             timeline.randomizeDirectionWeights = false;
+            timeline.runRewardCatalog = RunRewardCatalog.CreateRuntimeDefault();
 
             var basic = MonsterData.CreatePrototype("runtime-basic", "Prototype Goblin", MonsterShape.Grunt,
                 MonsterAttribute.None, 40, 0.75f, 5, 2, defaultMonsterSprite, defaultMonsterMoveFrames);
@@ -261,6 +271,14 @@ namespace CrossDefense.Data
 
         public IEnumerable<string> Validate()
         {
+            if (runRewardCatalog == null)
+                yield return "The stage has no run reward catalog.";
+            else
+            {
+                foreach (string warning in runRewardCatalog.Validate())
+                    yield return $"Run reward catalog: {warning}";
+            }
+
             if (waves == null || waves.Count == 0)
             {
                 yield return "The stage has no waves.";
@@ -288,6 +306,8 @@ namespace CrossDefense.Data
                 {
                     if (wave.MonsterSpawns[j] == null || wave.MonsterSpawns[j].Monster == null)
                         yield return $"Wave {i + 1}, monster entry {j + 1} has no Monster Profile.";
+                    else if (wave.MonsterSpawns[j].SizeMultiplier <= 0f)
+                        yield return $"Wave {i + 1}, monster entry {j + 1} has an invalid size multiplier.";
                 }
             }
         }

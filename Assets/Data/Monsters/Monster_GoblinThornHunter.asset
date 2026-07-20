@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e6e5f7f5cf74f4f8b7b73b8dce9a1c2, type: 3}
-  m_Name: Monster_GoblinNatureRaider
+  m_Name: Monster_GoblinThornHunter
   m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.MonsterData
-  monsterId: goblin-nature-raider
-  displayName: "\uC790\uC5F0 \uACE0\uBE14\uB9B0 \uC57D\uD0C8\uC790"
-  shape: 3
+  monsterId: goblin-thorn-hunter
+  displayName: "\uC790\uC5F0 \uACE0\uBE14\uB9B0 \uAC00\uC2DC \uC0AC\uB0E5\uAFBC"
+  shape: 1
   attribute: 3
-  sprite: {fileID: 21300000, guid: e43940973af84821a1ac31ec0c109fde, type: 3}
+  sprite: {fileID: 21300000, guid: 7029270f972e2e14da6f015772c476a3, type: 3}
   moveFrames: []
   moveAnimationFps: 9
   attackFrames: []
   attackAnimationFps: 18
-  baseHp: 95
-  moveSpeed: 0.95
+  baseHp: 70
+  moveSpeed: 0.9
   contactDamage: 6
-  attacksPerSecond: 1
-  attackRange: 0.55
-  rewardGold: 3
-  sizeMultiplier: 1
+  attacksPerSecond: 0.9
+  attackRange: 2.2
+  rewardGold: 4
+  sizeMultiplier: 0.95

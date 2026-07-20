@@ -16,22 +16,15 @@ MonoBehaviour:
   displayName: "\uD654\uC5FC \uACE0\uBE14\uB9B0 \uC815\uCC30\uBCD1"
   shape: 1
   attribute: 1
-  sprite: {fileID: 21300000, guid: 07da60cd6b815bc448ba897100442ed4, type: 3}
-  moveFrames:
-  - {fileID: 814720638514902731, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: -295104837620581466, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: 673905218437106829, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: -784126509330741852, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: 391650284716092537, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: -619837205481360924, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: 528104963720481635, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: -237650918436205781, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
-  - {fileID: 746318205974103682, guid: b73690afc4814dde9d65f1a724e7c630, type: 3}
+  sprite: {fileID: 21300000, guid: b36b54b376e24dbbb202f969f136c4f0, type: 3}
+  moveFrames: []
   moveAnimationFps: 9
+  attackFrames: []
+  attackAnimationFps: 18
   baseHp: 65
-  moveSpeed: 1.6
-  contactDamage: 1
-  attacksPerSecond: 1
-  attackRange: 0.55
+  moveSpeed: 1.45
+  contactDamage: 4
+  attacksPerSecond: 1.2
+  attackRange: 0.5
   rewardGold: 3
   sizeMultiplier: 0.9
