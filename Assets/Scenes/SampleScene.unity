@@ -581,6 +581,7 @@ MonoBehaviour:
   firePosition: {fileID: 115237141}
   spawnOffset: 0.4
   projectileScale: 0.65
+  volleyShotDelay: 0.09
   idleFrames:
   - {fileID: 3707358749038027266, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
   - {fileID: -1558088450625946277, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
@@ -889,6 +890,10 @@ MonoBehaviour:
   restartStageOnDefeat: 1
   defeatRestartDelay: 1.25
   growthBalance: {fileID: 11400000, guid: bdc2782e003172949ad988967dd55bfc, type: 2}
+  monsterCatalog: {fileID: 11400000, guid: c13494a960e27bd4ca8400b3374c0f94, type: 2}
+  equipmentCatalog: {fileID: 11400000, guid: 160b1295ceedced46a7672a1ad4980c5, type: 2}
+  merchantCatalog: {fileID: 11400000, guid: 42c51469fd318ea4e8a95aabc9f681bf, type: 2}
+  dopamineBalance: {fileID: 11400000, guid: f2cdf33cafc6413db89b0df4a54698f6, type: 2}
   summonPool: []
   runtimePrototypeSummonSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
   runtimePrototypePunchSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
@@ -957,6 +962,48 @@ MonoBehaviour:
   runtimeStar3FireEffectSprite: {fileID: 21300000, guid: 005bf71e05b73234aac7628c33170fb7, type: 3}
   runtimeStar3IceEffectSprite: {fileID: 21300000, guid: 03938096e57292747a2d79a981f20927, type: 3}
   runtimeStar3NatureEffectSprite: {fileID: 21300000, guid: 2bb778f6eaa37a3468357c863f80bff1, type: 3}
+  runtimeExplosionStar3EffectFrames:
+  - {fileID: 286354783571157652, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -8372516123535416995, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 4032882372213062139, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -2520915888631964272, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -3042429207339010407, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 4439341176720341408, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 7069292609803652604, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -8856983450250083333, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -7659473598035362436, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  runtimeMeteorProjectileSprite: {fileID: 21300000, guid: 1826d8076d6cd2647a8d737154360b6c, type: 3}
+  runtimeMeteorEffectFrames:
+  - {fileID: 3341097193763820795, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: 2258295125871327435, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -823120227653369352, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -119116472234480114, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -779298853172824851, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -2364353028356555654, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -4627547469989191796, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -6494904546301798713, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  - {fileID: -2557572776321238692, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
+  runtimeIceWallEffectFrames:
+  - {fileID: 6354834988811594857, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: 6059288854835222261, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: -1608396721965185217, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: -6753147002065091999, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: -8610568265894508638, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: 4336140337269977972, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: -4104395749610144809, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: 8890068060344238269, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  - {fileID: -3353631235777640891, guid: 21ce46ee62a2c9640acccbf3bec6492f, type: 3}
+  runtimeAegisEffectSprite: {fileID: 21300000, guid: 75c327f500c92db4896b34b6e87ea26e, type: 3}
+  runtimeGoblinDeathEffectFrames:
+  - {fileID: -9045014454720270459, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: -6976922778416783462, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: 4886616776278931058, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: -4612333923122050145, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: 2527902470575483568, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: 4128052852331201768, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: -8090327015114928730, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: 5998035425806528506, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  - {fileID: -3289128554310958305, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
   autoDeploySummonedUnits: 1
   currencyResultChance: 0.18
   directRankOneChance: 0.05
