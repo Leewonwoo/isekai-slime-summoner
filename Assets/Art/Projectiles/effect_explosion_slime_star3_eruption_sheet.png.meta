@@ -226,7 +226,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -240,7 +240,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 128
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -264,7 +264,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -318,19 +318,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_0
       rect:
         serializedVersion: 2
-        x: 176
-        y: 284
-        width: 31
-        height: 79
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 4922e72982659f300800000000000000
+      spriteID: 979474364894b7b4e89724b66cc3b767
       internalID: 286354783571157652
       vertices: []
       indices: 
@@ -340,19 +340,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_1
       rect:
         serializedVersion: 2
-        x: 282
-        y: 304
-        width: 12
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: d51e074f1f8decb80800000000000000
+      spriteID: 4ea4c62cd8c791846ad695eaca3bdd05
       internalID: -8372516123535416995
       vertices: []
       indices: 
@@ -362,19 +362,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_2
       rect:
         serializedVersion: 2
-        x: 297
-        y: 267
-        width: 35
-        height: 101
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: bf9b1b0862da7f730800000000000000
+      spriteID: 720ca44d31f077b4788c09f63e544b2b
       internalID: 4032882372213062139
       vertices: []
       indices: 
@@ -384,19 +384,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_3
       rect:
         serializedVersion: 2
-        x: 336
-        y: 307
-        width: 12
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 09d147d0b58e30dd0800000000000000
+      spriteID: 5fb2c22e143fff740a95148ab776dced
       internalID: -2520915888631964272
       vertices: []
       indices: 
@@ -406,19 +406,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_4
       rect:
         serializedVersion: 2
-        x: 51
-        y: 267
-        width: 28
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 996f84261ce17c5d0800000000000000
+      spriteID: 41e5a3bff29cbd9409c9cca9970859d4
       internalID: -3042429207339010407
       vertices: []
       indices: 
@@ -428,19 +428,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_5
       rect:
         serializedVersion: 2
-        x: 172
-        y: 267
-        width: 23
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0a93e239745bb9d30800000000000000
+      spriteID: 0c5664bd62c65974aa7e60771e16b21f
       internalID: 4439341176720341408
       vertices: []
       indices: 
@@ -450,19 +450,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_6
       rect:
         serializedVersion: 2
-        x: 38
-        y: 139
-        width: 50
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: cfd04a48c2c2b1260800000000000000
+      spriteID: 000f731f3671dce42ab6172563a5b1df
       internalID: 7069292609803652604
       vertices: []
       indices: 
@@ -472,19 +472,19 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_7
       rect:
         serializedVersion: 2
-        x: 151
-        y: 139
-        width: 78
-        height: 112
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: bf384527a7ca51580800000000000000
+      spriteID: e278118bfa63f0942b25287d4e007c05
       internalID: -8856983450250083333
       vertices: []
       indices: 
@@ -494,1230 +494,20 @@ TextureImporter:
       name: effect_explosion_slime_star3_eruption_sheet_8
       rect:
         serializedVersion: 2
-        x: 285
-        y: 225
-        width: 11
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c7d7e9e185514b590800000000000000
+      spriteID: 08461d00188cce84abdf5072c67eb4af
       internalID: -7659473598035362436
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_9
-      rect:
-        serializedVersion: 2
-        x: 298
-        y: 236
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8e386ce35907df910800000000000000
-      internalID: 1872776806361629672
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_10
-      rect:
-        serializedVersion: 2
-        x: 322
-        y: 236
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fe898c9e9f41beda0800000000000000
-      internalID: -5914610622019364625
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_11
-      rect:
-        serializedVersion: 2
-        x: 334
-        y: 225
-        width: 12
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 20100351b2ed1a910800000000000000
-      internalID: 1847001598819041538
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_12
-      rect:
-        serializedVersion: 2
-        x: 149
-        y: 210
-        width: 11
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 65b3b1543008623a0800000000000000
-      internalID: -6690519444879623338
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_13
-      rect:
-        serializedVersion: 2
-        x: 273
-        y: 214
-        width: 14
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5d75ae1fb58c7d070800000000000000
-      internalID: 8131187949466965973
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_14
-      rect:
-        serializedVersion: 2
-        x: 296
-        y: 220
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 23ec1036a7e1ec080800000000000000
-      internalID: -9165354680656474574
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_15
-      rect:
-        serializedVersion: 2
-        x: 303
-        y: 222
-        width: 10
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5e30ddf8666c9f750800000000000000
-      internalID: 6339316094303273957
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_16
-      rect:
-        serializedVersion: 2
-        x: 315
-        y: 220
-        width: 12
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 611eeb3ee3b9062c0800000000000000
-      internalID: -4440378538176093930
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_17
-      rect:
-        serializedVersion: 2
-        x: 326
-        y: 220
-        width: 11
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8b674f850f9dd94c0800000000000000
-      internalID: -4279024444624308552
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_18
-      rect:
-        serializedVersion: 2
-        x: 344
-        y: 213
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 524bebb898efcf030800000000000000
-      internalID: 3529976074660131877
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_19
-      rect:
-        serializedVersion: 2
-        x: 265
-        y: 197
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1e92c8c32fb744eb0800000000000000
-      internalID: -4736524627758798367
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_20
-      rect:
-        serializedVersion: 2
-        x: 271
-        y: 25
-        width: 83
-        height: 196
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f295f6d40e76a4430800000000000000
-      internalID: 3767938251318319407
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_21
-      rect:
-        serializedVersion: 2
-        x: 351
-        y: 195
-        width: 13
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4a42f2bf1d45b3c50800000000000000
-      internalID: 6645998935954367652
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_22
-      rect:
-        serializedVersion: 2
-        x: 272
-        y: 184
-        width: 14
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f362939f3f1df38c0800000000000000
-      internalID: -4017261496802662849
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_23
-      rect:
-        serializedVersion: 2
-        x: 343
-        y: 182
-        width: 12
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a983a2d8d4e310810800000000000000
-      internalID: 1729732234688739482
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_24
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 99
-        width: 13
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f6f1169b69be2e250800000000000000
-      internalID: 5972595088434470767
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_25
-      rect:
-        serializedVersion: 2
-        x: 50
-        y: 109
-        width: 23
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: caf383e78cd500df0800000000000000
-      internalID: -216069666421325908
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_26
-      rect:
-        serializedVersion: 2
-        x: 79
-        y: 106
-        width: 8
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d2b361ab5cc33f8d0800000000000000
-      internalID: -2813838522248185043
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_27
-      rect:
-        serializedVersion: 2
-        x: 161
-        y: 105
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 25a72d3a7f06afaa0800000000000000
-      internalID: -6126477726362469806
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_28
-      rect:
-        serializedVersion: 2
-        x: 186
-        y: 110
-        width: 12
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d35663e2403a26420800000000000000
-      internalID: 2621837171433563453
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_29
-      rect:
-        serializedVersion: 2
-        x: 209
-        y: 105
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 20b2c9a76433b47f0800000000000000
-      internalID: -627351345290269950
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_30
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 97
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: da733b9e5bc614c10800000000000000
-      internalID: 2036028035113891757
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_31
-      rect:
-        serializedVersion: 2
-        x: 89
-        y: 91
-        width: 15
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 45fc373cea69803a0800000000000000
-      internalID: -6698938768365990060
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_32
-      rect:
-        serializedVersion: 2
-        x: 153
-        y: 92
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 53dcb70749af350c0800000000000000
-      internalID: -4588048079911137995
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_33
-      rect:
-        serializedVersion: 2
-        x: 223
-        y: 91
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 17222f2dbfefef2a0800000000000000
-      internalID: -6701638837951389071
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_34
-      rect:
-        serializedVersion: 2
-        x: 20
-        y: 83
-        width: 11
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0528db4ea6826a280800000000000000
-      internalID: -9032487563075681712
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_35
-      rect:
-        serializedVersion: 2
-        x: 37
-        y: 88
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b91afcafcd5026c10800000000000000
-      internalID: 2045203627438481819
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_36
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 72
-        width: 22
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e824937370538b880800000000000000
-      internalID: -8595061583729048946
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_37
-      rect:
-        serializedVersion: 2
-        x: 73
-        y: 88
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d91e0d80c2880e280800000000000000
-      internalID: -9016056731287887459
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_38
-      rect:
-        serializedVersion: 2
-        x: 99
-        y: 78
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 140a6a26d52f23780800000000000000
-      internalID: -8704628646852779967
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_39
-      rect:
-        serializedVersion: 2
-        x: 178
-        y: 79
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1d09fd031c58623e0800000000000000
-      internalID: -2078827113189764911
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_40
-      rect:
-        serializedVersion: 2
-        x: 198
-        y: 84
-        width: 8
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0c146f0b236b36600800000000000000
-      internalID: 460411915755471296
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_41
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 64
-        width: 11
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8ccf94e9bf54662a0800000000000000
-      internalID: -6744626444945982264
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_42
-      rect:
-        serializedVersion: 2
-        x: 45
-        y: 63
-        width: 12
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e9ea0ed17a86db420800000000000000
-      internalID: 2647387222933810846
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_43
-      rect:
-        serializedVersion: 2
-        x: 73
-        y: 68
-        width: 15
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 179cee9f077b3f790800000000000000
-      internalID: -7497447258784347791
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_44
-      rect:
-        serializedVersion: 2
-        x: 106
-        y: 64
-        width: 9
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 498b90dd1d5a8a2c0800000000000000
-      internalID: -4420100713488992108
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_45
-      rect:
-        serializedVersion: 2
-        x: 146
-        y: 73
-        width: 8
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 969c16d45b738f640800000000000000
-      internalID: 5113898628706060649
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_46
-      rect:
-        serializedVersion: 2
-        x: 186
-        y: 68
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 48892ed3671621100800000000000000
-      internalID: 77231304091015300
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_47
-      rect:
-        serializedVersion: 2
-        x: 198
-        y: 65
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4c6a461decad4f1c0800000000000000
-      internalID: -4470707948260907324
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_48
-      rect:
-        serializedVersion: 2
-        x: 229
-        y: 72
-        width: 9
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c61f8c86a39846ae0800000000000000
-      internalID: -1556968687204241044
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_49
-      rect:
-        serializedVersion: 2
-        x: 50
-        y: 11
-        width: 32
-        height: 56
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 04b96697089604b50800000000000000
-      internalID: 6575371456474422080
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_50
-      rect:
-        serializedVersion: 2
-        x: 78
-        y: 53
-        width: 8
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 629f8618d9ceaecc0800000000000000
-      internalID: -3680869584196798170
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_51
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 51
-        width: 9
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e7d9915e0ea17f250800000000000000
-      internalID: 5978276583576280446
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_52
-      rect:
-        serializedVersion: 2
-        x: 170
-        y: 62
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 16c25dda0da3b1000800000000000000
-      internalID: 7664492315225185
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_53
-      rect:
-        serializedVersion: 2
-        x: 25
-        y: 49
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7b3d61ce042466d00800000000000000
-      internalID: 965532016723809207
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_54
-      rect:
-        serializedVersion: 2
-        x: 43
-        y: 53
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 48ceda6f1c7460dc0800000000000000
-      internalID: -3673169547681207164
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_55
-      rect:
-        serializedVersion: 2
-        x: 151
-        y: 50
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0251562bae63b6aa0800000000000000
-      internalID: -6166774883110546144
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_56
-      rect:
-        serializedVersion: 2
-        x: 194
-        y: 53
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4fc13b97f345a5ce0800000000000000
-      internalID: -1415726501253145356
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_57
-      rect:
-        serializedVersion: 2
-        x: 226
-        y: 51
-        width: 8
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 995352b635a290220800000000000000
-      internalID: 2452538009848198553
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_58
-      rect:
-        serializedVersion: 2
-        x: 31
-        y: 33
-        width: 13
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7034099e0a64a22f0800000000000000
-      internalID: -996906710581886201
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_59
-      rect:
-        serializedVersion: 2
-        x: 86
-        y: 31
-        width: 12
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b638a7a468dea3b70800000000000000
-      internalID: 8879670776345297771
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_60
-      rect:
-        serializedVersion: 2
-        x: 157
-        y: 35
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 74b9585c40673bbc0800000000000000
-      internalID: -3768538700313158841
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_61
-      rect:
-        serializedVersion: 2
-        x: 173
-        y: 11
-        width: 37
-        height: 41
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 794bee99bf888e710800000000000000
-      internalID: 1722777471669941399
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_62
-      rect:
-        serializedVersion: 2
-        x: 217
-        y: 34
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: db1f550c18252d690800000000000000
-      internalID: -7578904505680006723
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_explosion_slime_star3_eruption_sheet_63
-      rect:
-        serializedVersion: 2
-        x: 300
-        y: 11
-        width: 30
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d83cb5a8aa21357d0800000000000000
-      internalID: -2930978408813050995
       vertices: []
       indices: 
       edges: []
@@ -1726,7 +516,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: dcd69790f27073b488993a6453bfac07
     internalID: 0
     vertices: []
     indices: 
@@ -1738,68 +528,13 @@ TextureImporter:
     nameFileIdTable:
       effect_explosion_slime_star3_eruption_sheet_0: 286354783571157652
       effect_explosion_slime_star3_eruption_sheet_1: -8372516123535416995
-      effect_explosion_slime_star3_eruption_sheet_10: -5914610622019364625
-      effect_explosion_slime_star3_eruption_sheet_11: 1847001598819041538
-      effect_explosion_slime_star3_eruption_sheet_12: -6690519444879623338
-      effect_explosion_slime_star3_eruption_sheet_13: 8131187949466965973
-      effect_explosion_slime_star3_eruption_sheet_14: -9165354680656474574
-      effect_explosion_slime_star3_eruption_sheet_15: 6339316094303273957
-      effect_explosion_slime_star3_eruption_sheet_16: -4440378538176093930
-      effect_explosion_slime_star3_eruption_sheet_17: -4279024444624308552
-      effect_explosion_slime_star3_eruption_sheet_18: 3529976074660131877
-      effect_explosion_slime_star3_eruption_sheet_19: -4736524627758798367
       effect_explosion_slime_star3_eruption_sheet_2: 4032882372213062139
-      effect_explosion_slime_star3_eruption_sheet_20: 3767938251318319407
-      effect_explosion_slime_star3_eruption_sheet_21: 6645998935954367652
-      effect_explosion_slime_star3_eruption_sheet_22: -4017261496802662849
-      effect_explosion_slime_star3_eruption_sheet_23: 1729732234688739482
-      effect_explosion_slime_star3_eruption_sheet_24: 5972595088434470767
-      effect_explosion_slime_star3_eruption_sheet_25: -216069666421325908
-      effect_explosion_slime_star3_eruption_sheet_26: -2813838522248185043
-      effect_explosion_slime_star3_eruption_sheet_27: -6126477726362469806
-      effect_explosion_slime_star3_eruption_sheet_28: 2621837171433563453
-      effect_explosion_slime_star3_eruption_sheet_29: -627351345290269950
       effect_explosion_slime_star3_eruption_sheet_3: -2520915888631964272
-      effect_explosion_slime_star3_eruption_sheet_30: 2036028035113891757
-      effect_explosion_slime_star3_eruption_sheet_31: -6698938768365990060
-      effect_explosion_slime_star3_eruption_sheet_32: -4588048079911137995
-      effect_explosion_slime_star3_eruption_sheet_33: -6701638837951389071
-      effect_explosion_slime_star3_eruption_sheet_34: -9032487563075681712
-      effect_explosion_slime_star3_eruption_sheet_35: 2045203627438481819
-      effect_explosion_slime_star3_eruption_sheet_36: -8595061583729048946
-      effect_explosion_slime_star3_eruption_sheet_37: -9016056731287887459
-      effect_explosion_slime_star3_eruption_sheet_38: -8704628646852779967
-      effect_explosion_slime_star3_eruption_sheet_39: -2078827113189764911
       effect_explosion_slime_star3_eruption_sheet_4: -3042429207339010407
-      effect_explosion_slime_star3_eruption_sheet_40: 460411915755471296
-      effect_explosion_slime_star3_eruption_sheet_41: -6744626444945982264
-      effect_explosion_slime_star3_eruption_sheet_42: 2647387222933810846
-      effect_explosion_slime_star3_eruption_sheet_43: -7497447258784347791
-      effect_explosion_slime_star3_eruption_sheet_44: -4420100713488992108
-      effect_explosion_slime_star3_eruption_sheet_45: 5113898628706060649
-      effect_explosion_slime_star3_eruption_sheet_46: 77231304091015300
-      effect_explosion_slime_star3_eruption_sheet_47: -4470707948260907324
-      effect_explosion_slime_star3_eruption_sheet_48: -1556968687204241044
-      effect_explosion_slime_star3_eruption_sheet_49: 6575371456474422080
       effect_explosion_slime_star3_eruption_sheet_5: 4439341176720341408
-      effect_explosion_slime_star3_eruption_sheet_50: -3680869584196798170
-      effect_explosion_slime_star3_eruption_sheet_51: 5978276583576280446
-      effect_explosion_slime_star3_eruption_sheet_52: 7664492315225185
-      effect_explosion_slime_star3_eruption_sheet_53: 965532016723809207
-      effect_explosion_slime_star3_eruption_sheet_54: -3673169547681207164
-      effect_explosion_slime_star3_eruption_sheet_55: -6166774883110546144
-      effect_explosion_slime_star3_eruption_sheet_56: -1415726501253145356
-      effect_explosion_slime_star3_eruption_sheet_57: 2452538009848198553
-      effect_explosion_slime_star3_eruption_sheet_58: -996906710581886201
-      effect_explosion_slime_star3_eruption_sheet_59: 8879670776345297771
       effect_explosion_slime_star3_eruption_sheet_6: 7069292609803652604
-      effect_explosion_slime_star3_eruption_sheet_60: -3768538700313158841
-      effect_explosion_slime_star3_eruption_sheet_61: 1722777471669941399
-      effect_explosion_slime_star3_eruption_sheet_62: -7578904505680006723
-      effect_explosion_slime_star3_eruption_sheet_63: -2930978408813050995
       effect_explosion_slime_star3_eruption_sheet_7: -8856983450250083333
       effect_explosion_slime_star3_eruption_sheet_8: -7659473598035362436
-      effect_explosion_slime_star3_eruption_sheet_9: 1872776806361629672
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

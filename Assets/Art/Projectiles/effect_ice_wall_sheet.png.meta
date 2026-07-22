@@ -64,7 +64,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -78,7 +78,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 128
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -102,7 +102,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -156,19 +156,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 267
-        width: 86
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 96ca652c0c8e03850800000000000000
+      spriteID: 324912255b326a941a8058a03a902c78
       internalID: 6354834988811594857
       vertices: []
       indices: 
@@ -178,19 +178,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_1
       rect:
         serializedVersion: 2
-        x: 150
-        y: 267
-        width: 83
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 5f6dfe72c1be61450800000000000000
+      spriteID: 9bf842016f4110e4e87e7a74af1d3725
       internalID: 6059288854835222261
       vertices: []
       indices: 
@@ -200,19 +200,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_2
       rect:
         serializedVersion: 2
-        x: 274
-        y: 267
-        width: 87
-        height: 38
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f37cc59f3b3dda9e0800000000000000
+      spriteID: afc138e4cc13f2d45aab3caf09e29197
       internalID: -1608396721965185217
       vertices: []
       indices: 
@@ -222,19 +222,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_3
       rect:
         serializedVersion: 2
-        x: 11
-        y: 139
-        width: 102
-        height: 56
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 1628ae1d4900842a0800000000000000
+      spriteID: d0294fbee01aa3c4f9f733f73bbd7a95
       internalID: -6753147002065091999
       vertices: []
       indices: 
@@ -244,19 +244,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_4
       rect:
         serializedVersion: 2
-        x: 134
-        y: 139
-        width: 108
-        height: 72
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 2a74b1d68cd118880800000000000000
+      spriteID: aa6ac7264c59735478d675cdcc29e80d
       internalID: -8610568265894508638
       vertices: []
       indices: 
@@ -266,19 +266,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_5
       rect:
         serializedVersion: 2
-        x: 262
-        y: 139
-        width: 114
-        height: 87
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 4733833b9a01d2c30800000000000000
+      spriteID: 2e26d5eaab2e9a344a40435972866e98
       internalID: 4336140337269977972
       vertices: []
       indices: 
@@ -288,19 +288,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_6
       rect:
         serializedVersion: 2
-        x: 5
-        y: 11
-        width: 115
-        height: 103
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 7db3ddecfc14a07c0800000000000000
+      spriteID: 2bd3c872c3abe774f808bedbc55ea163
       internalID: -4104395749610144809
       vertices: []
       indices: 
@@ -310,19 +310,19 @@ TextureImporter:
       name: effect_ice_wall_sheet_7
       rect:
         serializedVersion: 2
-        x: 132
-        y: 11
-        width: 115
-        height: 104
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: db04ddd9ccddf5b70800000000000000
+      spriteID: abf00444440533442b033ef5c26fc922
       internalID: 8890068060344238269
       vertices: []
       indices: 
@@ -332,42 +332,20 @@ TextureImporter:
       name: effect_ice_wall_sheet_8
       rect:
         serializedVersion: 2
-        x: 241
-        y: 24
-        width: 9
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.1}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 546c1dbc8228571d0800000000000000
+      spriteID: 0d97a3a84f6a4c84999e61eeeac09552
       internalID: -3353631235777640891
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_ice_wall_sheet_9
-      rect:
-        serializedVersion: 2
-        x: 261
-        y: 11
-        width: 115
-        height: 103
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1b78cc9882978e070800000000000000
-      internalID: 8135885941862336433
       vertices: []
       indices: 
       edges: []
@@ -376,7 +354,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: b66e78024ccffce4f976b4251db70bb6
     internalID: 0
     vertices: []
     indices: 
@@ -395,7 +373,6 @@ TextureImporter:
       effect_ice_wall_sheet_6: -4104395749610144809
       effect_ice_wall_sheet_7: 8890068060344238269
       effect_ice_wall_sheet_8: -3353631235777640891
-      effect_ice_wall_sheet_9: 8135885941862336433
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

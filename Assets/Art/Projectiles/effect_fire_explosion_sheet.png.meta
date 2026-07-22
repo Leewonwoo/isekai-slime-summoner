@@ -247,7 +247,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -261,7 +261,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 128
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -285,7 +285,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -339,19 +339,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_0
       rect:
         serializedVersion: 2
-        x: 55
-        y: 314
-        width: 18
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: bf4d8522236fd5e20800000000000000
+      spriteID: 1e4377ed9624b3440b0d06b5c6afe8cf
       internalID: 3341097193763820795
       vertices: []
       indices: 
@@ -361,19 +361,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_1
       rect:
         serializedVersion: 2
-        x: 166
-        y: 297
-        width: 52
-        height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: bc87e87b373175f10800000000000000
+      spriteID: 2d99157993af6d34ea33f66905f06512
       internalID: 2258295125871327435
       vertices: []
       indices: 
@@ -383,19 +383,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_2
       rect:
         serializedVersion: 2
-        x: 280
-        y: 284
-        width: 77
-        height: 78
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 8f148479380b394f0800000000000000
+      spriteID: 6f28241cdf66638499e9d37eda1c6a12
       internalID: -823120227653369352
       vertices: []
       indices: 
@@ -405,19 +405,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_3
       rect:
         serializedVersion: 2
-        x: 18
-        y: 155
-        width: 90
-        height: 88
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e0ee0991330d85ef0800000000000000
+      spriteID: 6ec7e2c251608ce4ba9b6f675ca8110e
       internalID: -119116472234480114
       vertices: []
       indices: 
@@ -427,19 +427,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_4
       rect:
         serializedVersion: 2
-        x: 149
-        y: 219
-        width: 19
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: de4b3ca62df5f25f0800000000000000
+      spriteID: c3eadefef9aa9c9488bf4ab24a7a0bb5
       internalID: -779298853172824851
       vertices: []
       indices: 
@@ -449,19 +449,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_5
       rect:
         serializedVersion: 2
-        x: 157
-        y: 160
-        width: 87
-        height: 79
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a7c30359271203fd0800000000000000
+      spriteID: 2b3a9cac5b78b464b9d62a2b1c4fb352
       internalID: -2364353028356555654
       vertices: []
       indices: 
@@ -471,19 +471,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_6
       rect:
         serializedVersion: 2
-        x: 165
-        y: 228
-        width: 23
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c8f59060816a7cfb0800000000000000
+      spriteID: 2cf7445998994b645a01b8b1c2f9d571
       internalID: -4627547469989191796
       vertices: []
       indices: 
@@ -493,19 +493,19 @@ TextureImporter:
       name: effect_fire_explosion_sheet_7
       rect:
         serializedVersion: 2
-        x: 188
-        y: 233
-        width: 9
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 7c69c930ab67dd5a0800000000000000
+      spriteID: f6a2a9cfc6d447e4198f0e8607c9ace7
       internalID: -6494904546301798713
       vertices: []
       indices: 
@@ -515,1384 +515,20 @@ TextureImporter:
       name: effect_fire_explosion_sheet_8
       rect:
         serializedVersion: 2
-        x: 198
-        y: 232
-        width: 16
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c59b92c4c1da18cd0800000000000000
+      spriteID: 8ca394ca6f7365d4baf9be40b2b0fbd6
       internalID: -2557572776321238692
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_9
-      rect:
-        serializedVersion: 2
-        x: 279
-        y: 217
-        width: 21
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5e3e94150a8f082d0800000000000000
-      internalID: -3278347161283468315
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_10
-      rect:
-        serializedVersion: 2
-        x: 297
-        y: 234
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: efa57e9c35616d3d0800000000000000
-      internalID: -3182331537565197570
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_11
-      rect:
-        serializedVersion: 2
-        x: 307
-        y: 227
-        width: 18
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 70285122b58064cf0800000000000000
-      internalID: -268517940275084793
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_12
-      rect:
-        serializedVersion: 2
-        x: 329
-        y: 231
-        width: 10
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9cb0607c39c3dbca0800000000000000
-      internalID: -5999572523190711351
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_13
-      rect:
-        serializedVersion: 2
-        x: 337
-        y: 215
-        width: 22
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4f72bfbc102d9c6b0800000000000000
-      internalID: -5275454583328790540
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_14
-      rect:
-        serializedVersion: 2
-        x: 140
-        y: 172
-        width: 23
-        height: 47
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ec3514221e5622c60800000000000000
-      internalID: 7791902322921133006
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_15
-      rect:
-        serializedVersion: 2
-        x: 268
-        y: 204
-        width: 13
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9ec514fb0495cba50800000000000000
-      internalID: 6538198893656628457
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_16
-      rect:
-        serializedVersion: 2
-        x: 298
-        y: 162
-        width: 40
-        height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 927e8cd35fafdfaa0800000000000000
-      internalID: -6125463986943498455
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_17
-      rect:
-        serializedVersion: 2
-        x: 316
-        y: 211
-        width: 7
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ba4c8dc43b6926b20800000000000000
-      internalID: 3126226788181132459
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_18
-      rect:
-        serializedVersion: 2
-        x: 329
-        y: 204
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1d7f43ff03678b580800000000000000
-      internalID: -8811162718138206255
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_19
-      rect:
-        serializedVersion: 2
-        x: 351
-        y: 202
-        width: 16
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7f456eb0195b745e0800000000000000
-      internalID: -1925370681103067913
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_20
-      rect:
-        serializedVersion: 2
-        x: 266
-        y: 182
-        width: 14
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3acba55c205b00660800000000000000
-      internalID: 7350073615374269603
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_21
-      rect:
-        serializedVersion: 2
-        x: 282
-        y: 199
-        width: 8
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 90872cee8a1f59770800000000000000
-      internalID: 8617059169905833993
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_22
-      rect:
-        serializedVersion: 2
-        x: 353
-        y: 180
-        width: 18
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 576e3dcab6f8ed380800000000000000
-      internalID: -8944554117287385483
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_23
-      rect:
-        serializedVersion: 2
-        x: 271
-        y: 168
-        width: 15
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7bd304786521d81b0800000000000000
-      internalID: -5652841794434482761
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_24
-      rect:
-        serializedVersion: 2
-        x: 344
-        y: 182
-        width: 7
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cccbcb869f4411570800000000000000
-      internalID: 8435599415036394700
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_25
-      rect:
-        serializedVersion: 2
-        x: 149
-        y: 153
-        width: 20
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4c79a1378c4a73490800000000000000
-      internalID: -7766557851545593916
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_26
-      rect:
-        serializedVersion: 2
-        x: 216
-        y: 155
-        width: 17
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4df4dcaa748afa970800000000000000
-      internalID: 8768412025275371476
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_27
-      rect:
-        serializedVersion: 2
-        x: 279
-        y: 155
-        width: 19
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 792bdc57bef1ae630800000000000000
-      internalID: 3957010318752592535
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_28
-      rect:
-        serializedVersion: 2
-        x: 295
-        y: 170
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e4050ea1885278ba0800000000000000
-      internalID: -6086855104871247794
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_29
-      rect:
-        serializedVersion: 2
-        x: 337
-        y: 151
-        width: 20
-        height: 21
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 546c418f872775330800000000000000
-      internalID: 3699551482791904837
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_30
-      rect:
-        serializedVersion: 2
-        x: 354
-        y: 166
-        width: 10
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3d14e2de6b4c55da0800000000000000
-      internalID: -5956638642185289261
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_31
-      rect:
-        serializedVersion: 2
-        x: 169
-        y: 149
-        width: 19
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4f563e7e124958510800000000000000
-      internalID: 1550808520044275188
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_32
-      rect:
-        serializedVersion: 2
-        x: 188
-        y: 148
-        width: 8
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1fde6493bc14f8d30800000000000000
-      internalID: 4435836499078344177
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_33
-      rect:
-        serializedVersion: 2
-        x: 196
-        y: 147
-        width: 21
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7365aa32f963459e0800000000000000
-      internalID: -1633620707702581705
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_34
-      rect:
-        serializedVersion: 2
-        x: 275
-        y: 23
-        width: 84
-        height: 137
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 335730e7262fe7920800000000000000
-      internalID: 2990093707455460659
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_35
-      rect:
-        serializedVersion: 2
-        x: 298
-        y: 151
-        width: 10
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 107ffe36b3c9010c0800000000000000
-      internalID: -4607010639906343167
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_36
-      rect:
-        serializedVersion: 2
-        x: 328
-        y: 147
-        width: 10
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: af7667f76ea4700b0800000000000000
-      internalID: -5762554844355860486
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_37
-      rect:
-        serializedVersion: 2
-        x: 23
-        y: 84
-        width: 19
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fe8c509163ff50dd0800000000000000
-      internalID: -2520327808630798097
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_38
-      rect:
-        serializedVersion: 2
-        x: 41
-        y: 106
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4be3b509dcdf00e30800000000000000
-      internalID: 4467849889683553972
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_39
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 96
-        width: 17
-        height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4d9d6b4dfae28fd70800000000000000
-      internalID: 9077056381688142292
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_40
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 104
-        width: 7
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 162ba94f69edb3010800000000000000
-      internalID: 1169773268163015265
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_41
-      rect:
-        serializedVersion: 2
-        x: 152
-        y: 94
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9433dd25191361610800000000000000
-      internalID: 1591514018552296265
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_42
-      rect:
-        serializedVersion: 2
-        x: 169
-        y: 108
-        width: 6
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4fddb10e980c95250800000000000000
-      internalID: 5933985682440314356
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_43
-      rect:
-        serializedVersion: 2
-        x: 184
-        y: 106
-        width: 13
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0720b297867b07a80800000000000000
-      internalID: -8471069239746559376
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_44
-      rect:
-        serializedVersion: 2
-        x: 207
-        y: 92
-        width: 18
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f839e464474ef29b0800000000000000
-      internalID: -5102608664740588657
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_45
-      rect:
-        serializedVersion: 2
-        x: 89
-        y: 90
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1d089f543ba123280800000000000000
-      internalID: -9065153742667939631
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_46
-      rect:
-        serializedVersion: 2
-        x: 143
-        y: 77
-        width: 9
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2bc9125b4dea338d0800000000000000
-      internalID: -2867756309109695310
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_47
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 80
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e7be3935704039710800000000000000
-      internalID: 1698705913962294142
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_48
-      rect:
-        serializedVersion: 2
-        x: 39
-        y: 45
-        width: 43
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 21780ce1669c252b0800000000000000
-      internalID: -5597189946428324078
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_49
-      rect:
-        serializedVersion: 2
-        x: 100
-        y: 76
-        width: 8
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2d0e4d52c9c1539e0800000000000000
-      internalID: -1642375032131493678
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_50
-      rect:
-        serializedVersion: 2
-        x: 177
-        y: 73
-        width: 7
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1ec690e79bb47de20800000000000000
-      internalID: 3375249705793055969
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_51
-      rect:
-        serializedVersion: 2
-        x: 198
-        y: 79
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5602e265855c8a6c0800000000000000
-      internalID: -4131835674918772635
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_52
-      rect:
-        serializedVersion: 2
-        x: 230
-        y: 76
-        width: 7
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2298fc86540281160800000000000000
-      internalID: 6996377503603329314
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_53
-      rect:
-        serializedVersion: 2
-        x: 13
-        y: 58
-        width: 12
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8bb6cdf7d556d0eb0800000000000000
-      internalID: -4752030579554489416
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_54
-      rect:
-        serializedVersion: 2
-        x: 102
-        y: 58
-        width: 11
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: df05e724f9e00b2f0800000000000000
-      internalID: -959250643451752195
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_55
-      rect:
-        serializedVersion: 2
-        x: 140
-        y: 52
-        width: 7
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 66643f576ef7beb50800000000000000
-      internalID: 6623528304776529510
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_56
-      rect:
-        serializedVersion: 2
-        x: 169
-        y: 59
-        width: 25
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6b7be7ff8712cdde0800000000000000
-      internalID: -1307132988277999690
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_57
-      rect:
-        serializedVersion: 2
-        x: 185
-        y: 44
-        width: 20
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a4170591e2f782430800000000000000
-      internalID: 3758393725010604362
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_58
-      rect:
-        serializedVersion: 2
-        x: 230
-        y: 51
-        width: 7
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 04eeef48f7e44c9a0800000000000000
-      internalID: -6213755276265329088
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_59
-      rect:
-        serializedVersion: 2
-        x: 19
-        y: 41
-        width: 9
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 707c554ed6f28eab0800000000000000
-      internalID: -4978677239029315833
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_60
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 28
-        width: 17
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 27f96b3da18fdfa90800000000000000
-      internalID: -7278388628656054414
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_61
-      rect:
-        serializedVersion: 2
-        x: 95
-        y: 45
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b891331391408fb70800000000000000
-      internalID: 8932894367135504779
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_62
-      rect:
-        serializedVersion: 2
-        x: 28
-        y: 28
-        width: 11
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a9e7e9052ecec5c30800000000000000
-      internalID: 4349611796892384922
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_63
-      rect:
-        serializedVersion: 2
-        x: 44
-        y: 24
-        width: 10
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c0a1d6dc42b8270c0800000000000000
-      internalID: -4579444880900810228
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_64
-      rect:
-        serializedVersion: 2
-        x: 70
-        y: 24
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cafed72062de3e9d0800000000000000
-      internalID: -2746090600259522644
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_65
-      rect:
-        serializedVersion: 2
-        x: 154
-        y: 30
-        width: 15
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 49c6de6ac59d5e380800000000000000
-      internalID: -8942502493113455468
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_66
-      rect:
-        serializedVersion: 2
-        x: 170
-        y: 23
-        width: 10
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1e4ca8e18bcc4e8b0800000000000000
-      internalID: -5123745384882322207
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_67
-      rect:
-        serializedVersion: 2
-        x: 185
-        y: 19
-        width: 9
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e9dd80b9736157060800000000000000
-      internalID: 6950486027996290462
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_68
-      rect:
-        serializedVersion: 2
-        x: 200
-        y: 23
-        width: 6
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 441cd60aea4735ba0800000000000000
-      internalID: -6101404776792211132
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_69
-      rect:
-        serializedVersion: 2
-        x: 214
-        y: 30
-        width: 13
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ed7990bc2efb0abc0800000000000000
-      internalID: -3773805506946557986
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: effect_fire_explosion_sheet_70
-      rect:
-        serializedVersion: 2
-        x: 56
-        y: 19
-        width: 12
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d173058d5e673ac60800000000000000
-      internalID: 7828231306848778013
       vertices: []
       indices: 
       edges: []
@@ -1901,7 +537,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ab564cb91d2fd2149978139f13b8a362
     internalID: 0
     vertices: []
     indices: 
@@ -1913,75 +549,13 @@ TextureImporter:
     nameFileIdTable:
       effect_fire_explosion_sheet_0: 3341097193763820795
       effect_fire_explosion_sheet_1: 2258295125871327435
-      effect_fire_explosion_sheet_10: -3182331537565197570
-      effect_fire_explosion_sheet_11: -268517940275084793
-      effect_fire_explosion_sheet_12: -5999572523190711351
-      effect_fire_explosion_sheet_13: -5275454583328790540
-      effect_fire_explosion_sheet_14: 7791902322921133006
-      effect_fire_explosion_sheet_15: 6538198893656628457
-      effect_fire_explosion_sheet_16: -6125463986943498455
-      effect_fire_explosion_sheet_17: 3126226788181132459
-      effect_fire_explosion_sheet_18: -8811162718138206255
-      effect_fire_explosion_sheet_19: -1925370681103067913
       effect_fire_explosion_sheet_2: -823120227653369352
-      effect_fire_explosion_sheet_20: 7350073615374269603
-      effect_fire_explosion_sheet_21: 8617059169905833993
-      effect_fire_explosion_sheet_22: -8944554117287385483
-      effect_fire_explosion_sheet_23: -5652841794434482761
-      effect_fire_explosion_sheet_24: 8435599415036394700
-      effect_fire_explosion_sheet_25: -7766557851545593916
-      effect_fire_explosion_sheet_26: 8768412025275371476
-      effect_fire_explosion_sheet_27: 3957010318752592535
-      effect_fire_explosion_sheet_28: -6086855104871247794
-      effect_fire_explosion_sheet_29: 3699551482791904837
       effect_fire_explosion_sheet_3: -119116472234480114
-      effect_fire_explosion_sheet_30: -5956638642185289261
-      effect_fire_explosion_sheet_31: 1550808520044275188
-      effect_fire_explosion_sheet_32: 4435836499078344177
-      effect_fire_explosion_sheet_33: -1633620707702581705
-      effect_fire_explosion_sheet_34: 2990093707455460659
-      effect_fire_explosion_sheet_35: -4607010639906343167
-      effect_fire_explosion_sheet_36: -5762554844355860486
-      effect_fire_explosion_sheet_37: -2520327808630798097
-      effect_fire_explosion_sheet_38: 4467849889683553972
-      effect_fire_explosion_sheet_39: 9077056381688142292
       effect_fire_explosion_sheet_4: -779298853172824851
-      effect_fire_explosion_sheet_40: 1169773268163015265
-      effect_fire_explosion_sheet_41: 1591514018552296265
-      effect_fire_explosion_sheet_42: 5933985682440314356
-      effect_fire_explosion_sheet_43: -8471069239746559376
-      effect_fire_explosion_sheet_44: -5102608664740588657
-      effect_fire_explosion_sheet_45: -9065153742667939631
-      effect_fire_explosion_sheet_46: -2867756309109695310
-      effect_fire_explosion_sheet_47: 1698705913962294142
-      effect_fire_explosion_sheet_48: -5597189946428324078
-      effect_fire_explosion_sheet_49: -1642375032131493678
       effect_fire_explosion_sheet_5: -2364353028356555654
-      effect_fire_explosion_sheet_50: 3375249705793055969
-      effect_fire_explosion_sheet_51: -4131835674918772635
-      effect_fire_explosion_sheet_52: 6996377503603329314
-      effect_fire_explosion_sheet_53: -4752030579554489416
-      effect_fire_explosion_sheet_54: -959250643451752195
-      effect_fire_explosion_sheet_55: 6623528304776529510
-      effect_fire_explosion_sheet_56: -1307132988277999690
-      effect_fire_explosion_sheet_57: 3758393725010604362
-      effect_fire_explosion_sheet_58: -6213755276265329088
-      effect_fire_explosion_sheet_59: -4978677239029315833
       effect_fire_explosion_sheet_6: -4627547469989191796
-      effect_fire_explosion_sheet_60: -7278388628656054414
-      effect_fire_explosion_sheet_61: 8932894367135504779
-      effect_fire_explosion_sheet_62: 4349611796892384922
-      effect_fire_explosion_sheet_63: -4579444880900810228
-      effect_fire_explosion_sheet_64: -2746090600259522644
-      effect_fire_explosion_sheet_65: -8942502493113455468
-      effect_fire_explosion_sheet_66: -5123745384882322207
-      effect_fire_explosion_sheet_67: 6950486027996290462
-      effect_fire_explosion_sheet_68: -6101404776792211132
-      effect_fire_explosion_sheet_69: -3773805506946557986
       effect_fire_explosion_sheet_7: -6494904546301798713
-      effect_fire_explosion_sheet_70: 7828231306848778013
       effect_fire_explosion_sheet_8: -2557572776321238692
-      effect_fire_explosion_sheet_9: -3278347161283468315
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
