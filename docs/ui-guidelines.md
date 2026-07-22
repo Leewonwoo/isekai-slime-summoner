@@ -38,7 +38,7 @@
 - Canvas는 Screen Space Overlay, 기준 해상도 **1080×1920**, CanvasScaler는 Scale With Screen Size / Match Width Or Height **0**, Sorting Order **1000**을 사용한다. 특성 팝업의 Sorting Order 5000보다 아래에 둔다.
 - 전용 Canvas에는 `GraphicRaycaster`를 붙이지 않는다. 데미지 `Text`는 모두 `raycastTarget = false`, `maskable = false`, `CanvasRenderer.cullTransparentMesh = true`로 설정한다.
 - 숫자는 기본 uGUI 폰트와 같은 내장 Arial 폰트·기본 머티리얼을 모든 개체가 공유한다. 기준 글자 크기는 **44px**, 고정 RectTransform 크기는 **240×90px**이며 Best Fit·리치 텍스트·Layout 계열 컴포넌트는 사용하지 않는다.
-- 플레이어가 적에게 준 피해는 `--color-text`와 같은 **RGB(240, 234, 214)**, 고블린이 슬라임·소환사에게 준 피해는 `--color-danger`와 같은 **RGB(255, 82, 82)**를 사용한다. 가독성용 uGUI `Shadow`는 검정 72%·오프셋 **(2, -2)px** 1개만 허용하며 별도 머티리얼을 만들지 않는다.
+- 플레이어가 적에게 준 피해는 `--color-text`와 같은 **RGB(240, 234, 214)**, 고블린이 슬라임·소환사에게 준 피해는 `--color-danger`와 같은 **RGB(255, 82, 82)**, 버프 슬라임 회복은 `--color-positive`와 같은 **RGB(76, 217, 100)** 및 `+N` 형식을 사용한다. 가독성용 uGUI `Shadow`는 검정 72%·오프셋 **(2, -2)px** 1개만 허용하며 별도 머티리얼을 만들지 않는다.
 - 풀은 **24개 선생성**, **최대 64개**로 제한한다. 상한에 도달하면 수명이 가장 많이 지난 항목을 재사용하며 전투 중 Instantiate/Destroy 폭증을 막는다.
 - 수명은 **0.72초**, 상승 거리는 **84px**, 시작 가로 분산은 **±14px**로 고정한다. 별도 코루틴·Animator·DOTween 없이 서비스 1개의 `LateUpdate`에서 활성 항목을 일괄 갱신한다.
 - 전용 Canvas 분리는 움직이는 숫자의 Canvas 리빌드가 정적 HUD·하단 패널·특성 팝업으로 전파되지 않게 하기 위한 것이다. 같은 폰트·머티리얼과 연속된 계층을 유지해 활성 숫자가 배칭될 수 있게 한다.
@@ -118,6 +118,8 @@ Assets/Scripts/UI/
     /* 상태 */
     --color-positive: rgb(76, 217, 100);     /* 합성 가능 테두리, 상승 수치 */
     --color-reddot: rgb(255, 59, 48);
+    --color-overdrive: rgb(207, 105, 255);   /* 마력 폭주 게이지·활성 상태 */
+    --color-overdrive-deep: rgb(102, 43, 128);
 
     /* 속성 미니 아이콘 (SPEC §2.8 — 배지 안 표시 전용, 위협도 색 채널과 분리) */
     --color-attr-none: rgb(154, 163, 178);   /* 무 */
@@ -139,9 +141,27 @@ Assets/Scripts/UI/
     --portrait-ring-inset: 12px;
     --skill-button-size: 128px;
     --skill-button-radius: 64px;
+    --skill-button-icon-size: 56px;
+    --skill-button-label-size: 24px;
+    --skill-button-cooldown-size: 30px;
+    --codex-button-size: 96px;
+    --codex-slot-size: 188px;
+    --codex-slot-image-size: 72%;
+    --codex-detail-height: 280px;
+    --codex-detail-image-size: 220px;
+    --unlock-toast-inset-x: 25%;
+    --unlock-toast-top: 24%;
+    --modal-panel-width: 920px;
+    --modal-panel-height: 1450px;
+    --merchant-card-height: 300px;
+    --overdrive-gauge-width: 240px;
+    --overdrive-gauge-height: 24px;
+    --overdrive-gauge-bottom: 168px;
+    --combo-label-height: 52px;
     --bottom-panel-content-inset: 40px;
     --bench-slot-state-border: 4px;
     --bench-slot-size: 120px;               /* 장비 슬롯 등 공용 기본값 */
+    --gear-slot-width: 31%;
     --summon-grid-slot-width: 188px;
     --summon-grid-slot-height: 210px;
     --summon-grid-icon-size: 112px;
@@ -172,6 +192,7 @@ Assets/Scripts/UI/
 - 적용법: `background-image` + `-unity-slice-left/-top/-right/-bottom`(px) + `-unity-slice-scale`. 슬라이스 값은 프레임 두께와 일치시키고 이 문서에 기록.
 - TopHUD 프레임: `Assets/Art/UIFrames/top_hud_frame.png` — slice left/right **96px**, top/bottom **72px**, scale **0.4**. 원본은 `ArtSource/ui-frames/top_hud_frame.png`.
 - TopHUD 프레임 배경은 UI 요소 전체를 채우도록 `background-size: 100% 100%`와 `background-repeat: no-repeat`을 사용한다.
+- TopHUD 스테이지 정보는 프로필·재화의 Flex 폭과 분리해 HUD 가로 **50% 정중앙**에 절대 배치한다. `--top-hud-stage-width`를 유지하고 `translate: -50% 0`으로 자체 너비의 절반만큼 보정해 긴 닉네임과 겹치지 않게 한다.
 - TopHUD 설정 버튼 아이콘: `Assets/Art/UIIcons/icon_settings.png` — **64×64px**로 중앙 정렬하고 버튼 텍스트는 표시하지 않는다. 터치 영역은 유지하되 버튼 배경과 테두리는 투명하게 표시한다. 원본은 `ArtSource/ui-icons/icon_settings.png`.
 - BottomPanel 콘텐츠 프레임: `Assets/Art/UIFrames/bottom_panel_content_frame.png` — `.tab-content`에 적용, slice left/right/top/bottom **92px**, scale **0.4**, 내부 안전 여백 **40px**. 원본은 `ArtSource/ui-frames/bottom_panel_content_frame.png`.
 - 벤치·장비 공용 슬롯 프레임: `Assets/Art/UIFrames/bench_slot_frame.png` — `.bench-slot`에 적용, slice left/right/top/bottom **190px**, scale **0.1**. 기본 상태 테두리는 투명, 합성 가능 상태는 **4px** 초록 CSS 테두리를 이미지 위에 표시한다. 원본은 `ArtSource/ui-frames/bench_slot_frame.png`.
@@ -222,7 +243,7 @@ Assets/Scripts/UI/
 
 1. 색상·간격·크기는 **반드시 `var(--토큰)`**. 리터럴 색상이 USS에 보이면 리뷰 반려 대상.
 2. 스타일은 USS에만. **C#에서 `style.*` 직접 조작 금지** — 상태 변화는 USS 클래스 토글(`AddToClassList`/`RemoveFromClassList`/`EnableInClassList`)로.
-   - **예외 3가지만 허용**: ① 월드 앵커 위치 동기화(배지 `style.translate`), ② 세이프 에어리어 패딩, ③ 연속 수치 게이지 fill(`.gauge__fill`의 `style.width` — HP/EXP 등).
+   - **예외 3가지만 허용**: ① 월드 앵커 위치 동기화(배지 `style.translate`), ② 세이프 에어리어 패딩, ③ 연속 수치 게이지 fill(`.gauge__fill`의 `style.width` — HP/EXP/오버드라이브 등).
 3. 상태 변형은 `--modifier` 클래스: `.badge--danger`, `.buy-button--disabled`, `.tab__button--active`, `.slot--mergeable`.
 4. `:hover` 의존 금지 (모바일). 눌림 피드백은 `:active`로.
 5. 전환 효과는 USS `transition`으로 선언 (예: 탭 콘텐츠 페이드, 패널 확장). DOTween은 원칙적으로 월드 오브젝트 전용이다. 단, 소환 룰렛 릴과 몬스터 드랍 골드가 HUD에 도착한 직후의 **골드 숫자 카운트업**은 값 보간만 허용하며 레이아웃·색상·위치를 직접 트윈하지 않는다.
@@ -273,7 +294,9 @@ public class TopHUDController
 
 ### 8.1 필드 상단 웨이브 상태
 - 현재 웨이브와 잔여 몬스터 수는 TopHUD 아래의 FieldOverlay 상단 중앙에 표시한다.
-- 방향 예고 배지(N/E/S/W)는 사용하지 않는다. FieldOverlay는 웨이브 상태와 스킬 플로팅 버튼을 소유한다.
+- 방향 예고 배지(N/E/S/W)는 사용하지 않는다. FieldOverlay는 웨이브 상태·콤보·오버드라이브 게이지와 스킬 플로팅 버튼을 소유한다.
+- 콤보 라벨은 웨이브 상태 바로 아래에서 2콤보부터 표시한다. `xN COMBO` 단일 라벨을 재사용하고 10/20/30 진입 순간에만 `.combo--milestone` 클래스로 강조한다. 처치마다 새 Label을 생성하지 않는다.
+- 오버드라이브 게이지는 스킬 버튼 위에 `--overdrive-gauge-width` × `--overdrive-gauge-height`로 배치한다. 충전/준비/활성 상태는 `.overdrive--charging`, `.overdrive--ready`, `.overdrive--active` 클래스로 나누고 fill 폭만 런타임에서 갱신한다.
 
 ### 8.2 벤치(UI) → 필드(월드) 드래그 앤 드롭
 - 흐름: 벤치 슬롯 `PointerDownEvent` → 루트에 고스트 요소 생성(`picking-mode: Ignore`) → `PointerMoveEvent`로 고스트 이동 + 포인터 캡처 → `PointerUpEvent`에서 스크린 좌표로 `Physics2D.OverlapPoint`(슬롯 레이어) → 유효 슬롯이면 스냅 배치, 아니면 벤치 복귀.
@@ -289,6 +312,12 @@ public class TopHUDController
 - **소환 버튼**: 우측 엄지 위치(패널 우하단), 용병 계약서 1장 비용과 등급 확률을 노출한다. 계약서가 0장이거나 총 보유 개체 수가 현재 슬롯 한도에 도달하면 회색 비활성화한다.
 - **합성 가능 벤치 슬롯**: `--color-positive` 테두리 + "합성" 뱃지.
 - **강화 탭**: 전체 공격력·전체 공격속도·소환사 HP 회복·치명타 런 강화 4행만 표시한다. 각 행은 현재→다음 수치와 골드 비용을 함께 표시하며, 골드 부족·최대 레벨·HP 회복이 불필요한 상태에서는 버튼을 회색 비활성화한다. 강화 버튼은 짧게 누르면 1회, 0.4초 이상 누르면 0.08초 간격으로 반복 시도한다.
+- **스킬 탭**: `UpgradeRow` 템플릿으로 메테오·얼음벽·소환사 보호막 3행을 표시한다. 이름 아래에 효과·쿨다운 또는 `Lv.N 해금`을 표시하고, 해금된 행은 `장착`/`장착 중`, 잠긴 행은 `잠김`으로 표시한다. 액티브 스킬은 1개만 장착하며 별도 스킬 레벨업 버튼은 두지 않는다.
+- **필드 스킬 버튼**: 우하단 링 내부에 장착 스킬 이름과 남은 쿨다운을 별도 자식 `Label`로 표시한다. 대상 지정 중에는 `지점 선택`을 표시하고 버튼에 `.skill-button--targeting`, 쿨다운 중에는 `.skill-button--cooldown` 클래스를 적용한다. 대상 범위와 얼음벽 방향 미리보기는 UI Toolkit이 아니라 월드 `SpriteRenderer`로 그린다.
+- **콤보/오버드라이브**: FieldOverlay에서 콤보 라벨과 오버드라이브 게이지를 소유한다. 콤보는 2부터 노출하고 10/20/30 진입 때만 강조한다. 게이지는 충전 중 수치 텍스트를 숨기고, 가득 차면 `READY`, 활성 중에는 `OVERDRIVE N.Ns`를 표시한다. 오버드라이브 색은 `--color-overdrive*`만 사용하며 골드 재화/행동 색과 섞지 않는다.
+- **몬스터 도감**: FieldOverlay의 TopHUD 아래 우상단에 96px 플로팅 버튼을 둔다. 전체화면 스크림 안의 920×1450 패널에 4×4 슬롯 그리드와 상세 영역을 배치한다. 미조우 슬롯은 `?`만 표시하고 팝업 동안 게임플레이를 정지한다.
+- **행상인**: RootLayout 내부 전체화면 팝업으로 장비·소모품·런 유물 카드 3장을 세로 배치한다. 가격·효과·품절·구매 불가 사유를 항상 표시하고 닫기 버튼을 제공한다.
+- **장비 탭**: 소환사 무기·방어구·장신구 장착 슬롯 3개, 영구 보유 장비 스크롤 목록, 현재 런 유물 목록 순서로 배치한다. 장비와 유물의 계산·가격 규칙은 컨트롤러가 아니라 런타임 서비스가 제공한다.
 - **소환사 영구 성장**: 소환사 EXP는 획득 즉시 자동으로 레벨에 반영한다. 소환사 탭은 저장된 영구 Lv와 현재 EXP/요구 EXP 게이지, 실제 적용 능력치와 특성 텍스트만 표시하며 레벨업 버튼이나 공용 강화 행을 사용하지 않는다.
 - **터치 타깃**: 상호작용 요소는 최소 `--touch-min`(96px) 확보.
 
@@ -316,4 +345,5 @@ public class TopHUDController
 - `capsule__icon`은 `--currency-icon-size`로 크기를 제어하며, 아이콘 PNG의 투명 배경을 그대로 표시한다.
 - 용병 계약서는 소환 탭 전용 런 재화이므로 TopHUD에 추가하지 않는다. 계약서 아이콘 에셋 제작 전에는 소환 탭의 텍스트 캡슐로 보유량을 표시한다.
 - 강화 스탯 아이콘은 `Assets/Art/UIIcons/icon_atk.png`, `icon_aspd.png`, `icon_crit.png`, `icon_hp.png`, `icon_range.png`, `icon_income.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 UpgradeRow의 88px 아이콘 영역에 `background-size: 100% 100%`로 표시한다.
+- 액티브 스킬 아이콘은 `icon_skill_meteor.png`, `icon_skill_ice_wall.png`, `icon_skill_aegis.png`를 사용한다. 모두 **128×128px** 투명 PNG·Point 필터·무압축으로 임포트하고, `SkillTab`의 88px 공용 행 아이콘과 FieldOverlay 스킬 버튼의 `--skill-button-icon-size` **56px** 영역에 같은 에셋을 재사용한다.
 - 하단 5개 탭은 `icon_tab_summon.png`, `icon_tab_upgrade.png`, `icon_tab_skill.png`, `icon_tab_gear.png`, `icon_tab_summoner.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 **44px**로 표시하고, 탭 텍스트는 기능명 확인을 위해 유지한다.
