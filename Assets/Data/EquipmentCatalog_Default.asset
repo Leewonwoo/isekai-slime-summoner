@@ -1,0 +1,204 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-9122632336373922140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: accessory-hunter
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: accessory-hunter
+  displayName: "\uC0AC\uB0E5\uAFBC \uBB38\uC7A5"
+  description: "\uCE58\uBA85\uD0C0 \uD655\uB960 +5%"
+  slot: 2
+  effect: 3
+  value: 0.05
+  price: 120
+  icon: {fileID: 0}
+--- !u!114 &-7892329161496706044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: armor-bark
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: armor-bark
+  displayName: "\uB098\uBB34\uAECD\uC9C8 \uAC11\uC637"
+  description: "\uC18C\uD658\uC0AC \uCD5C\uB300 HP +18%"
+  slot: 1
+  effect: 1
+  value: 0.18
+  price: 120
+  icon: {fileID: 0}
+--- !u!114 &-4692951523474267612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: weapon-ember
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: weapon-ember
+  displayName: "\uBD88\uC528 \uC9C0\uD321\uC774"
+  description: "\uC18C\uD658\uC0AC \uACF5\uACA9\uB825 +14%"
+  slot: 0
+  effect: 0
+  value: 0.14
+  price: 120
+  icon: {fileID: 0}
+--- !u!114 &-4692005487115174810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: armor-leather
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: armor-leather
+  displayName: "\uAC00\uC8FD \uC678\uD22C"
+  description: "\uC18C\uD658\uC0AC \uCD5C\uB300 HP +10%"
+  slot: 1
+  effect: 1
+  value: 0.1
+  price: 80
+  icon: {fileID: 0}
+--- !u!114 &-3054324071784643950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: armor-guardian
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: armor-guardian
+  displayName: "\uC218\uD638\uC790 \uD310\uAE08"
+  description: "\uC18C\uD658\uC0AC \uCD5C\uB300 HP +28%"
+  slot: 1
+  effect: 1
+  value: 0.28
+  price: 180
+  icon: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36c0adf16d00b9a48a2b23f97d308bb8, type: 3}
+  m_Name: EquipmentCatalog_Default
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentCatalog
+  equipment:
+  - {fileID: 6864359378564953599}
+  - {fileID: -4692951523474267612}
+  - {fileID: 8133082241525257124}
+  - {fileID: -4692005487115174810}
+  - {fileID: -7892329161496706044}
+  - {fileID: -3054324071784643950}
+  - {fileID: 4402767791461403716}
+  - {fileID: -9122632336373922140}
+  - {fileID: 4222067962667549485}
+--- !u!114 &4222067962667549485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: accessory-lucky
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: accessory-lucky
+  displayName: "\uD589\uC6B4\uC758 \uBD80\uC801"
+  description: "\u26052 \uC9C1\uD589 \uD655\uB960 +3%"
+  slot: 2
+  effect: 4
+  value: 0.03
+  price: 160
+  icon: {fileID: 0}
+--- !u!114 &4402767791461403716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: accessory-swift
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: accessory-swift
+  displayName: "\uC2E0\uC18D\uC758 \uBC18\uC9C0"
+  description: "\uC18C\uD658\uC0AC \uACF5\uACA9\uC18D\uB3C4 +8%"
+  slot: 2
+  effect: 2
+  value: 0.08
+  price: 80
+  icon: {fileID: 0}
+--- !u!114 &6864359378564953599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: weapon-oak
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: weapon-oak
+  displayName: "\uCC38\uB098\uBB34 \uC9C0\uD321\uC774"
+  description: "\uC18C\uD658\uC0AC \uACF5\uACA9\uB825 +8%"
+  slot: 0
+  effect: 0
+  value: 0.08
+  price: 80
+  icon: {fileID: 0}
+--- !u!114 &8133082241525257124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a96a1860a2a2d69429c38b8b095a5eee, type: 3}
+  m_Name: weapon-arcane
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
+  equipmentId: weapon-arcane
+  displayName: "\uBE44\uC804 \uC9C0\uD321\uC774"
+  description: "\uC18C\uD658\uC0AC \uACF5\uACA9\uB825 +22%"
+  slot: 0
+  effect: 0
+  value: 0.22
+  price: 180
+  icon: {fileID: 0}
