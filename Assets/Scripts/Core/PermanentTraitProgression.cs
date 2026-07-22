@@ -93,6 +93,26 @@ namespace CrossDefense.Core
             PermanentTraitType.SummonCapacity,
         };
 
+        static readonly PermanentTraitType[][] ChoiceGroups =
+        {
+            new[]
+            {
+                PermanentTraitType.SummonerPower,
+                PermanentTraitType.SummonerHaste,
+            },
+            new[]
+            {
+                PermanentTraitType.SlimePower,
+                PermanentTraitType.SlimeHaste,
+                PermanentTraitType.SummonCapacity,
+            },
+            new[]
+            {
+                PermanentTraitType.CoreVitality,
+                PermanentTraitType.LuckySummon,
+            },
+        };
+
         readonly GrowthBalanceData _balance;
         readonly Func<int> _summonerLevelProvider;
         readonly Action<string> _saveJson;
@@ -112,7 +132,8 @@ namespace CrossDefense.Core
             }
         }
 
-        int CurrentEntitlement => Mathf.Max(0, (_summonerLevelProvider?.Invoke() ?? 1) - 1);
+        public int CurrentEntitlement =>
+            Mathf.Max(0, ((_summonerLevelProvider?.Invoke() ?? 1) - 1) / 2);
 
         public event Action<PermanentTraitSnapshot> Changed;
 
@@ -154,28 +175,44 @@ namespace CrossDefense.Core
             if (PendingChoiceCount <= 0)
                 return Array.Empty<PermanentTraitChoice>();
 
-            var available = new List<PermanentTraitType>(AllTypes.Length);
-            for (int i = 0; i < AllTypes.Length; i++)
-            {
-                PermanentTraitType type = AllTypes[i];
-                if (type == PermanentTraitType.SummonCapacity &&
-                    GetLevel(type) >= _balance.PermanentSummonCapacityMaxLevel)
-                    continue;
-                available.Add(type);
-            }
-            if (available.Count < 3)
-                return Array.Empty<PermanentTraitChoice>();
-
+            var offeredTypes = new List<PermanentTraitType>(ChoiceGroups.Length);
             var random = new System.Random(unchecked(0x5F3759DF + TotalChoiceCount * 7919));
-            for (int i = available.Count - 1; i > 0; i--)
+            for (int groupIndex = 0; groupIndex < ChoiceGroups.Length; groupIndex++)
             {
-                int swapIndex = random.Next(i + 1);
-                (available[i], available[swapIndex]) = (available[swapIndex], available[i]);
+                PermanentTraitType[] group = ChoiceGroups[groupIndex];
+                var available = new List<PermanentTraitType>(group.Length);
+                for (int i = 0; i < group.Length; i++)
+                {
+                    PermanentTraitType type = group[i];
+                    if (GetLevel(type) < MaxLevel(type))
+                        available.Add(type);
+                }
+                if (available.Count > 0)
+                    offeredTypes.Add(available[random.Next(available.Count)]);
             }
+
+            if (offeredTypes.Count < 3)
+            {
+                var fallback = new List<PermanentTraitType>(AllTypes.Length);
+                for (int i = 0; i < AllTypes.Length; i++)
+                {
+                    PermanentTraitType type = AllTypes[i];
+                    if (GetLevel(type) < MaxLevel(type) && !offeredTypes.Contains(type))
+                        fallback.Add(type);
+                }
+                while (offeredTypes.Count < 3 && fallback.Count > 0)
+                {
+                    int index = random.Next(fallback.Count);
+                    offeredTypes.Add(fallback[index]);
+                    fallback.RemoveAt(index);
+                }
+            }
+            if (offeredTypes.Count < 3)
+                return Array.Empty<PermanentTraitChoice>();
 
             var choices = new PermanentTraitChoice[3];
             for (int i = 0; i < choices.Length; i++)
-                choices[i] = BuildChoice(available[i]);
+                choices[i] = BuildChoice(offeredTypes[i]);
             return choices;
         }
 
@@ -200,6 +237,11 @@ namespace CrossDefense.Core
             Changed?.Invoke(BuildSnapshot());
             return true;
         }
+
+        public int MaxLevel(PermanentTraitType type) =>
+            type == PermanentTraitType.SummonCapacity
+                ? _balance.PermanentSummonCapacityMaxLevel
+                : 10;
 
         public string GetDisplayName(PermanentTraitType type)
         {

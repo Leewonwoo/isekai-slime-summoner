@@ -105,7 +105,7 @@ namespace CrossDefense.Tests.EditMode
         [Test]
         public void PermanentTraits_SummonerLevelCreatesThreeDeterministicChoices()
         {
-            int summonerLevel = 2;
+            int summonerLevel = 3;
             var traits = new PermanentTraitProgression(_balance, () => summonerLevel);
 
             var first = traits.GetCurrentChoices();
@@ -116,12 +116,25 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(second.Count, Is.EqualTo(3));
             for (int i = 0; i < first.Count; i++)
                 Assert.That(second[i].Type, Is.EqualTo(first[i].Type));
+            Assert.That(
+                first[0].Type,
+                Is.EqualTo(PermanentTraitType.SummonerPower)
+                    .Or.EqualTo(PermanentTraitType.SummonerHaste));
+            Assert.That(
+                first[1].Type,
+                Is.EqualTo(PermanentTraitType.SlimePower)
+                    .Or.EqualTo(PermanentTraitType.SlimeHaste)
+                    .Or.EqualTo(PermanentTraitType.SummonCapacity));
+            Assert.That(
+                first[2].Type,
+                Is.EqualTo(PermanentTraitType.CoreVitality)
+                    .Or.EqualTo(PermanentTraitType.LuckySummon));
         }
 
         [Test]
         public void PermanentTraits_ChoicePersistsAndAppliesPermanentMultiplier()
         {
-            const int summonerLevel = 2;
+            const int summonerLevel = 3;
             string savedJson = null;
             var traits = new PermanentTraitProgression(
                 _balance,
@@ -158,12 +171,60 @@ namespace CrossDefense.Tests.EditMode
         [Test]
         public void PermanentTraits_MissedLevelUpsRemainPendingUntilAllAreChosen()
         {
-            const int summonerLevel = 4;
+            const int summonerLevel = 7;
             var traits = new PermanentTraitProgression(_balance, () => summonerLevel);
 
             Assert.That(traits.PendingChoiceCount, Is.EqualTo(3));
             Assert.That(traits.TryChoose(traits.GetCurrentChoices()[0].Type), Is.True);
             Assert.That(traits.PendingChoiceCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void PermanentTraits_LegacyExcessLevelsAreRetainedWithoutCreatingDebt()
+        {
+            const string legacyJson =
+                "{\"version\":1,\"traits\":[{\"type\":0,\"level\":8},{\"type\":3,\"level\":7}]}";
+            var traits = new PermanentTraitProgression(
+                _balance,
+                () => 9,
+                () => legacyJson);
+
+            Assert.That(traits.GetLevel(PermanentTraitType.SummonerPower), Is.EqualTo(8));
+            Assert.That(traits.GetLevel(PermanentTraitType.SlimePower), Is.EqualTo(7));
+            Assert.That(traits.TotalChoiceCount, Is.EqualTo(15));
+            Assert.That(traits.CurrentEntitlement, Is.EqualTo(4));
+            Assert.That(traits.PendingChoiceCount, Is.Zero);
+        }
+
+        [Test]
+        public void SummonerSkillLoadout_RejectsLockedSkillAndPersistsUnlockedEquip()
+        {
+            int level = 7;
+            string saved = null;
+            var loadout = new SummonerSkillLoadout(
+                () => level,
+                () => string.Empty,
+                json => saved = json);
+
+            Assert.That(loadout.TryEquip(SummonerSkillId.IceWall), Is.False);
+            level = 8;
+            Assert.That(loadout.TryEquip(SummonerSkillId.IceWall), Is.True);
+            Assert.That(loadout.EquippedSkill, Is.EqualTo(SummonerSkillId.IceWall));
+            Assert.That(saved, Is.Not.Empty);
+
+            var restored = new SummonerSkillLoadout(() => level, () => saved);
+            Assert.That(restored.EquippedSkill, Is.EqualTo(SummonerSkillId.IceWall));
+        }
+
+        [Test]
+        public void SummonerSkillCatalog_UsesApprovedUnlocksAndCooldowns()
+        {
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Meteor).UnlockLevel, Is.EqualTo(1));
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Meteor).Cooldown, Is.EqualTo(22f));
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).UnlockLevel, Is.EqualTo(8));
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).Cooldown, Is.EqualTo(26f));
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Aegis).UnlockLevel, Is.EqualTo(15));
+            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Aegis).Cooldown, Is.EqualTo(32f));
         }
 
         [Test]

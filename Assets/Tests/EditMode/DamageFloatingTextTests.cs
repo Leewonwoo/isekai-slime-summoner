@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Linq;
 using CrossDefense.UI;
 using NUnit.Framework;
 using UnityEngine;
@@ -92,6 +93,20 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(active.color.b, Is.EqualTo(expected.b).Within(0.001f));
             Assert.That(active.color.a, Is.EqualTo(expected.a).Within(0.001f));
             Assert.That(active.raycastTarget, Is.False);
+        }
+
+        [Test]
+        public void Show_FormatsHealingAsPositiveGreenNumber()
+        {
+            Assert.That(_service.Show(Vector3.zero, 7f, DamageTextKind.Healing), Is.True);
+
+            Text active = _service.OverlayCanvas.GetComponentsInChildren<Text>(true)
+                .First(text => text.gameObject.activeSelf);
+            Assert.That(active.text, Is.EqualTo("+7"));
+            Color expected = new Color32(76, 217, 100, 255);
+            Assert.That(active.color.r, Is.EqualTo(expected.r).Within(0.001f));
+            Assert.That(active.color.g, Is.EqualTo(expected.g).Within(0.001f));
+            Assert.That(active.color.b, Is.EqualTo(expected.b).Within(0.001f));
         }
     }
 }

@@ -17,6 +17,7 @@ namespace CrossDefense.Core
         System.Random _random;
         Coroutine _routine;
         int _waveIndex;
+        int _pendingRushSpawners;
 
         public int CurrentWaveIndex => _waveIndex;
         public int TotalWaves => _timeline == null ? 0 : _timeline.WaveCount;
@@ -82,6 +83,17 @@ namespace CrossDefense.Core
                 if (hasNextWave)
                     _gameManager.GrantWaveClearReward(wave);
 
+                if (wave.ClearGoldBonus > 0)
+                    _gameManager.GrantWaveClearGoldBonus(_waveIndex + 1, wave.ClearGoldBonus);
+
+                if (hasNextWave && wave.PostClearEvent == PostWaveEvent.Merchant &&
+                    _gameManager.BeginMerchant(_waveIndex + 1))
+                {
+                    while (_gameManager.IsMerchantOpen && !_gameManager.IsRunOver)
+                        yield return null;
+                    if (_gameManager.IsRunOver) yield break;
+                }
+
                 int clearedWave = _waveIndex + 1;
                 if (hasNextWave && _timeline.ShouldOfferRunTrait(clearedWave) &&
                     _gameManager.BeginRunTraitChoice(clearedWave))
@@ -101,30 +113,45 @@ namespace CrossDefense.Core
 
         IEnumerator SpawnWave(MonoBehaviour coroutineHost, StageWave wave)
         {
+            if (wave.IsRush)
+            {
+                _pendingRushSpawners = 0;
+                foreach (var rushEntry in wave.MonsterSpawns)
+                {
+                    if (rushEntry == null || rushEntry.Monster == null) continue;
+                    _pendingRushSpawners++;
+                    coroutineHost.StartCoroutine(SpawnEntry(wave, rushEntry, true));
+                }
+                while (_pendingRushSpawners > 0 && !_gameManager.IsRunOver)
+                    yield return null;
+                yield break;
+            }
+
             foreach (var entry in wave.MonsterSpawns)
             {
                 if (entry == null || entry.Monster == null) continue;
-                for (int i = 0; i < entry.Count; i++)
-                {
-                    while (_gameManager.IsGameplayPaused)
-                        yield return null;
-                    var zone = _timeline.ChooseSpawnZone(wave, _random);
-                    var monster = _spawner.Spawn(
-                        _gameManager,
-                        _summoner,
-                        entry.Monster,
-                        zone,
-                        _timeline.GetMonsterHpMultiplier(wave, entry),
-                        _timeline.GetMonsterSpeedMultiplier(wave, entry),
-                        entry.RewardMultiplier,
-                        entry.SizeMultiplier,
-                        _random);
-                    _livingMonsters.Add(monster);
-                    _gameManager.NotifyMonsterSpawned(monster, wave, _livingMonsters.Count);
-                    yield return new WaitForSeconds(_timeline.GetSpawnInterval(wave, entry));
-                    if (_gameManager.IsRunOver) yield break;
-                }
+                yield return SpawnEntry(wave, entry, false);
             }
+        }
+
+        IEnumerator SpawnEntry(StageWave wave, MonsterSpawnEntry entry, bool rush)
+        {
+            for (int i = 0; i < entry.Count; i++)
+            {
+                while (_gameManager.IsGameplayPaused || _livingMonsters.Count >= wave.MaxLivingMonsters)
+                    yield return null;
+                if (_gameManager.IsRunOver) break;
+                var zone = _timeline.ChooseSpawnZone(wave, _random);
+                var monster = _spawner.Spawn(
+                    _gameManager, _summoner, entry.Monster, zone,
+                    _timeline.GetMonsterHpMultiplier(wave, entry),
+                    _timeline.GetMonsterSpeedMultiplier(wave, entry),
+                    entry.RewardMultiplier, entry.SizeMultiplier, _random);
+                _livingMonsters.Add(monster);
+                _gameManager.NotifyMonsterSpawned(monster, wave, _livingMonsters.Count);
+                yield return new WaitForSeconds(_timeline.GetSpawnInterval(wave, entry));
+            }
+            if (rush) _pendingRushSpawners = Mathf.Max(0, _pendingRushSpawners - 1);
         }
     }
 }

@@ -68,7 +68,7 @@ namespace CrossDefense.Data
 
         [Header("Summon Pool")]
         [Min(0)] [SerializeField] int weight = 100;
-        [SerializeField] bool unlockedByDefault = true;
+        [Min(1)] [SerializeField] int unlockLevel = 1;
 
         [Header("Combat")]
         [SerializeField] MonsterAttribute attribute = MonsterAttribute.None;
@@ -88,6 +88,8 @@ namespace CrossDefense.Data
         [Min(1)] [SerializeField] int pierceCount = 1;
         [Range(0f, 1f)] [SerializeField] float supportAttackSpeedBonus;
         [Min(0f)] [SerializeField] float supportRadius = 2.5f;
+        [Min(0.1f)] [SerializeField] float supportHealInterval = 2f;
+        [SerializeField] float[] supportHealFractions = { 0.03f, 0.04f, 0.05f };
 
         [Header("Rank")]
         [SerializeField] Sprite[] rankWorldSprites;
@@ -114,6 +116,7 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float star3SkillDotDuration;
         [Min(0.1f)] [SerializeField] float star3SkillVisualScale = 1f;
         [SerializeField] Sprite star3SkillEffectSprite;
+        [SerializeField] Sprite[] star3SkillEffectFrames;
 
         public string UnitId => unitId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
@@ -125,7 +128,8 @@ namespace CrossDefense.Data
         public Sprite[] MoveFrames => moveFrames;
         public float MoveAnimationFps => moveAnimationFps;
         public int Weight => weight;
-        public bool UnlockedByDefault => unlockedByDefault;
+        public int UnlockLevel => Mathf.Max(1, unlockLevel);
+        public bool IsUnlockedAtLevel(int summonerLevel) => summonerLevel >= UnlockLevel;
         public MonsterAttribute Attribute => attribute;
         public SummonAttackStyle AttackStyle => attackStyle;
         public SummonTargetPriority TargetPriority => targetPriority;
@@ -143,6 +147,7 @@ namespace CrossDefense.Data
         public int PierceCount => pierceCount;
         public float SupportAttackSpeedBonus => supportAttackSpeedBonus;
         public float SupportRadius => supportRadius;
+        public float SupportHealInterval => Mathf.Max(0.1f, supportHealInterval);
         public string Star3SkillName => star3SkillName;
         public Star3SkillMode Star3SkillModeValue => star3SkillMode;
         public float Star3SkillCooldown => star3SkillCooldown;
@@ -157,6 +162,7 @@ namespace CrossDefense.Data
         public float Star3SkillDotDuration => star3SkillDotDuration;
         public float Star3SkillVisualScale => star3SkillVisualScale;
         public Sprite Star3SkillEffectSprite => star3SkillEffectSprite;
+        public Sprite[] Star3SkillEffectFrames => star3SkillEffectFrames;
         public bool HasStar3Skill => star3SkillMode != Star3SkillMode.None;
 
         public Sprite WorldSpriteAtRank(int rank)
@@ -191,6 +197,8 @@ namespace CrossDefense.Data
         public float ScaleAtRank(int rank) => RankValue(rankScaleMultipliers, rank, 1f);
         public float ProjectileScaleAtRank(int rank) =>
             RankValue(rankProjectileScaleMultipliers, rank, 1f);
+        public float SupportHealFractionAtRank(int rank) =>
+            Mathf.Max(0f, RankValue(supportHealFractions, rank, 0f));
         public string NameAtRank(int rank)
         {
             int clamped = SummonRank.Clamp(rank);
@@ -230,7 +238,7 @@ namespace CrossDefense.Data
             data.attackRange = Mathf.Max(0.1f, range);
             data.moveSpeed = Mathf.Max(0f, moveSpeed);
             data.tint = tint ?? Color.white;
-            data.unlockedByDefault = true;
+            data.unlockLevel = 1;
             data.hideFlags = HideFlags.HideAndDontSave;
             return data;
         }
@@ -244,7 +252,9 @@ namespace CrossDefense.Data
             float dotSeconds,
             int pierce,
             float supportBonus = 0f,
-            float supportRange = 2.5f)
+            float supportRange = 2.5f,
+            float supportHealSeconds = 2f,
+            float[] supportHealByRank = null)
         {
             projectileSprite = projectile;
             areaRadius = Mathf.Max(0f, area);
@@ -255,6 +265,9 @@ namespace CrossDefense.Data
             pierceCount = Mathf.Max(1, pierce);
             supportAttackSpeedBonus = Mathf.Clamp01(supportBonus);
             supportRadius = Mathf.Max(0f, supportRange);
+            supportHealInterval = Mathf.Max(0.1f, supportHealSeconds);
+            if (supportHealByRank != null && supportHealByRank.Length > 0)
+                supportHealFractions = supportHealByRank;
         }
 
         public void ConfigurePrototypeAnimation(Sprite[] frames, float framesPerSecond = 9f)
@@ -284,6 +297,9 @@ namespace CrossDefense.Data
                         : projectileSprite;
             }
         }
+
+        public void ConfigurePrototypeUnlockLevel(int level) =>
+            unlockLevel = Mathf.Max(1, level);
 
         public void ConfigurePrototypeStar3Skill(
             string skillName,
@@ -316,6 +332,9 @@ namespace CrossDefense.Data
             star3SkillDotMultiplier = Mathf.Max(0f, skillDotMultiplier);
             star3SkillDotDuration = Mathf.Max(0f, skillDotDuration);
         }
+
+        public void ConfigurePrototypeStar3SkillFrames(Sprite[] frames) =>
+            star3SkillEffectFrames = frames;
 
         static float RankValue(float[] values, int rank, float fallback)
         {

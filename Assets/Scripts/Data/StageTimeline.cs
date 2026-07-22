@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace CrossDefense.Data
 {
+    public enum StageWaveKind { Normal, Boss, Rush }
+    public enum PostWaveEvent { None, Merchant }
+
     /// <summary>Reusable stage-wide balance knobs. Assign one profile to many stages to tune them together.</summary>
     [CreateAssetMenu(fileName = "StageBalanceProfile", menuName = "Cross Defense/Data/Stage Balance Profile", order = 11)]
     public sealed class StageBalanceProfile : ScriptableObject
@@ -112,22 +115,32 @@ namespace CrossDefense.Data
     public sealed class StageWave
     {
         [SerializeField] string label = "Wave";
+        [SerializeField] StageWaveKind kind;
+        // 기존 Stage_01의 보스 플래그를 보존하는 마이그레이션 필드.
         [SerializeField] bool isBoss;
         [Min(0)] [SerializeField] float preparationTime = 5f;
         [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
         [Min(0.01f)] [SerializeField] float speedMultiplier = 1f;
         [Min(0)] [SerializeField] int summonContractReward = 1;
+        [Min(0)] [SerializeField] int clearGoldBonus;
+        [SerializeField] PostWaveEvent postClearEvent;
+        [Min(1)] [SerializeField] int maxLivingMonsters = 64;
         [SerializeField] SpawnZoneWeightSet spawnZoneWeights = new();
         // 기존 에셋 호환용. 새 런타임은 spawnZoneWeights를 우선 사용한다.
         [SerializeField] DirectionWeightSet directionWeights = new();
         [SerializeField] List<MonsterSpawnEntry> monsterSpawns = new();
 
         public string Label => label;
-        public bool IsBoss => isBoss;
+        public StageWaveKind Kind => isBoss ? StageWaveKind.Boss : kind;
+        public bool IsBoss => Kind == StageWaveKind.Boss;
+        public bool IsRush => Kind == StageWaveKind.Rush;
         public float PreparationTime => preparationTime;
         public float HpMultiplier => hpMultiplier;
         public float SpeedMultiplier => speedMultiplier;
         public int SummonContractReward => summonContractReward;
+        public int ClearGoldBonus => Mathf.Max(0, clearGoldBonus);
+        public PostWaveEvent PostClearEvent => postClearEvent;
+        public int MaxLivingMonsters => Mathf.Max(1, maxLivingMonsters);
         public SpawnZoneWeightSet SpawnZoneWeights => spawnZoneWeights;
         public DirectionWeightSet DirectionWeights => directionWeights;
         public IReadOnlyList<MonsterSpawnEntry> MonsterSpawns => monsterSpawns;
@@ -148,6 +161,7 @@ namespace CrossDefense.Data
             return new StageWave
             {
                 label = label,
+                kind = isBoss ? StageWaveKind.Boss : StageWaveKind.Normal,
                 isBoss = isBoss,
                 preparationTime = 1f,
                 summonContractReward = isBoss ? 2 : 1,
@@ -204,6 +218,17 @@ namespace CrossDefense.Data
 
             wave = null;
             return false;
+        }
+
+        public IEnumerable<MonsterData> EnumerateMonsters()
+        {
+            var seen = new HashSet<string>();
+            foreach (StageWave wave in waves)
+            {
+                if (wave?.MonsterSpawns == null) continue;
+                foreach (MonsterSpawnEntry entry in wave.MonsterSpawns)
+                    if (entry?.Monster != null && seen.Add(entry.Monster.MonsterId)) yield return entry.Monster;
+            }
         }
 
         public static StageTimeline CreatePrototype(int waveCount = 3, Sprite defaultMonsterSprite = null,
@@ -300,6 +325,8 @@ namespace CrossDefense.Data
                     yield return $"Wave {i + 1} has no viewport spawn-zone weight.";
                 if (wave.SummonContractReward < 0)
                     yield return $"Wave {i + 1} has a negative summon contract reward.";
+                if (wave.IsRush && wave.MaxLivingMonsters > 64)
+                    yield return $"Wave {i + 1} rush living-monster cap exceeds 64.";
 
                 if (wave.MonsterSpawns == null) continue;
                 for (int j = 0; j < wave.MonsterSpawns.Count; j++)

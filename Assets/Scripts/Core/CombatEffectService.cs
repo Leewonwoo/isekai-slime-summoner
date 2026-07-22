@@ -11,9 +11,12 @@ namespace CrossDefense.Core
         readonly Transform _template;
         readonly Func<bool> _canPlay;
 
-        public CombatEffectService(Transform parent, Func<bool> canPlay = null)
+        public CombatEffectService(
+            Transform parent,
+            Func<bool> canPlay = null,
+            string rootName = "CombatEffects")
         {
-            var rootObject = new GameObject("CombatEffects");
+            var rootObject = new GameObject(rootName);
             _root = rootObject.transform;
             _root.SetParent(parent, false);
             _canPlay = canPlay;
@@ -56,6 +59,34 @@ namespace CrossDefense.Core
                 Mathf.Max(0.1f, scale));
         }
 
+        public void PlayFrames(
+            Vector3 position,
+            Sprite[] frames,
+            Color color,
+            float scale,
+            float framesPerSecond = 18f,
+            float holdLastFrameSeconds = 0f,
+            float rotationDegrees = 0f)
+        {
+            if (frames == null || frames.Length == 0 || frames[0] == null || !CanPlay)
+                return;
+
+            Transform spawned = RuntimePoolService.Spawn(
+                _template,
+                position,
+                Quaternion.Euler(0f, 0f, rotationDegrees),
+                _root);
+            if (spawned == null)
+                return;
+            spawned.GetComponent<CombatEffectController>().PlayFrames(
+                this,
+                frames,
+                color,
+                Mathf.Max(0.1f, scale),
+                Mathf.Max(1f, framesPerSecond),
+                Mathf.Max(0f, holdLastFrameSeconds));
+        }
+
         internal void Release(CombatEffectController effect)
         {
             if (effect == null)
@@ -72,6 +103,11 @@ namespace CrossDefense.Core
         CombatEffectService _service;
         Sequence _sequence;
         bool _playing;
+        Sprite[] _frames;
+        float _framesPerSecond;
+        float _frameElapsed;
+        float _holdLastFrameSeconds;
+        bool _frameMode;
 
         void Awake() => _renderer = GetComponent<SpriteRenderer>();
 
@@ -99,9 +135,48 @@ namespace CrossDefense.Core
                 .OnComplete(() => _service?.Release(this));
         }
 
+        public void PlayFrames(
+            CombatEffectService service,
+            Sprite[] frames,
+            Color color,
+            float scale,
+            float framesPerSecond,
+            float holdLastFrameSeconds)
+        {
+            ResetForPool();
+            _service = service;
+            _playing = true;
+            _frameMode = true;
+            _frames = frames;
+            _framesPerSecond = framesPerSecond;
+            _holdLastFrameSeconds = holdLastFrameSeconds;
+            _frameElapsed = 0f;
+            color.a = 1f;
+            _renderer.color = color;
+            _renderer.sprite = frames[0];
+            transform.localScale = Vector3.one * scale;
+        }
+
         void Update()
         {
             if (_playing && (_service == null || !_service.CanPlay))
+            {
+                _service?.Release(this);
+                return;
+            }
+            if (!_playing || !_frameMode || _frames == null || _frames.Length == 0)
+                return;
+
+            _frameElapsed += Time.deltaTime;
+            int frameIndex = Mathf.FloorToInt(_frameElapsed * _framesPerSecond);
+            if (frameIndex < _frames.Length)
+            {
+                _renderer.sprite = _frames[Mathf.Clamp(frameIndex, 0, _frames.Length - 1)];
+                return;
+            }
+            float animationDuration = _frames.Length / _framesPerSecond;
+            _renderer.sprite = _frames[_frames.Length - 1];
+            if (_frameElapsed >= animationDuration + _holdLastFrameSeconds)
                 _service?.Release(this);
         }
 
@@ -110,6 +185,10 @@ namespace CrossDefense.Core
             _playing = false;
             _sequence?.Kill(false);
             _sequence = null;
+            _frames = null;
+            _frameMode = false;
+            _frameElapsed = 0f;
+            _holdLastFrameSeconds = 0f;
             _service = null;
             transform.localScale = Vector3.one;
             transform.localRotation = Quaternion.identity;

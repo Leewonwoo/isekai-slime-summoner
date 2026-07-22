@@ -358,25 +358,88 @@ namespace CrossDefense.Units
 
         public float GetSupportAttackSpeedMultiplier(SummonedUnitController source)
         {
-            float multiplier = 1f;
+            SummonedUnitController strongest = FindStrongestSupportFor(source);
+            if (strongest == null)
+                return 1f;
+            strongest.PresentSupportBuff();
+            return 1f + SupportStrength(strongest);
+        }
+
+        public bool TryHealWithSupport(SummonedUnitController healer)
+        {
+            if (!CanUnitsFight || IsGameplayPaused || healer?.Data == null ||
+                healer.Instance == null || healer.Data.AttackStyle != SummonAttackStyle.Support)
+                return false;
+
+            SummonedUnitController target = null;
+            float lowestRatio = 1f;
             foreach (var unit in _units)
             {
-                if (unit == null || unit == source || unit.Data == null ||
-                    unit.Data.AttackStyle != SummonAttackStyle.Support)
+                if (unit == null || unit == healer || unit.IsDefeated || unit.MaxHp <= 0f ||
+                    unit.CurrentHp >= unit.MaxHp)
                     continue;
-                float radius = unit.Data.SupportRadius;
-                if ((unit.transform.position - source.transform.position).sqrMagnitude <= radius * radius)
+                float radius = healer.Data.SupportRadius;
+                if ((unit.transform.position - healer.transform.position).sqrMagnitude > radius * radius ||
+                    FindStrongestSupportFor(unit) != healer)
+                    continue;
+                float ratio = unit.CurrentHp / unit.MaxHp;
+                if (ratio >= lowestRatio)
+                    continue;
+                target = unit;
+                lowestRatio = ratio;
+            }
+            if (target == null)
+                return false;
+
+            float overdrive = healer.IsStar3AuraOverdriveActive
+                ? Mathf.Max(1f, healer.Data.Star3SkillStrength)
+                : 1f;
+            float amount = target.MaxHp *
+                healer.Data.SupportHealFractionAtRank(healer.Instance.Rank) *
+                overdrive;
+            float healed = target.Heal(amount);
+            if (healed <= 0f)
+                return false;
+            healer.PresentSupportBuff();
+            PresentDamageNumber(target.GetFloatingTextAnchor(), healed, DamageTextKind.Healing);
+            return true;
+        }
+
+        SummonedUnitController FindStrongestSupportFor(SummonedUnitController target)
+        {
+            if (target == null)
+                return null;
+            SummonedUnitController strongest = null;
+            float strongestValue = 0f;
+            foreach (SummonedUnitController candidate in _units)
+            {
+                if (candidate == null || candidate == target || candidate.IsDefeated ||
+                    candidate.Data == null || candidate.Instance == null ||
+                    candidate.Data.AttackStyle != SummonAttackStyle.Support)
+                    continue;
+                float radius = candidate.Data.SupportRadius;
+                if ((candidate.transform.position - target.transform.position).sqrMagnitude > radius * radius)
+                    continue;
+                float value = SupportStrength(candidate);
+                if (value > strongestValue + 0.0001f ||
+                    Mathf.Approximately(value, strongestValue) &&
+                    (strongest == null || candidate.Instance.InstanceId < strongest.Instance.InstanceId))
                 {
-                    float star3Multiplier = unit.IsStar3AuraOverdriveActive
-                        ? unit.Data.Star3SkillStrength
-                        : 1f;
-                    multiplier += unit.Data.SupportAttackSpeedBonus *
-                        (1f + 0.15f * unit.Instance.Rank) *
-                        star3Multiplier;
-                    unit.PresentSupportBuff();
+                    strongest = candidate;
+                    strongestValue = value;
                 }
             }
-            return multiplier;
+            return strongest;
+        }
+
+        static float SupportStrength(SummonedUnitController support)
+        {
+            float overdrive = support.IsStar3AuraOverdriveActive
+                ? Mathf.Max(1f, support.Data.Star3SkillStrength)
+                : 1f;
+            return support.Data.SupportAttackSpeedBonus *
+                (1f + 0.15f * support.Instance.Rank) *
+                overdrive;
         }
 
         public bool TryCastStar3Skill(SummonedUnitController unit)
@@ -474,6 +537,16 @@ namespace CrossDefense.Units
                 _ => Color.white,
             };
             float rotation = (unit.Instance.InstanceId * 37) % 360;
+            if (data.Star3SkillEffectFrames != null && data.Star3SkillEffectFrames.Length > 0)
+            {
+                Effects?.PlayFrames(
+                    data.UnitId == "explosion-slime" ? unit.GetHeadEffectAnchor() : position,
+                    data.Star3SkillEffectFrames,
+                    color,
+                    data.Star3SkillVisualScale,
+                    18f);
+                return;
+            }
             Effects?.Play(
                 position,
                 data.Star3SkillEffectSprite,

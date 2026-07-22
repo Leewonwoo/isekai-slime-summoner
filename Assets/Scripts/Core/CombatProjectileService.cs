@@ -73,7 +73,9 @@ namespace CrossDefense.Core
             float speed,
             float scale,
             float hitRadius = 0.55f,
-            bool hitAllInRadius = false)
+            bool hitAllInRadius = false,
+            Action<Vector3> onImpact = null,
+            Color? tint = null)
         {
             var spawned = RuntimePoolService.Spawn(_template, origin, Quaternion.identity, _root);
             if (spawned == null) return;
@@ -85,7 +87,9 @@ namespace CrossDefense.Core
                 speed,
                 scale,
                 hitRadius,
-                hitAllInRadius);
+                hitAllInRadius,
+                onImpact,
+                tint);
         }
 
         internal void ResolveImpact(
@@ -149,7 +153,8 @@ namespace CrossDefense.Core
             Vector3 point,
             DamagePacket packet,
             float radius,
-            bool hitAllInRadius)
+            bool hitAllInRadius,
+            Action<Vector3> onImpact)
         {
             var monsters = _monsterProvider?.Invoke();
             if (monsters != null)
@@ -157,7 +162,8 @@ namespace CrossDefense.Core
                 float radiusSq = Mathf.Max(0.1f, radius) * Mathf.Max(0.1f, radius);
                 MonsterController nearest = null;
                 float nearestSq = radiusSq;
-                foreach (var monster in monsters)
+                var snapshot = new List<MonsterController>(monsters);
+                foreach (var monster in snapshot)
                 {
                     if (!IsValid(monster)) continue;
                     float distanceSq = (monster.transform.position - point).sqrMagnitude;
@@ -174,7 +180,14 @@ namespace CrossDefense.Core
                 if (!hitAllInRadius)
                     nearest?.ApplyDamage(packet);
             }
-            Release(projectile);
+            try
+            {
+                onImpact?.Invoke(point);
+            }
+            finally
+            {
+                Release(projectile);
+            }
         }
 
         static void ResolvePierce(
@@ -266,6 +279,7 @@ namespace CrossDefense.Core
         float _chainedDamageMultiplier;
         bool _hitAllInRadius;
         bool _linePierce;
+        Action<Vector3> _pointImpact;
         Vector3 _launchOrigin;
         bool _inFlight;
 
@@ -294,6 +308,7 @@ namespace CrossDefense.Core
             _chainedDamageMultiplier = Mathf.Clamp(chainedDamageMultiplier, 0.05f, 1f);
             _hitAllInRadius = false;
             _linePierce = linePierce;
+            _pointImpact = null;
             _launchOrigin = transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
@@ -316,7 +331,9 @@ namespace CrossDefense.Core
             float speed,
             float scale,
             float hitRadius,
-            bool hitAllInRadius)
+            bool hitAllInRadius,
+            Action<Vector3> onImpact,
+            Color? tint)
         {
             _service = service;
             _target = null;
@@ -330,11 +347,12 @@ namespace CrossDefense.Core
             _chainedDamageMultiplier = 1f;
             _hitAllInRadius = hitAllInRadius;
             _linePierce = false;
+            _pointImpact = onImpact;
             _launchOrigin = transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
             _renderer.sprite = sprite;
-            _renderer.color = AttributeColor(packet.Attribute);
+            _renderer.color = tint ?? AttributeColor(packet.Attribute);
             FaceDirection(_pointTarget - transform.position);
         }
 
@@ -362,7 +380,13 @@ namespace CrossDefense.Core
             {
                 _inFlight = false;
                 if (_usesPointTarget)
-                    _service.ResolvePointImpact(this, _pointTarget, _packet, _areaRadius, _hitAllInRadius);
+                    _service.ResolvePointImpact(
+                        this,
+                        _pointTarget,
+                        _packet,
+                        _areaRadius,
+                        _hitAllInRadius,
+                        _pointImpact);
                 else
                     _service.ResolveImpact(
                         this,
@@ -393,9 +417,13 @@ namespace CrossDefense.Core
             _chainedDamageMultiplier = 1f;
             _hitAllInRadius = false;
             _linePierce = false;
+            _pointImpact = null;
             _launchOrigin = Vector3.zero;
             if (_renderer != null)
+            {
                 _renderer.sprite = null;
+                _renderer.color = Color.white;
+            }
         }
 
         bool IsValidTarget() =>

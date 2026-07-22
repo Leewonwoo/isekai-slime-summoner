@@ -29,6 +29,7 @@ namespace CrossDefense
     {
         Dealt,
         Received,
+        Healing,
     }
 
     public enum RunPhase
@@ -48,5 +49,7 @@ namespace CrossDefense
         None = 0,
         TraitChoice = 1 << 0,
         SummonRoulette = 1 << 1,
+        MonsterCodex = 1 << 2,
+        Merchant = 1 << 3,
     }
 }

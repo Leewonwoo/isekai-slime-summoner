@@ -20,6 +20,7 @@ namespace CrossDefense.Core
         readonly int _currencyReward;
         readonly int _maxCapacity;
         readonly Func<int> _capacityProvider;
+        readonly Func<int> _summonerLevelProvider;
 
         int _nextResultId = 1;
         int _nextInstanceId = 1;
@@ -51,7 +52,8 @@ namespace CrossDefense.Core
             int benchCapacity,
             int randomSeed = 0,
             Func<float> directRankOneChanceProvider = null,
-            Func<int> capacityProvider = null)
+            Func<int> capacityProvider = null,
+            Func<int> summonerLevelProvider = null)
         {
             _gameManager = gameManager;
             _pool = new List<SummonUnitData>();
@@ -59,7 +61,7 @@ namespace CrossDefense.Core
             {
                 foreach (var unit in pool)
                 {
-                    if (unit != null && unit.UnlockedByDefault && unit.Weight > 0)
+                    if (unit != null && unit.Weight > 0)
                         _pool.Add(unit);
                 }
             }
@@ -70,6 +72,7 @@ namespace CrossDefense.Core
             _currencyReward = Mathf.Max(0, currencyReward);
             _maxCapacity = Mathf.Max(1, benchCapacity);
             _capacityProvider = capacityProvider;
+            _summonerLevelProvider = summonerLevelProvider;
             _random = randomSeed == 0 ? new System.Random() : new System.Random(randomSeed);
         }
 
@@ -82,7 +85,7 @@ namespace CrossDefense.Core
                 return false;
 
             int id = _nextResultId++;
-            if (_pool.Count == 0 || _random.NextDouble() < _currencyChance)
+            if (!HasUnlockedUnit() || _random.NextDouble() < _currencyChance)
             {
                 result = SummonResult.CurrencyResult(id, _currencyReward);
             }
@@ -324,13 +327,19 @@ namespace CrossDefense.Core
             {
                 foreach (var unit in _pool)
                 {
-                    if (unit.Rarity >= SummonUnitRarity.Rare && !IsOwned(unit))
+                    if (IsUnlocked(unit) && unit.Rarity >= SummonUnitRarity.Rare && !IsOwned(unit))
                         candidates.Add(unit);
                 }
             }
 
             if (candidates.Count == 0)
-                candidates.AddRange(_pool);
+            {
+                foreach (var unit in _pool)
+                    if (IsUnlocked(unit)) candidates.Add(unit);
+            }
+
+            if (candidates.Count == 0)
+                return null;
 
             int totalWeight = 0;
             foreach (var unit in candidates)
@@ -353,7 +362,7 @@ namespace CrossDefense.Core
             for (int i = 0; i < _pool.Count; i++)
             {
                 SummonUnitData unit = _pool[i];
-                if (unit == null || !CanAddToBench(unit, rank))
+                if (unit == null || !IsUnlocked(unit) || !CanAddToBench(unit, rank))
                     continue;
                 if (preferUnowned && IsOwned(unit))
                     continue;
@@ -365,7 +374,7 @@ namespace CrossDefense.Core
                 for (int i = 0; i < _pool.Count; i++)
                 {
                     SummonUnitData unit = _pool[i];
-                    if (unit != null && CanAddToBench(unit, rank))
+                    if (unit != null && IsUnlocked(unit) && CanAddToBench(unit, rank))
                         candidates.Add(unit);
                 }
             }
@@ -435,6 +444,27 @@ namespace CrossDefense.Core
         bool IsOwned(SummonUnitData unit)
         {
             return unit != null && IsUnitOwned(unit.UnitId);
+        }
+
+        bool IsUnlocked(SummonUnitData unit) =>
+            unit != null && unit.IsUnlockedAtLevel(_summonerLevelProvider?.Invoke() ?? 1);
+
+        public bool IsUnitUnlocked(string unitId)
+        {
+            if (string.IsNullOrWhiteSpace(unitId)) return false;
+            for (int i = 0; i < _pool.Count; i++)
+            {
+                SummonUnitData unit = _pool[i];
+                if (unit != null && unit.UnitId == unitId) return IsUnlocked(unit);
+            }
+            return false;
+        }
+
+        bool HasUnlockedUnit()
+        {
+            for (int i = 0; i < _pool.Count; i++)
+                if (IsUnlocked(_pool[i])) return true;
+            return false;
         }
     }
 }

@@ -23,6 +23,7 @@ namespace CrossDefense.Units
         float _nextSearchTime;
         float _nextAttackTime;
         float _nextStar3SkillTime;
+        float _nextSupportHealTime;
         float _star3AuraOverdriveUntil;
         float _moveAnimationElapsed;
         float _hp;
@@ -63,6 +64,7 @@ namespace CrossDefense.Units
             _nextSearchTime = 0f;
             _nextAttackTime = 0f;
             _nextStar3SkillTime = 0f;
+            _nextSupportHealTime = Time.time + (_data?.SupportHealInterval ?? 2f);
             _star3AuraOverdriveUntil = 0f;
             _moveAnimationElapsed = 0f;
             _hp = 0f;
@@ -93,6 +95,11 @@ namespace CrossDefense.Units
             TickStar3Skill();
             if (_data.AttackStyle == SummonAttackStyle.Support)
             {
+                if (Time.time >= _nextSupportHealTime)
+                {
+                    _nextSupportHealTime = Time.time + _data.SupportHealInterval;
+                    _manager.TryHealWithSupport(this);
+                }
                 TickMoveAnimation(false, 0f);
                 return;
             }
@@ -186,6 +193,7 @@ namespace CrossDefense.Units
             _nextSearchTime = 0f;
             _nextAttackTime = 0f;
             _star3AuraOverdriveUntil = 0f;
+            _nextSupportHealTime = Time.time + (_data?.SupportHealInterval ?? 2f);
             _moveAnimationElapsed = 0f;
             _isMoving = false;
             _renderer.sprite = _data.WorldSpriteAtRank(_instance.Rank);
@@ -257,11 +265,25 @@ namespace CrossDefense.Units
                 Time.time + Mathf.Max(0f, duration));
         }
 
-        public void Heal(float amount)
+        public float Heal(float amount)
         {
-            if (amount <= 0f || IsDefeated || MaxHp <= 0f) return;
+            if (amount <= 0f || IsDefeated || MaxHp <= 0f) return 0f;
+            float previousHp = _hp;
             _hp = Mathf.Min(MaxHp, _hp + amount);
             _healthBar?.SetHealth(_hp, MaxHp);
+            return _hp - previousHp;
+        }
+
+        public Vector3 GetFloatingTextAnchor() => GetDamageNumberAnchor();
+
+        public Vector3 GetHeadEffectAnchor()
+        {
+            if (_renderer != null && _renderer.sprite != null)
+            {
+                Bounds bounds = _renderer.bounds;
+                return new Vector3(bounds.center.x, bounds.max.y, transform.position.z);
+            }
+            return transform.position + Vector3.up * 0.45f;
         }
 
         public void ResetForPool()
@@ -274,6 +296,7 @@ namespace CrossDefense.Units
             _isMoving = false;
             _moveAnimationElapsed = 0f;
             _nextStar3SkillTime = 0f;
+            _nextSupportHealTime = 0f;
             _star3AuraOverdriveUntil = 0f;
             _hp = 0f;
             _shieldHp = 0f;

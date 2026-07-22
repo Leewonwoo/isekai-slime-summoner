@@ -20,6 +20,7 @@ namespace CrossDefense.Units
         Core.GameManager _gameManager;
         SummonedUnitManager _unitManager;
         SummonerAttackController _summonerAttack;
+        SummonerSkillController _summonerSkills;
         Camera _camera;
         UIDocument _uiDocument;
         Vector2 _pressScreenPosition;
@@ -35,11 +36,13 @@ namespace CrossDefense.Units
         public void Initialize(
             Core.GameManager gameManager,
             SummonedUnitManager unitManager,
-            SummonerAttackController summonerAttack)
+            SummonerAttackController summonerAttack,
+            SummonerSkillController summonerSkills = null)
         {
             _gameManager = gameManager;
             _unitManager = unitManager;
             _summonerAttack = summonerAttack;
+            _summonerSkills = summonerSkills;
             _camera = Camera.main;
             _uiDocument = FindFirstObjectByType<UIDocument>();
         }
@@ -96,6 +99,11 @@ namespace CrossDefense.Units
             if (_blockedByUi) return;
 
             _pressWorldPosition = ScreenToWorld(screen);
+            if (_summonerSkills?.IsTargeting == true)
+            {
+                _summonerSkills.UpdateTargetPreview(_pressWorldPosition);
+                return;
+            }
             foreach (var hit in Physics2D.OverlapPointAll(_pressWorldPosition))
             {
                 if (_pressedUnit == null && hit.TryGetComponent<SummonedUnitController>(out var unit))
@@ -113,6 +121,11 @@ namespace CrossDefense.Units
         void HandleMove(Vector2 screen)
         {
             if (_blockedByUi) return;
+            if (_summonerSkills?.IsTargeting == true)
+            {
+                _summonerSkills.UpdateTargetPreview(ScreenToWorld(screen));
+                return;
+            }
             if (!_fieldDrag && _pressedUnit != null &&
                 HasExceededDragThreshold(_pressScreenPosition, screen))
                 _fieldDrag = _unitManager.BeginFieldDrag(_pressedUnit);
@@ -130,6 +143,13 @@ namespace CrossDefense.Units
             }
 
             Vector3 world = ScreenToWorld(screen);
+            if (_summonerSkills?.IsTargeting == true)
+            {
+                if (!HasExceededDragThreshold(_pressScreenPosition, screen))
+                    _summonerSkills.TryCastAt(world);
+                ResetPointerState();
+                return;
+            }
             if (_fieldDrag)
             {
                 _unitManager.EndFieldDrag(

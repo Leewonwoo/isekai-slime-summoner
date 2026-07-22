@@ -79,9 +79,9 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void BenchCapacity_CountsSameUnitAndRankAsOneStack()
+        public void BenchCapacity_CountsTotalOwnedUnitsEvenWhenUiStacks()
         {
-            var manager = new SummonManager(null, new[] { _data }, 0f, 0f, 0, 1, 123);
+            var manager = new SummonManager(null, new[] { _data }, 0f, 0f, 0, 2, 123);
 
             Assert.That(manager.ReturnToBench(new SummonUnitInstance(1, _data, 0)), Is.True);
             Assert.That(manager.ReturnToBench(new SummonUnitInstance(2, _data, 0)), Is.True);
@@ -114,6 +114,19 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_data.PierceCount, Is.EqualTo(1));
             Assert.That(_data.SupportAttackSpeedBonus, Is.EqualTo(1f));
             Assert.That(_data.SupportRadius, Is.Zero);
+            Assert.That(_data.SupportHealInterval, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void SupportHealing_StoresApprovedRankFractions()
+        {
+            _data.ConfigurePrototypeEffects(
+                null, 0f, 0f, 0f, 0f, 0f, 1, 0.16f, 2.8f, 2f,
+                new[] { 0.03f, 0.04f, 0.05f });
+
+            Assert.That(_data.SupportHealFractionAtRank(0), Is.EqualTo(0.03f));
+            Assert.That(_data.SupportHealFractionAtRank(1), Is.EqualTo(0.04f));
+            Assert.That(_data.SupportHealFractionAtRank(2), Is.EqualTo(0.05f));
         }
 
         [Test]

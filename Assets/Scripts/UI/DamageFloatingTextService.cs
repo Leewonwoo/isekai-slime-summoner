@@ -114,8 +114,15 @@ namespace CrossDefense.UI
             entry.StartPosition = localPoint + new Vector2(jitter, 0f);
             entry.Elapsed = 0f;
             entry.Active = true;
-            entry.Text.text = FormatDamage(amount);
-            entry.Text.color = kind == DamageTextKind.Received ? ReceivedColor : DealtColor;
+            entry.Text.text = kind == DamageTextKind.Healing
+                ? $"+{FormatDamage(amount)}"
+                : FormatDamage(amount);
+            entry.Text.color = kind switch
+            {
+                DamageTextKind.Received => ReceivedColor,
+                DamageTextKind.Healing => new Color32(76, 217, 100, 255),
+                _ => DealtColor,
+            };
             entry.Rect.anchoredPosition = entry.StartPosition;
             entry.Rect.localScale = Vector3.one * 0.82f;
             entry.GameObject.SetActive(true);
