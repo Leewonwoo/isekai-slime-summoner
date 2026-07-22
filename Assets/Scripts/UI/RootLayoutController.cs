@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using CrossDefense.Core;
 using CrossDefense.Units;
@@ -24,12 +25,15 @@ namespace CrossDefense.UI
         readonly List<GrowthRowModel> _growthRowBuffer = new();
         IReadOnlyList<SummonResult> _runRewardSummonResults;
         int _runRewardSummonResultIndex;
+        int _lastUnlockLevel;
 
         public TopHUDController TopHUD { get; private set; }
         public FieldOverlayController FieldOverlay { get; private set; }
         public BottomPanelController BottomPanel { get; private set; }
         public SummonRouletteView SummonRoulette { get; private set; }
         public SummonUnitDetailView SummonUnitDetail { get; private set; }
+        public MonsterCodexModalController MonsterCodexModal { get; private set; }
+        public MerchantModalController MerchantModal { get; private set; }
 
         void OnEnable()
         {
@@ -40,7 +44,12 @@ namespace CrossDefense.UI
             BottomPanel = new BottomPanelController(_root, upgradeRowTemplate);
             SummonRoulette = new SummonRouletteView(_root);
             SummonUnitDetail = new SummonUnitDetailView(_root);
+            MonsterCodexModal = new MonsterCodexModalController(_root);
+            MerchantModal = new MerchantModalController(_root);
             SummonUnitDetail.LevelUpRequested += OnSlimeLevelUpRequested;
+            MonsterCodexModal.CloseRequested += OnCodexCloseRequested;
+            MerchantModal.CloseRequested += OnMerchantCloseRequested;
+            MerchantModal.PurchaseRequested += OnMerchantPurchaseRequested;
             _gameManager = FindFirstObjectByType<GameManager>();
             if (_gameManager == null)
                 ApplyScaffoldDemoState();
@@ -82,9 +91,19 @@ namespace CrossDefense.UI
                     _gameManager.PermanentTraits.Changed -= OnPermanentTraitsChanged;
                 if (_gameManager.RunTraits != null)
                     _gameManager.RunTraits.Changed -= OnRunTraitsChanged;
+                if (_gameManager.SummonerSkills != null)
+                    _gameManager.SummonerSkills.StateChanged -= RefreshSkillUI;
+                if (_gameManager.Dopamine != null)
+                    _gameManager.Dopamine.StateChanged -= OnDopamineStateChanged;
+                if (_gameManager.Equipment != null)
+                    _gameManager.Equipment.Changed -= OnEquipmentChanged;
+                if (_gameManager.RunRelics != null)
+                    _gameManager.RunRelics.Changed -= OnRunRelicsChanged;
                 _gameManager.RegisterGoldScreenPositionProvider(null);
                 _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.Merchant, false);
             }
             if (BottomPanel != null)
             {
@@ -94,7 +113,14 @@ namespace CrossDefense.UI
                 BottomPanel.BenchDragMoved -= OnBenchDragMoved;
                 BottomPanel.BenchDragEnded -= OnBenchDragEnded;
                 BottomPanel.RunUpgradeRequested -= OnRunUpgradeRequested;
+                BottomPanel.SkillEquipRequested -= OnSkillEquipRequested;
+                BottomPanel.EquipmentEquipRequested -= OnEquipmentEquipRequested;
                 BottomPanel.Dispose();
+            }
+            if (FieldOverlay != null)
+            {
+                FieldOverlay.SkillRequested -= OnSkillRequested;
+                FieldOverlay.CodexRequested -= OnCodexRequested;
             }
             _traitChoicePopupOpen = false;
             _traitChoicePopup?.Hide();
@@ -104,6 +130,18 @@ namespace CrossDefense.UI
                 SummonUnitDetail.Dispose();
             }
             TopHUD?.Dispose();
+            FieldOverlay?.Dispose();
+            if (MonsterCodexModal != null)
+            {
+                MonsterCodexModal.CloseRequested -= OnCodexCloseRequested;
+                MonsterCodexModal.Dispose();
+            }
+            if (MerchantModal != null)
+            {
+                MerchantModal.CloseRequested -= OnMerchantCloseRequested;
+                MerchantModal.PurchaseRequested -= OnMerchantPurchaseRequested;
+                MerchantModal.Dispose();
+            }
         }
 
         void BindGameManager()
@@ -128,12 +166,26 @@ namespace CrossDefense.UI
                 _gameManager.PermanentTraits.Changed += OnPermanentTraitsChanged;
             if (_gameManager.RunTraits != null)
                 _gameManager.RunTraits.Changed += OnRunTraitsChanged;
+            if (_gameManager.SummonerSkills != null)
+                _gameManager.SummonerSkills.StateChanged += RefreshSkillUI;
+            if (_gameManager.Dopamine != null)
+                _gameManager.Dopamine.StateChanged += OnDopamineStateChanged;
+            if (_gameManager.Equipment != null)
+                _gameManager.Equipment.Changed += OnEquipmentChanged;
+            if (_gameManager.RunRelics != null)
+                _gameManager.RunRelics.Changed += OnRunRelicsChanged;
+            FieldOverlay.SkillRequested += OnSkillRequested;
+            FieldOverlay.CodexRequested += OnCodexRequested;
             BottomPanel.SummonRequested += OnSummonRequested;
             BottomPanel.BenchSlotSelected += OnBenchSlotSelected;
             BottomPanel.BenchDragStarted += OnBenchDragStarted;
             BottomPanel.BenchDragMoved += OnBenchDragMoved;
             BottomPanel.BenchDragEnded += OnBenchDragEnded;
             BottomPanel.RunUpgradeRequested += OnRunUpgradeRequested;
+            BottomPanel.SkillEquipRequested += OnSkillEquipRequested;
+            BottomPanel.EquipmentEquipRequested += OnEquipmentEquipRequested;
+            MonsterCodexModal.Bind(_gameManager.MonsterCatalog, _gameManager.MonsterCodex);
+            MerchantModal.Bind(_gameManager.Merchant);
             _gameManager.RegisterGoldScreenPositionProvider(TopHUD.GetGoldScreenPosition);
             if (_gameManager.StageTimeline != null)
                 TopHUD.SetStageName(_gameManager.StageTimeline.DisplayName);
@@ -142,12 +194,20 @@ namespace CrossDefense.UI
             OnGoldChanged(_gameManager.Gold);
             OnSummonContractsChanged(_gameManager.SummonContracts);
             RefreshOwnedUnits();
+            _lastUnlockLevel = _gameManager.SummonerProgression.Snapshot.Level;
             OnSummonerProgressionChanged(_gameManager.SummonerProgression.Snapshot);
+            RefreshEquipmentUI();
             RefreshGrowthUI();
+            RefreshSkillUI();
+            RefreshDopamineUI();
             TryShowTraitChoice();
         }
 
-        void OnWaveChanged(int current, int total) => FieldOverlay.SetWave(current, _gameManager.LivingMonsterCount);
+        void OnWaveChanged(int current, int total)
+        {
+            FieldOverlay.SetWaveKind(_gameManager.CurrentWaveData?.Kind ?? StageWaveKind.Normal);
+            FieldOverlay.SetWave(current, _gameManager.LivingMonsterCount);
+        }
         void OnLivingMonsterCountChanged(int count) => FieldOverlay.SetWave(_gameManager.CurrentWave, count);
         void OnGoldChanged(int amount)
         {
@@ -182,10 +242,97 @@ namespace CrossDefense.UI
 
         void OnSummonerProgressionChanged(SummonerProgressionSnapshot snapshot)
         {
+            if (_lastUnlockLevel > 0 && snapshot.Level > _lastUnlockLevel && _gameManager?.SummonManager?.Pool != null)
+            {
+                var unlocked = new List<string>();
+                foreach (SummonUnitData unit in _gameManager.SummonManager.Pool)
+                    if (unit != null && unit.UnlockLevel > _lastUnlockLevel && unit.UnlockLevel <= snapshot.Level)
+                        unlocked.Add(unit.DisplayName);
+                if (unlocked.Count > 0)
+                    FieldOverlay.ShowUnlockToast($"새 슬라임 해금!\n{string.Join(" · ", unlocked)}");
+            }
+            _lastUnlockLevel = snapshot.Level;
             TopHUD.SetSummonerProfile("위대한 소환사", snapshot.Level);
             BottomPanel.SetDirectRankOneChance(_gameManager.DirectRankOneChance);
             RefreshSummonerUI(snapshot);
+            RefreshSkillUI();
             TryShowTraitChoice();
+        }
+
+        void OnSkillRequested() => _gameManager?.SummonerSkills?.PressSkillButton();
+
+        void OnCodexRequested()
+        {
+            MonsterCodexModal?.Show();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.MonsterCodex, true);
+        }
+
+        void OnCodexCloseRequested()
+        {
+            MonsterCodexModal?.Hide();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
+        }
+
+        void OnMerchantCloseRequested() => _gameManager?.CloseMerchant();
+
+        void OnMerchantPurchaseRequested(int index)
+        {
+            _gameManager?.Merchant?.TryPurchase(index);
+            MerchantModal?.Refresh();
+            RefreshEquipmentUI();
+        }
+
+        void OnEquipmentEquipRequested(string id)
+        {
+            if (_gameManager?.Equipment?.TryEquip(id) == true)
+                RefreshEquipmentUI();
+        }
+
+        void OnEquipmentChanged()
+        {
+            RefreshEquipmentUI();
+            RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
+        }
+
+        void OnRunRelicsChanged()
+        {
+            RefreshEquipmentUI();
+            RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
+        }
+
+        void RefreshEquipmentUI() =>
+            BottomPanel?.SetEquipmentData(_gameManager?.Equipment, _gameManager?.RunRelics);
+
+        void OnSkillEquipRequested(SummonerSkillId id)
+        {
+            if (_gameManager?.SummonerSkillLoadout?.TryEquip(id) == true)
+                RefreshSkillUI();
+        }
+
+        void RefreshSkillUI()
+        {
+            if (_gameManager?.SummonerSkills == null ||
+                _gameManager.SummonerProgression == null)
+                return;
+            SummonerSkillController skills = _gameManager.SummonerSkills;
+            FieldOverlay.SetSkillState(
+                skills.EquippedDefinition,
+                skills.RemainingCooldown,
+                skills.IsTargeting);
+            BottomPanel.SetSkillRows(
+                _gameManager.SummonerProgression.Snapshot.Level,
+                skills.EquippedSkill);
+        }
+
+        void OnDopamineStateChanged(DopamineSnapshot _) => RefreshDopamineUI();
+
+        void RefreshDopamineUI()
+        {
+            if (_gameManager?.Dopamine == null || FieldOverlay == null)
+                return;
+            FieldOverlay.SetDopamineState(
+                _gameManager.Dopamine.Snapshot,
+                _gameManager.Dopamine.Balance);
         }
 
         void OnPermanentTraitsChanged(PermanentTraitSnapshot snapshot)
@@ -281,8 +428,12 @@ namespace CrossDefense.UI
             float damageMultiplier =
                 snapshot.DamageMultiplier *
                 (traits?.Snapshot.SummonerDamageMultiplier ?? 1f) *
-                (_gameManager.Growth?.RunDamageMultiplier ?? 1f);
-            float criticalChance = Mathf.Clamp01(_gameManager.Growth?.CriticalChance ?? 0f);
+                (_gameManager.Growth?.RunDamageMultiplier ?? 1f) *
+                (_gameManager.Equipment?.DamageMultiplier ?? 1f) *
+                (_gameManager.RunRelics?.DamageMultiplier ?? 1f);
+            float criticalChance = Mathf.Clamp01(
+                (_gameManager.Growth?.CriticalChance ?? 0f) +
+                (_gameManager.Equipment?.CriticalChanceBonus ?? 0f));
             string experience = snapshot.IsMaxLevel
                 ? "EXP MAX"
                 : $"EXP {snapshot.Experience:N0} / {snapshot.ExperienceToNext:N0}";
@@ -570,6 +721,15 @@ namespace CrossDefense.UI
             float panelPerPixel = 1080f / Screen.width; // Match Width(0) 기준 환산
             root.style.paddingTop = (Screen.height - safe.yMax) * panelPerPixel;
             root.style.paddingBottom = safe.yMin * panelPerPixel;
+        }
+
+        void Update()
+        {
+            if (Keyboard.current?.escapeKey.wasPressedThisFrame != true) return;
+            if (MonsterCodexModal?.IsVisible == true)
+                OnCodexCloseRequested();
+            else if (MerchantModal?.IsVisible == true)
+                OnMerchantCloseRequested();
         }
     }
 }

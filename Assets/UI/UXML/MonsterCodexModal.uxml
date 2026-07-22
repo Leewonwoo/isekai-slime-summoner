@@ -1,0 +1,23 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/MonsterCodexModal.uss" />
+    <VisualElement name="codex-overlay" class="modal-overlay hidden">
+        <VisualElement class="modal-backdrop" picking-mode="Ignore" />
+        <VisualElement class="codex-panel">
+            <VisualElement class="modal-header">
+                <Label class="modal-title" text="몬스터 도감" />
+                <Button name="codex-close-button" class="btn modal-close" text="닫기" />
+            </VisualElement>
+            <ScrollView name="codex-grid-scroll" class="panel-scroll codex-grid-scroll" mode="Vertical">
+                <VisualElement name="codex-grid" class="codex-grid" />
+            </ScrollView>
+            <VisualElement name="codex-detail" class="codex-detail">
+                <Image name="codex-detail-image" class="codex-detail__image" />
+                <VisualElement class="codex-detail__text">
+                    <Label name="codex-detail-name" class="codex-detail__name" text="슬롯을 선택하세요" />
+                    <Label name="codex-detail-attribute" class="codex-detail__attribute" text="" />
+                    <Label name="codex-detail-stats" class="codex-detail__stats" text="" />
+                </VisualElement>
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

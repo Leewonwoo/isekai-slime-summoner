@@ -81,7 +81,6 @@ namespace CrossDefense.UI
     public class BottomPanelController
     {
         const int BenchSlotCount = 12;
-        const int GearSlotCount = 6;
         const float BenchDragThreshold = 22f;
 
         static readonly string[] TabKeys = { "summon", "upgrade", "skill", "gear", "summoner" };
@@ -93,7 +92,15 @@ namespace CrossDefense.UI
         readonly List<VisualElement> _benchSlots = new();
         readonly VisualTreeAsset _upgradeRowTemplate;
         readonly ScrollView _upgradeList;
+        readonly ScrollView _skillList;
         readonly Dictionary<string, GrowthRowBinding> _upgradeRows = new();
+        readonly Dictionary<SummonerSkillId, SkillRowBinding> _skillRows = new();
+        readonly List<EquipmentRowBinding> _equipmentRows = new();
+        readonly ScrollView _equipmentList;
+        readonly Label _gearWeapon;
+        readonly Label _gearArmor;
+        readonly Label _gearAccessory;
+        readonly Label _runRelicList;
         readonly Label _benchCount;
         readonly Label _summonContractCount;
         readonly Label _summonProbability;
@@ -120,6 +127,8 @@ namespace CrossDefense.UI
         public event Action<SummonUnitInstance, Vector2> BenchDragMoved;
         public event Action<SummonUnitInstance, Vector2> BenchDragEnded;
         public event Action<RunUpgradeType> RunUpgradeRequested;
+        public event Action<SummonerSkillId> SkillEquipRequested;
+        public event Action<string> EquipmentEquipRequested;
         public bool IsSummonAnimating => _isSummonAnimating;
 
         public BottomPanelController(VisualElement root, VisualTreeAsset upgradeRowTemplate)
@@ -137,13 +146,18 @@ namespace CrossDefense.UI
 
             _bench = root.Q<VisualElement>("bench");
             BuildBenchSlots();
-            BuildSlots(root.Q<VisualElement>("gear-slots"), GearSlotCount);
+            _equipmentList = root.Q<ScrollView>("equipment-list");
+            _gearWeapon = root.Q<Label>("gear-slot-weapon");
+            _gearArmor = root.Q<Label>("gear-slot-armor");
+            _gearAccessory = root.Q<Label>("gear-slot-accessory");
+            _runRelicList = root.Q<Label>("run-relic-list");
             _benchCount = root.Q<Label>("bench-count");
             _summonContractCount = root.Q<Label>("summon-contract-count");
             _summonProbability = root.Q<Label>("summon-prob");
             _summonButton = root.Q<Button>("summon-button");
             _summonButton.clicked += () => SummonRequested?.Invoke();
             _upgradeList = root.Q<ScrollView>("upgrade-list");
+            _skillList = root.Q<ScrollView>("skill-list");
             _summonerTabName = root.Q<Label>("summoner-tab-name");
             _summonerTabLevel = root.Q<Label>("summoner-tab-level");
             _summonerExpText = root.Q<Label>("summoner-exp-text");
@@ -158,13 +172,17 @@ namespace CrossDefense.UI
             SetBenchUsage(0, 0, BenchSlotCount);
             SetSummonContracts(0);
 
-            BuildDummyRows(root.Q<ScrollView>("skill-list"), upgradeRowTemplate,
-                new[] { "메테오", "급속 소환", "코어 실드" }, "개방");
+            BuildSkillRows();
         }
 
         public void Dispose()
         {
             DisposeRows(_upgradeRows);
+            foreach (SkillRowBinding binding in _skillRows.Values)
+                binding.Dispose();
+            _skillRows.Clear();
+            foreach (EquipmentRowBinding binding in _equipmentRows) binding.Dispose();
+            _equipmentRows.Clear();
         }
 
         public void SelectTab(string key)
@@ -206,6 +224,71 @@ namespace CrossDefense.UI
 
         public void SetGrowthRows(IReadOnlyList<GrowthRowModel> rows) =>
             SyncGrowthRows(_upgradeList, _upgradeRows, rows);
+
+        public void SetSkillRows(int summonerLevel, SummonerSkillId equipped)
+        {
+            foreach (SummonerSkillDefinition definition in SummonerSkillCatalog.All)
+            {
+                if (!_skillRows.TryGetValue(definition.Id, out SkillRowBinding binding))
+                    continue;
+                bool unlocked = SummonerSkillCatalog.IsUnlocked(definition.Id, summonerLevel);
+                bool isEquipped = definition.Id == equipped;
+                string values = unlocked
+                    ? $"{definition.Description} · {definition.Cooldown:0}초"
+                    : $"Lv.{definition.UnlockLevel} 해금 · {definition.Description}";
+                binding.View.Bind(
+                    definition.DisplayName,
+                    values,
+                    !unlocked ? "잠김" : isEquipped ? "장착 중" : "장착",
+                    SkillRowIconClass(definition.Id));
+                binding.View.SetAffordable(unlocked && !isEquipped);
+            }
+        }
+
+        public void SetEquipmentData(EquipmentProgression equipment, RunRelicInventory relics)
+        {
+            _gearWeapon.text = SlotText("무기", equipment?.Equipped(EquipmentSlot.Weapon));
+            _gearArmor.text = SlotText("방어구", equipment?.Equipped(EquipmentSlot.Armor));
+            _gearAccessory.text = SlotText("장신구", equipment?.Equipped(EquipmentSlot.Accessory));
+
+            foreach (EquipmentRowBinding binding in _equipmentRows) binding.Dispose();
+            _equipmentRows.Clear();
+            _equipmentList?.Clear();
+            if (equipment?.Catalog?.Equipment != null && _equipmentList != null && _upgradeRowTemplate != null)
+            {
+                foreach (EquipmentData item in equipment.Catalog.Equipment)
+                {
+                    if (item == null || !equipment.IsOwned(item.EquipmentId)) continue;
+                    VisualElement row = _upgradeRowTemplate.Instantiate();
+                    var binding = new EquipmentRowBinding(row, item.EquipmentId,
+                        id => EquipmentEquipRequested?.Invoke(id));
+                    bool equipped = equipment.Equipped(item.Slot)?.EquipmentId == item.EquipmentId;
+                    binding.View.Bind(item.DisplayName, item.Description, equipped ? "장착 중" : "장착");
+                    binding.View.SetAffordable(!equipped);
+                    _equipmentRows.Add(binding);
+                    _equipmentList.Add(row);
+                }
+            }
+
+            var relicNames = new List<string>();
+            if (relics?.Owned != null)
+                foreach (RunRelicDefinition relic in relics.Owned)
+                    relicNames.Add($"• {relic.DisplayName} — {relic.Description}");
+            if (_runRelicList != null)
+                _runRelicList.text = relicNames.Count == 0
+                    ? "보유한 유물이 없습니다."
+                    : string.Join("\n", relicNames);
+        }
+
+        static string SlotText(string slotName, EquipmentData item) =>
+            item == null ? $"{slotName}\n비어 있음" : $"{slotName}\n{item.DisplayName}";
+
+        static string SkillRowIconClass(SummonerSkillId id) => id switch
+        {
+            SummonerSkillId.IceWall => "row__icon--skill-ice-wall",
+            SummonerSkillId.Aegis => "row__icon--skill-aegis",
+            _ => "row__icon--skill-meteor",
+        };
 
         public void SetSummonerInfo(SummonerInfoModel model)
         {
@@ -406,6 +489,56 @@ namespace CrossDefense.UI
             {
                 Root = root;
                 View = new UpgradeRowView(root);
+            }
+        }
+
+        sealed class SkillRowBinding
+        {
+            public UpgradeRowView View { get; }
+            readonly Button _button;
+            readonly Action _handler;
+
+            public SkillRowBinding(VisualElement root, SummonerSkillId id, Action<SummonerSkillId> onClicked)
+            {
+                View = new UpgradeRowView(root);
+                _button = View.ActionButton;
+                _handler = () => onClicked?.Invoke(id);
+                _button.clicked += _handler;
+            }
+
+            public void Dispose() => _button.clicked -= _handler;
+        }
+
+        sealed class EquipmentRowBinding
+        {
+            public UpgradeRowView View { get; }
+            readonly Button _button;
+            readonly Action _handler;
+
+            public EquipmentRowBinding(VisualElement root, string id, Action<string> onClicked)
+            {
+                View = new UpgradeRowView(root);
+                _button = View.ActionButton;
+                _handler = () => onClicked?.Invoke(id);
+                _button.clicked += _handler;
+            }
+
+            public void Dispose() => _button.clicked -= _handler;
+        }
+
+        void BuildSkillRows()
+        {
+            if (_skillList == null || _upgradeRowTemplate == null)
+                return;
+            foreach (SummonerSkillDefinition definition in SummonerSkillCatalog.All)
+            {
+                VisualElement root = _upgradeRowTemplate.Instantiate();
+                var binding = new SkillRowBinding(
+                    root,
+                    definition.Id,
+                    id => SkillEquipRequested?.Invoke(id));
+                _skillRows.Add(definition.Id, binding);
+                _skillList.Add(root);
             }
         }
 

@@ -21,7 +21,7 @@
                 <VisualElement class="capsule__icon capsule__icon--gold" />
                 <Label name="gold-value" class="capsule__value" text="0" />
             </VisualElement>
-            <VisualElement name="gem-capsule" class="capsule top-hud__capsule">
+            <VisualElement name="gem-capsule" class="capsule top-hud__capsule hidden">
                 <VisualElement class="capsule__icon capsule__icon--gem" />
                 <Label name="gem-value" class="capsule__value" text="0" />
             </VisualElement>

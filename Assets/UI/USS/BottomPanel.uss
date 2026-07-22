@@ -425,6 +425,56 @@
     margin-bottom: var(--gap-sm);
 }
 
+.gear-tab__title,
+.gear-tab__section {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    margin-bottom: var(--gap-sm);
+}
+
+.gear-tab__section {
+    font-size: var(--font-caption);
+    margin-top: var(--gap-sm);
+}
+
+.gear-tab__slots {
+    flex-direction: row;
+    flex-shrink: 0;
+    justify-content: space-between;
+}
+
+.gear-tab__slot {
+    width: var(--gear-slot-width);
+    min-height: var(--touch-min);
+    color: var(--color-text);
+    background-color: var(--color-panel-deep);
+    border-width: var(--gap-xs);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-caption);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.gear-tab__inventory {
+    flex-grow: 1;
+    min-height: var(--row-height);
+}
+
+.gear-tab__relics {
+    min-height: var(--touch-min);
+    color: var(--color-text-dim);
+    background-color: var(--color-panel-deep);
+    border-radius: var(--radius-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-sm);
+    font-size: var(--font-caption);
+    white-space: normal;
+}
+
 /* ── 소환사 탭 ─────────────────────── */
 .summoner-tab {
     flex-grow: 1;

@@ -1,6 +1,14 @@
 <UXML xmlns="UnityEngine.UIElements">
     <VisualElement name="gear-tab" class="gear-tab">
-        <Label class="gear-tab__hint" text="장비 슬롯 — 대상 선택 후 장착 (2주차 구현)" />
-        <VisualElement name="gear-slots" class="bench" />
+        <Label class="gear-tab__title" text="소환사 영구 장비" />
+        <VisualElement name="gear-slots" class="gear-tab__slots">
+            <Label name="gear-slot-weapon" class="gear-tab__slot" text="무기&#10;비어 있음" />
+            <Label name="gear-slot-armor" class="gear-tab__slot" text="방어구&#10;비어 있음" />
+            <Label name="gear-slot-accessory" class="gear-tab__slot" text="장신구&#10;비어 있음" />
+        </VisualElement>
+        <Label class="gear-tab__section" text="보유 장비" />
+        <ScrollView name="equipment-list" class="row-list panel-scroll gear-tab__inventory" mode="Vertical" />
+        <Label class="gear-tab__section" text="이번 런 유물" />
+        <Label name="run-relic-list" class="gear-tab__relics" text="보유한 유물이 없습니다." />
     </VisualElement>
 </UXML>

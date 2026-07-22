@@ -36,6 +36,8 @@
     /* 상태 */
     --color-positive: rgb(76, 217, 100);
     --color-reddot: rgb(255, 59, 48);
+    --color-overdrive: rgb(207, 105, 255);
+    --color-overdrive-deep: rgb(102, 43, 128);
 
     /* 속성 미니 아이콘 (배지 안 표시 전용) */
     --color-attr-none: rgb(154, 163, 178);
@@ -78,11 +80,29 @@
     --portrait-ring-inset: 12px;
     --skill-button-size: 128px;
     --skill-button-radius: 64px;
+    --skill-button-icon-size: 56px;
+    --skill-button-label-size: 24px;
+    --skill-button-cooldown-size: 30px;
+    --codex-button-size: 96px;
+    --codex-slot-size: 188px;
+    --codex-slot-image-size: 72%;
+    --codex-detail-height: 280px;
+    --codex-detail-image-size: 220px;
+    --unlock-toast-inset-x: 25%;
+    --unlock-toast-top: 24%;
+    --modal-panel-width: 920px;
+    --modal-panel-height: 1450px;
+    --merchant-card-height: 300px;
+    --overdrive-gauge-width: 240px;
+    --overdrive-gauge-height: 24px;
+    --overdrive-gauge-bottom: 168px;
+    --combo-label-height: 52px;
 
     /* BottomPanel 구조 (1080 기준) */
     --bottom-panel-content-inset: 40px;
     --bench-slot-state-border: 4px;
     --bench-slot-size: 120px;
+    --gear-slot-width: 31%;
     --summon-grid-slot-width: 188px;
     --summon-grid-slot-height: 210px;
     --summon-grid-icon-size: 112px;

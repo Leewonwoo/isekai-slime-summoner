@@ -4,7 +4,18 @@
         <VisualElement name="wave-status" class="field-overlay__wave-status" picking-mode="Ignore">
             <Label name="wave-label" class="field-overlay__wave" text="WAVE 1" picking-mode="Ignore" />
             <Label name="remaining-monsters-label" class="field-overlay__remaining" text="잔여 몬스터 24" picking-mode="Ignore" />
+            <Label name="combo-label" class="field-overlay__combo hidden" text="" picking-mode="Ignore" />
         </VisualElement>
-        <Button name="skill-button" class="skill-button" text="스킬" />
+        <VisualElement name="overdrive-gauge" class="overdrive-gauge overdrive--charging" picking-mode="Ignore">
+            <VisualElement name="overdrive-gauge-fill" class="overdrive-gauge__fill" picking-mode="Ignore" />
+            <Label name="overdrive-gauge-label" class="overdrive-gauge__label" text="" picking-mode="Ignore" />
+        </VisualElement>
+        <Button name="codex-button" class="codex-button" text="도감" tooltip="몬스터 도감" />
+        <Label name="unlock-toast" class="unlock-toast hidden" text="새 슬라임 해금" picking-mode="Ignore" />
+        <Button name="skill-button" class="skill-button">
+            <VisualElement name="skill-button-icon" class="skill-button__icon" picking-mode="Ignore" />
+            <Label name="skill-button-name" class="skill-button__name" text="메테오" picking-mode="Ignore" />
+            <Label name="skill-button-cooldown" class="skill-button__cooldown" text="" picking-mode="Ignore" />
+        </Button>
     </VisualElement>
 </UXML>

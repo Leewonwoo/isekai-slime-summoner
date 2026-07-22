@@ -1,4 +1,5 @@
 .top-hud {
+    position: relative;
     flex-grow: 1;
     flex-direction: row;
     align-items: center;
@@ -68,20 +69,29 @@
 }
 
 .top-hud__stage {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    translate: -50% 0;
     width: var(--top-hud-stage-width);
     flex-shrink: 0;
     justify-content: center;
+    align-items: center;
     padding-left: var(--gap-sm);
     padding-right: var(--gap-sm);
 }
 
 .top-hud__section-label {
+    width: 100%;
     color: var(--color-text-dim);
     font-size: var(--font-caption);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
 .top-hud__stage-name {
+    width: 100%;
     color: var(--color-text);
     font-size: var(--font-body);
     -unity-font-style: bold;

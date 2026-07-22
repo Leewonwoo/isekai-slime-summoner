@@ -56,6 +56,18 @@
     background-image: url("project://database/Assets/Art/UIIcons/icon_income.png?fileID=21300000&guid=61230eb94fd865c43bd49bf5ce85b95d&type=3");
 }
 
+.row__icon--skill-meteor {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_meteor.png");
+}
+
+.row__icon--skill-ice-wall {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_ice_wall.png");
+}
+
+.row__icon--skill-aegis {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_aegis.png");
+}
+
 .row__info {
     flex-grow: 1;
 }
