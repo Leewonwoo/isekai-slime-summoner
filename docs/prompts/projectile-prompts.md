@@ -36,7 +36,41 @@ Avoid: smooth vector art, painterly rendering, 3D render, circular badge, weapon
 | `projectile_summoner_arcane_bolt.png` | one compact violet-white arcane bolt; bright lavender core, tapered right nose, short jagged left tail, two square sparks; `#00FF00` chroma key |
 | `projectile_summoner_fireball.png` | one compressed fireball; pale-yellow core, orange-red shell, sharp right nose, short jagged left flame tail; `#00FF00` chroma key |
 | `projectile_summoner_ice_lance.png` | one slender angular ice spear; icy-white ridge, cyan right point, swept cobalt fins and tiny trailing frost shards; `#00FF00` chroma key |
-| `projectile_summoner_lightning_orb.png` | one nature lightning orb; pale-yellow core, lime/turquoise shell, right-facing lightning prongs and zigzag left tail; no plant motif; `#FF00FF` chroma key |
+| `projectile_summoner_lightning_orb.png` | one elongated blue-white lightning discharge; three strong angular zigzag bends, compact charged core, sharp right-facing tip, and at most two attached branch forks; no green/yellow; `#FF00FF` chroma key |
+
+### 1.3 2026-07-21 메테오 전용 유성
+
+기존 화염 폭발·파이어볼·메테오 스킬 아이콘을 스타일 참조로 사용하되, 착탄 폭발과 분리되는 단일 월드 투사체로 생성했다.
+
+```text
+Use case: stylized-concept
+Asset type: Unity 2D world-space spell projectile sprite
+Primary request: one large right-facing flaming meteor; compact irregular dark volcanic-rock head with orange-hot cracks and a bright leading rim; long tapered layered flame tail streaming left
+Style/medium: strict crisp 16-bit pixel art, chunky hard square pixels, restrained dark-red/orange/yellow/ivory palette, no blur or soft transparency
+Composition/framing: one centered horizontal projectile, rock head right and narrowing flame tail left, generous padding, strong silhouette at 128×128
+Backdrop: perfectly uniform solid #00FF00 chroma key
+Avoid: explosion burst, impact ring, smoke cloud, multiple meteors, character, UI, text, watermark
+```
+
+원본은 `ArtSource/projectiles/projectile_summoner_meteor.png`, 크로마 제거·최근접 128×128px 가공본은 `Assets/Art/Projectiles/projectile_summoner_meteor.png`에 보관한다.
+
+### 1.2 2026-07-21 전격구 파란 지그재그 리디자인
+
+`Codex image_gen`의 이미지 편집 모드로 기존 전격구의 캔버스·픽셀 밀도·우향 구도를 유지하면서 실루엣과 색을 교체했다.
+
+```text
+Use case: precise-object-edit
+Asset type: Unity 2D world projectile sprite for a portrait mobile tower-defense game
+Input images: Image 1 is the edit target
+Primary request: redesign only the projectile in Image 1 so the attack reads instantly as a blue zigzag lightning discharge traveling horizontally to the right
+Subject: one connected, elongated electrical projectile with three strong angular zigzag bends; a compact white-blue charged core near the middle-left, a sharp right-facing lightning tip, and at most two short attached branch forks; the main silhouette must be a lightning bolt rather than a round orb
+Style/medium: preserve exact chunky strict 16-bit pixel-art, hard square pixels, limited palette, fully opaque clusters, dark outline
+Composition/framing: same centered horizontal side-view placement, footprint, scale, padding; points right
+Color: brilliant white, pale cyan, electric blue, royal blue, dark navy; remove lime/green/turquoise-green/yellow
+Backdrop: flat #FF00FF chroma key
+Constraints: change only design/colors; preserve canvas, framing, pixel density, orientation, and chroma background; no text, UI, or watermark
+Avoid: green, yellow, nature motifs, leaves, round fireball silhouette, soft glow, vector art, antialiasing, blur, 3D, detached distant particles
+```
 
 ### 슬라임 성급별 3열 원본
 
