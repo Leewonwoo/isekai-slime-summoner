@@ -1,0 +1,671 @@
+fileFormatVersion: 2
+guid: c3c7a84d921db0a4b82653f4d3f4048a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9045014454720270459
+    second: effect_goblin_death_sheet_0
+  - first:
+      213: -6976922778416783462
+    second: effect_goblin_death_sheet_1
+  - first:
+      213: 4886616776278931058
+    second: effect_goblin_death_sheet_2
+  - first:
+      213: -4612333923122050145
+    second: effect_goblin_death_sheet_3
+  - first:
+      213: 2527902470575483568
+    second: effect_goblin_death_sheet_4
+  - first:
+      213: 4128052852331201768
+    second: effect_goblin_death_sheet_5
+  - first:
+      213: -8090327015114928730
+    second: effect_goblin_death_sheet_6
+  - first:
+      213: 5998035425806528506
+    second: effect_goblin_death_sheet_7
+  - first:
+      213: -3289128554310958305
+    second: effect_goblin_death_sheet_8
+  - first:
+      213: 3221366369729023977
+    second: effect_goblin_death_sheet_9
+  - first:
+      213: 4441491228227274763
+    second: effect_goblin_death_sheet_10
+  - first:
+      213: 3276251213645329913
+    second: effect_goblin_death_sheet_11
+  - first:
+      213: 8465591167956484711
+    second: effect_goblin_death_sheet_12
+  - first:
+      213: -6194990873842620544
+    second: effect_goblin_death_sheet_13
+  - first:
+      213: 5551284265122121661
+    second: effect_goblin_death_sheet_14
+  - first:
+      213: 1093877306398852254
+    second: effect_goblin_death_sheet_15
+  - first:
+      213: 2851869804426002433
+    second: effect_goblin_death_sheet_16
+  - first:
+      213: 169545619884036399
+    second: effect_goblin_death_sheet_17
+  - first:
+      213: -8913647021532408127
+    second: effect_goblin_death_sheet_18
+  - first:
+      213: 1570401691321606772
+    second: effect_goblin_death_sheet_19
+  - first:
+      213: 1907469613105965886
+    second: effect_goblin_death_sheet_20
+  - first:
+      213: -8757589683558566541
+    second: effect_goblin_death_sheet_21
+  - first:
+      213: 8403115381815171086
+    second: effect_goblin_death_sheet_22
+  - first:
+      213: -5229639165308961807
+    second: effect_goblin_death_sheet_23
+  - first:
+      213: -4936028436100313164
+    second: effect_goblin_death_sheet_24
+  - first:
+      213: -452445063403883461
+    second: effect_goblin_death_sheet_25
+  - first:
+      213: 1987181804014597777
+    second: effect_goblin_death_sheet_26
+  - first:
+      213: 3329256473245425087
+    second: effect_goblin_death_sheet_27
+  - first:
+      213: -5070431035131268082
+    second: effect_goblin_death_sheet_28
+  - first:
+      213: 4489273671536606002
+    second: effect_goblin_death_sheet_29
+  - first:
+      213: -3761115727528664041
+    second: effect_goblin_death_sheet_30
+  - first:
+      213: -6315493436453322689
+    second: effect_goblin_death_sheet_31
+  - first:
+      213: 6254194730742866709
+    second: effect_goblin_death_sheet_32
+  - first:
+      213: -4387534361841069131
+    second: effect_goblin_death_sheet_33
+  - first:
+      213: -6860774427778386346
+    second: effect_goblin_death_sheet_34
+  - first:
+      213: 7712480860245123513
+    second: effect_goblin_death_sheet_35
+  - first:
+      213: 944900194011259161
+    second: effect_goblin_death_sheet_36
+  - first:
+      213: 2102899356740806494
+    second: effect_goblin_death_sheet_37
+  - first:
+      213: -8750424500770173621
+    second: effect_goblin_death_sheet_38
+  - first:
+      213: 8572248242698019071
+    second: effect_goblin_death_sheet_39
+  - first:
+      213: -3710968317973376844
+    second: effect_goblin_death_sheet_40
+  - first:
+      213: 4053426479169852242
+    second: effect_goblin_death_sheet_41
+  - first:
+      213: -5892272928816199539
+    second: effect_goblin_death_sheet_42
+  - first:
+      213: -568961525018974313
+    second: effect_goblin_death_sheet_43
+  - first:
+      213: -8739053771903178090
+    second: effect_goblin_death_sheet_44
+  - first:
+      213: 1612020854250191979
+    second: effect_goblin_death_sheet_45
+  - first:
+      213: 5966153975904190618
+    second: effect_goblin_death_sheet_46
+  - first:
+      213: -1840538553220042177
+    second: effect_goblin_death_sheet_47
+  - first:
+      213: 37303224403817823
+    second: effect_goblin_death_sheet_48
+  - first:
+      213: 1013622708945869995
+    second: effect_goblin_death_sheet_49
+  - first:
+      213: 8260346193518622601
+    second: effect_goblin_death_sheet_50
+  - first:
+      213: -9085934925468360250
+    second: effect_goblin_death_sheet_51
+  - first:
+      213: -4094792955232764131
+    second: effect_goblin_death_sheet_52
+  - first:
+      213: 4156927527002221529
+    second: effect_goblin_death_sheet_53
+  - first:
+      213: 6190874619690468280
+    second: effect_goblin_death_sheet_54
+  - first:
+      213: 5166012935187233894
+    second: effect_goblin_death_sheet_55
+  - first:
+      213: 1354352691474007799
+    second: effect_goblin_death_sheet_56
+  - first:
+      213: 4282894652120024616
+    second: effect_goblin_death_sheet_57
+  - first:
+      213: 950224330625653653
+    second: effect_goblin_death_sheet_58
+  - first:
+      213: -5361956069584787349
+    second: effect_goblin_death_sheet_59
+  - first:
+      213: -1354639441548764267
+    second: effect_goblin_death_sheet_60
+  - first:
+      213: 2613997904313972769
+    second: effect_goblin_death_sheet_61
+  - first:
+      213: 9003149370876401601
+    second: effect_goblin_death_sheet_62
+  - first:
+      213: -8817488266190634000
+    second: effect_goblin_death_sheet_63
+  - first:
+      213: 4474458107039746069
+    second: effect_goblin_death_sheet_64
+  - first:
+      213: -3492505462254624834
+    second: effect_goblin_death_sheet_65
+  - first:
+      213: 2457421656488569277
+    second: effect_goblin_death_sheet_66
+  - first:
+      213: 92185556655445498
+    second: effect_goblin_death_sheet_67
+  - first:
+      213: 7655056473360144876
+    second: effect_goblin_death_sheet_68
+  - first:
+      213: 2780186960196103434
+    second: effect_goblin_death_sheet_69
+  - first:
+      213: 1291236996205719691
+    second: effect_goblin_death_sheet_70
+  - first:
+      213: 4619694157337230291
+    second: effect_goblin_death_sheet_71
+  - first:
+      213: -4857096275134732651
+    second: effect_goblin_death_sheet_72
+  - first:
+      213: 4230714212122917705
+    second: effect_goblin_death_sheet_73
+  - first:
+      213: 5263374225306932233
+    second: effect_goblin_death_sheet_74
+  - first:
+      213: 6011135024032605759
+    second: effect_goblin_death_sheet_75
+  - first:
+      213: -8426378337164915185
+    second: effect_goblin_death_sheet_76
+  - first:
+      213: 4776746762078976228
+    second: effect_goblin_death_sheet_77
+  - first:
+      213: -1150399165813276702
+    second: effect_goblin_death_sheet_78
+  - first:
+      213: -7689596709345805773
+    second: effect_goblin_death_sheet_79
+  - first:
+      213: -5883897191729458577
+    second: effect_goblin_death_sheet_80
+  - first:
+      213: 2386287768938503750
+    second: effect_goblin_death_sheet_81
+  - first:
+      213: 4788480627525425900
+    second: effect_goblin_death_sheet_82
+  - first:
+      213: 8042166242896417316
+    second: effect_goblin_death_sheet_83
+  - first:
+      213: 3691109662233805946
+    second: effect_goblin_death_sheet_84
+  - first:
+      213: -9156936270576586468
+    second: effect_goblin_death_sheet_85
+  - first:
+      213: 8442221946545358149
+    second: effect_goblin_death_sheet_86
+  - first:
+      213: 4609870019771823302
+    second: effect_goblin_death_sheet_87
+  - first:
+      213: -1777824417678319421
+    second: effect_goblin_death_sheet_88
+  - first:
+      213: -2092728346696978297
+    second: effect_goblin_death_sheet_89
+  - first:
+      213: 5659043776405872569
+    second: effect_goblin_death_sheet_90
+  - first:
+      213: -4714176207755399354
+    second: effect_goblin_death_sheet_91
+  - first:
+      213: -885086377528815882
+    second: effect_goblin_death_sheet_92
+  - first:
+      213: 4218831072299561357
+    second: effect_goblin_death_sheet_93
+  - first:
+      213: -590153620043058316
+    second: effect_goblin_death_sheet_94
+  - first:
+      213: 961064813189228461
+    second: effect_goblin_death_sheet_95
+  - first:
+      213: 8783942579129383139
+    second: effect_goblin_death_sheet_96
+  - first:
+      213: 990076218264553235
+    second: effect_goblin_death_sheet_97
+  - first:
+      213: -4759854844176024311
+    second: effect_goblin_death_sheet_98
+  - first:
+      213: 3121232014722460844
+    second: effect_goblin_death_sheet_99
+  - first:
+      213: 2984028106075628668
+    second: effect_goblin_death_sheet_100
+  - first:
+      213: -6485357784255449879
+    second: effect_goblin_death_sheet_101
+  - first:
+      213: 625709445891704021
+    second: effect_goblin_death_sheet_102
+  - first:
+      213: 8900364243901047152
+    second: effect_goblin_death_sheet_103
+  - first:
+      213: 1631379806897427386
+    second: effect_goblin_death_sheet_104
+  - first:
+      213: -6483436267189173073
+    second: effect_goblin_death_sheet_105
+  - first:
+      213: 9036522443910197580
+    second: effect_goblin_death_sheet_106
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d92ed11d05d1544baabcde33e7a2b5b
+      internalID: -9045014454720270459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbba72e93df9c2047b1df9eef680a53d
+      internalID: -6976922778416783462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6632aa0a3d3235149b34ce7c71bfb063
+      internalID: 4886616776278931058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fdfe6732d3ae9945b067f230db4c439
+      internalID: -4612333923122050145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98327759424f2c54490571ff6573a8fc
+      internalID: 2527902470575483568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_5
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1257db938ceafb40bc33c93314c0434
+      internalID: 4128052852331201768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39753e53d1467e342ad4864e2f18a938
+      internalID: -8090327015114928730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_7
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9605d2c05387ca44a6167e6ef6c9f70
+      internalID: 5998035425806528506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_goblin_death_sheet_8
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a400b02250b6f924ea12f82a10744785
+      internalID: -3289128554310958305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 71f157f8ff9f96c42a3576c0ebafe625
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      effect_goblin_death_sheet_0: -9045014454720270459
+      effect_goblin_death_sheet_1: -6976922778416783462
+      effect_goblin_death_sheet_2: 4886616776278931058
+      effect_goblin_death_sheet_3: -4612333923122050145
+      effect_goblin_death_sheet_4: 2527902470575483568
+      effect_goblin_death_sheet_5: 4128052852331201768
+      effect_goblin_death_sheet_6: -8090327015114928730
+      effect_goblin_death_sheet_7: 5998035425806528506
+      effect_goblin_death_sheet_8: -3289128554310958305
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
