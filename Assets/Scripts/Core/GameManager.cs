@@ -282,6 +282,9 @@ namespace CrossDefense.Core
 
         void Awake()
         {
+            if (PersistentProgressReset.ConsumePendingReset())
+                Debug.Log("[CrossDefense] 예약된 영구 진행 초기화를 적용했습니다. Lv.1부터 시작합니다.", this);
+
             if (gameplayBackground == null)
                 gameplayBackground = transform.Find("Background")?.GetComponent<SpriteRenderer>();
             if (summoner == null)
@@ -653,6 +656,17 @@ namespace CrossDefense.Core
             _summonerSkillLoadout?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.buildIndex >= 0)
+                SceneManager.LoadScene(scene.buildIndex);
+            else if (!string.IsNullOrWhiteSpace(scene.name))
+                SceneManager.LoadScene(scene.name);
+        }
+
+        public void ResetAllProgressAndRestart()
+        {
+            PersistentProgressReset.RequestOnNextSceneLoad();
+            RestoreGameplayTimeScale();
             Scene scene = SceneManager.GetActiveScene();
             if (scene.buildIndex >= 0)
                 SceneManager.LoadScene(scene.buildIndex);
