@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f6204bae21c223f4fab0f9c95e1cb0b3
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/PoolBoss/Scripts/PoolBossCategory.cs
+  uploadId: 940970

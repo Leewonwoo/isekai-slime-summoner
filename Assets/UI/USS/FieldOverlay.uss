@@ -1,0 +1,219 @@
+.field-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* HUD 아래 필드 상단 중앙의 웨이브 상태 */
+.field-overlay__wave-status {
+    position: absolute;
+    top: var(--gap-md);
+    left: 50%;
+    translate: -50% 0;
+    width: var(--wave-status-width);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-transparent);
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-sm);
+}
+
+.field-overlay__wave {
+    color: var(--color-gold);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+}
+
+.field-overlay__remaining {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    margin-top: var(--gap-xs);
+}
+
+.field-overlay__combo {
+    height: var(--combo-label-height);
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: color, font-size;
+    transition-duration: 0.12s;
+}
+
+.combo--milestone {
+    color: var(--color-overdrive);
+    font-size: var(--font-title);
+}
+
+.overdrive-gauge {
+    position: absolute;
+    right: var(--gap-lg);
+    bottom: var(--overdrive-gauge-bottom);
+    width: var(--overdrive-gauge-width);
+    height: var(--overdrive-gauge-height);
+    overflow: hidden;
+    background-color: var(--color-panel-deep);
+    border-left-width: var(--gap-xs);
+    border-right-width: var(--gap-xs);
+    border-top-width: var(--gap-xs);
+    border-bottom-width: var(--gap-xs);
+    border-left-color: var(--color-overdrive-deep);
+    border-right-color: var(--color-overdrive-deep);
+    border-top-color: var(--color-overdrive-deep);
+    border-bottom-color: var(--color-overdrive-deep);
+    border-radius: var(--radius-md);
+}
+
+.overdrive-gauge__fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background-color: var(--color-overdrive);
+    border-radius: var(--radius-sm);
+}
+
+.overdrive-gauge__label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--color-text);
+    font-size: var(--font-small);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.overdrive--charging .overdrive-gauge__label {
+    color: var(--color-transparent);
+}
+
+.overdrive--ready {
+    border-left-color: var(--color-overdrive);
+    border-right-color: var(--color-overdrive);
+    border-top-color: var(--color-overdrive);
+    border-bottom-color: var(--color-overdrive);
+}
+
+.overdrive--active .overdrive-gauge__label {
+    color: var(--color-text);
+}
+
+.codex-button {
+    position: absolute;
+    right: var(--gap-lg);
+    top: var(--gap-lg);
+    width: var(--codex-button-size);
+    height: var(--codex-button-size);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    border-width: var(--gap-xs);
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.codex-button:active {
+    background-color: var(--color-surface-deep);
+}
+
+.unlock-toast {
+    position: absolute;
+    left: var(--unlock-toast-inset-x);
+    right: var(--unlock-toast-inset-x);
+    top: var(--unlock-toast-top);
+    min-height: var(--touch-min);
+    color: var(--color-ink);
+    background-color: var(--color-gold);
+    border-width: var(--gap-xs);
+    border-color: var(--color-gold-deep);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.field-overlay__wave--rush {
+    color: var(--color-danger);
+}
+
+/* 스킬 플로팅 버튼 (우하단) — 공용 돌 링 */
+.skill-button {
+    position: absolute;
+    right: var(--gap-lg);
+    bottom: var(--gap-lg);
+    width: var(--skill-button-size);
+    height: var(--skill-button-size);
+    border-radius: var(--skill-button-radius);
+    background-color: var(--color-panel-deep);
+    background-image: url("project://database/Assets/Art/UIFrames/frame_ring.png?fileID=21300000&guid=9603ecb7000a32e47a1b0382e5871157&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-width: 0;
+    color: var(--color-gold);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.skill-button:active {
+    background-color: var(--color-surface-deep);
+}
+
+.skill-button__name {
+    color: var(--color-gold);
+    font-size: var(--skill-button-label-size);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.skill-button__icon {
+    width: var(--skill-button-icon-size);
+    height: var(--skill-button-icon-size);
+    flex-shrink: 0;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+}
+
+.skill-icon--meteor {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_meteor.png");
+}
+
+.skill-icon--ice-wall {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_ice_wall.png");
+}
+
+.skill-icon--aegis {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_aegis.png");
+}
+
+.skill-button__cooldown {
+    color: var(--color-text);
+    font-size: var(--skill-button-cooldown-size);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.skill-button--cooldown {
+    opacity: 0.72;
+}
+
+.skill-button--targeting {
+    background-color: var(--color-surface-deep);
+}

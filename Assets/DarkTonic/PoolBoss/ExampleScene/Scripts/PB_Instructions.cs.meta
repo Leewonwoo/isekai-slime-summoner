@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 260cbec20af2452419a06785d4daa851
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 23931
+  packageName: Pool Boss
+  packageVersion: 1.2.4
+  assetPath: Assets/DarkTonic/PoolBoss/ExampleScene/Scripts/PB_Instructions.cs
+  uploadId: 940970

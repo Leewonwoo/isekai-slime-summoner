@@ -1,0 +1,9 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <VisualElement class="merchant-card">
+        <Label name="merchant-card-category" class="merchant-card__category" text="상품" />
+        <Label name="merchant-card-name" class="merchant-card__name" text="상품 이름" />
+        <Label name="merchant-card-description" class="merchant-card__description" text="효과" />
+        <Label name="merchant-card-state" class="merchant-card__state" text="" />
+        <Button name="merchant-card-buy" class="btn btn--primary merchant-card__buy" text="0 G" />
+    </VisualElement>
+</UXML>

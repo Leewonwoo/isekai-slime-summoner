@@ -1,0 +1,137 @@
+.top-hud {
+    position: relative;
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-panel);
+    background-image: url("project://database/Assets/Art/UIFrames/top_hud_frame.png?fileID=21300000&guid=8cc292d12e8f97f46b0db2102706eca2&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 96px;
+    -unity-slice-top: 72px;
+    -unity-slice-right: 96px;
+    -unity-slice-bottom: 72px;
+    -unity-slice-scale: 0.4;
+    border-bottom-width: 3px;
+    border-bottom-color: var(--color-bg);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+}
+
+.top-hud__profile {
+    width: var(--top-hud-profile-width);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+.top-hud__portrait-frame {
+    width: var(--top-hud-portrait-size);
+    height: var(--top-hud-portrait-size);
+    flex-shrink: 0;
+    border-radius: var(--top-hud-portrait-radius);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/frame_ring.png?fileID=21300000&guid=9603ecb7000a32e47a1b0382e5871157&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    padding-top: var(--portrait-ring-inset);
+    padding-bottom: var(--portrait-ring-inset);
+    padding-left: var(--portrait-ring-inset);
+    padding-right: var(--portrait-ring-inset);
+    margin-right: var(--gap-sm);
+}
+
+.top-hud__portrait {
+    flex-grow: 1;
+    border-radius: var(--top-hud-portrait-radius);
+    background-color: var(--color-panel-deep);
+}
+
+.top-hud__profile-info {
+    justify-content: center;
+}
+
+.top-hud__nickname {
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.top-hud__level {
+    color: var(--color-gold);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    margin-top: var(--gap-xs);
+}
+
+.top-hud__stage {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    translate: -50% 0;
+    width: var(--top-hud-stage-width);
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-sm);
+}
+
+.top-hud__section-label {
+    width: 100%;
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.top-hud__stage-name {
+    width: 100%;
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    margin-top: var(--gap-xs);
+    -unity-text-align: middle-center;
+}
+
+.top-hud__currency-group {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.top-hud__capsule {
+    margin-left: var(--gap-sm);
+}
+
+.top-hud__settings {
+    margin-left: var(--gap-sm);
+    width: var(--top-hud-settings-width);
+    min-height: var(--touch-min);
+    flex-shrink: 0;
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIIcons/icon_settings.png?fileID=21300000&guid=39c989c3992a75b48b8c672fc77e1e56&type=3");
+    background-size: var(--top-hud-settings-icon-size) var(--top-hud-settings-icon-size);
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-radius: var(--radius-md);
+    border-width: 2px;
+    border-color: var(--color-transparent);
+    border-bottom-width: 4px;
+    border-bottom-color: var(--color-transparent);
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.top-hud__settings:active {
+    border-bottom-width: 2px;
+    translate: 0 2px;
+    background-color: var(--color-transparent);
+}

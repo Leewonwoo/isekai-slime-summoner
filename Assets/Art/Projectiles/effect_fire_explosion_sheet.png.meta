@@ -1,0 +1,563 @@
+fileFormatVersion: 2
+guid: cf57b7682107e184e9bf5bfb91fd2c25
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3341097193763820795
+    second: effect_fire_explosion_sheet_0
+  - first:
+      213: 2258295125871327435
+    second: effect_fire_explosion_sheet_1
+  - first:
+      213: -823120227653369352
+    second: effect_fire_explosion_sheet_2
+  - first:
+      213: -119116472234480114
+    second: effect_fire_explosion_sheet_3
+  - first:
+      213: -779298853172824851
+    second: effect_fire_explosion_sheet_4
+  - first:
+      213: -2364353028356555654
+    second: effect_fire_explosion_sheet_5
+  - first:
+      213: -4627547469989191796
+    second: effect_fire_explosion_sheet_6
+  - first:
+      213: -6494904546301798713
+    second: effect_fire_explosion_sheet_7
+  - first:
+      213: -2557572776321238692
+    second: effect_fire_explosion_sheet_8
+  - first:
+      213: -3278347161283468315
+    second: effect_fire_explosion_sheet_9
+  - first:
+      213: -3182331537565197570
+    second: effect_fire_explosion_sheet_10
+  - first:
+      213: -268517940275084793
+    second: effect_fire_explosion_sheet_11
+  - first:
+      213: -5999572523190711351
+    second: effect_fire_explosion_sheet_12
+  - first:
+      213: -5275454583328790540
+    second: effect_fire_explosion_sheet_13
+  - first:
+      213: 7791902322921133006
+    second: effect_fire_explosion_sheet_14
+  - first:
+      213: 6538198893656628457
+    second: effect_fire_explosion_sheet_15
+  - first:
+      213: -6125463986943498455
+    second: effect_fire_explosion_sheet_16
+  - first:
+      213: 3126226788181132459
+    second: effect_fire_explosion_sheet_17
+  - first:
+      213: -8811162718138206255
+    second: effect_fire_explosion_sheet_18
+  - first:
+      213: -1925370681103067913
+    second: effect_fire_explosion_sheet_19
+  - first:
+      213: 7350073615374269603
+    second: effect_fire_explosion_sheet_20
+  - first:
+      213: 8617059169905833993
+    second: effect_fire_explosion_sheet_21
+  - first:
+      213: -8944554117287385483
+    second: effect_fire_explosion_sheet_22
+  - first:
+      213: -5652841794434482761
+    second: effect_fire_explosion_sheet_23
+  - first:
+      213: 8435599415036394700
+    second: effect_fire_explosion_sheet_24
+  - first:
+      213: -7766557851545593916
+    second: effect_fire_explosion_sheet_25
+  - first:
+      213: 8768412025275371476
+    second: effect_fire_explosion_sheet_26
+  - first:
+      213: 3957010318752592535
+    second: effect_fire_explosion_sheet_27
+  - first:
+      213: -6086855104871247794
+    second: effect_fire_explosion_sheet_28
+  - first:
+      213: 3699551482791904837
+    second: effect_fire_explosion_sheet_29
+  - first:
+      213: -5956638642185289261
+    second: effect_fire_explosion_sheet_30
+  - first:
+      213: 1550808520044275188
+    second: effect_fire_explosion_sheet_31
+  - first:
+      213: 4435836499078344177
+    second: effect_fire_explosion_sheet_32
+  - first:
+      213: -1633620707702581705
+    second: effect_fire_explosion_sheet_33
+  - first:
+      213: 2990093707455460659
+    second: effect_fire_explosion_sheet_34
+  - first:
+      213: -4607010639906343167
+    second: effect_fire_explosion_sheet_35
+  - first:
+      213: -5762554844355860486
+    second: effect_fire_explosion_sheet_36
+  - first:
+      213: -2520327808630798097
+    second: effect_fire_explosion_sheet_37
+  - first:
+      213: 4467849889683553972
+    second: effect_fire_explosion_sheet_38
+  - first:
+      213: 9077056381688142292
+    second: effect_fire_explosion_sheet_39
+  - first:
+      213: 1169773268163015265
+    second: effect_fire_explosion_sheet_40
+  - first:
+      213: 1591514018552296265
+    second: effect_fire_explosion_sheet_41
+  - first:
+      213: 5933985682440314356
+    second: effect_fire_explosion_sheet_42
+  - first:
+      213: -8471069239746559376
+    second: effect_fire_explosion_sheet_43
+  - first:
+      213: -5102608664740588657
+    second: effect_fire_explosion_sheet_44
+  - first:
+      213: -9065153742667939631
+    second: effect_fire_explosion_sheet_45
+  - first:
+      213: -2867756309109695310
+    second: effect_fire_explosion_sheet_46
+  - first:
+      213: 1698705913962294142
+    second: effect_fire_explosion_sheet_47
+  - first:
+      213: -5597189946428324078
+    second: effect_fire_explosion_sheet_48
+  - first:
+      213: -1642375032131493678
+    second: effect_fire_explosion_sheet_49
+  - first:
+      213: 3375249705793055969
+    second: effect_fire_explosion_sheet_50
+  - first:
+      213: -4131835674918772635
+    second: effect_fire_explosion_sheet_51
+  - first:
+      213: 6996377503603329314
+    second: effect_fire_explosion_sheet_52
+  - first:
+      213: -4752030579554489416
+    second: effect_fire_explosion_sheet_53
+  - first:
+      213: -959250643451752195
+    second: effect_fire_explosion_sheet_54
+  - first:
+      213: 6623528304776529510
+    second: effect_fire_explosion_sheet_55
+  - first:
+      213: -1307132988277999690
+    second: effect_fire_explosion_sheet_56
+  - first:
+      213: 3758393725010604362
+    second: effect_fire_explosion_sheet_57
+  - first:
+      213: -6213755276265329088
+    second: effect_fire_explosion_sheet_58
+  - first:
+      213: -4978677239029315833
+    second: effect_fire_explosion_sheet_59
+  - first:
+      213: -7278388628656054414
+    second: effect_fire_explosion_sheet_60
+  - first:
+      213: 8932894367135504779
+    second: effect_fire_explosion_sheet_61
+  - first:
+      213: 4349611796892384922
+    second: effect_fire_explosion_sheet_62
+  - first:
+      213: -4579444880900810228
+    second: effect_fire_explosion_sheet_63
+  - first:
+      213: -2746090600259522644
+    second: effect_fire_explosion_sheet_64
+  - first:
+      213: -8942502493113455468
+    second: effect_fire_explosion_sheet_65
+  - first:
+      213: -5123745384882322207
+    second: effect_fire_explosion_sheet_66
+  - first:
+      213: 6950486027996290462
+    second: effect_fire_explosion_sheet_67
+  - first:
+      213: -6101404776792211132
+    second: effect_fire_explosion_sheet_68
+  - first:
+      213: -3773805506946557986
+    second: effect_fire_explosion_sheet_69
+  - first:
+      213: 7828231306848778013
+    second: effect_fire_explosion_sheet_70
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e4377ed9624b3440b0d06b5c6afe8cf
+      internalID: 3341097193763820795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d99157993af6d34ea33f66905f06512
+      internalID: 2258295125871327435
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f28241cdf66638499e9d37eda1c6a12
+      internalID: -823120227653369352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ec7e2c251608ce4ba9b6f675ca8110e
+      internalID: -119116472234480114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3eadefef9aa9c9488bf4ab24a7a0bb5
+      internalID: -779298853172824851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_5
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2b3a9cac5b78b464b9d62a2b1c4fb352
+      internalID: -2364353028356555654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2cf7445998994b645a01b8b1c2f9d571
+      internalID: -4627547469989191796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_7
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6a2a9cfc6d447e4198f0e8607c9ace7
+      internalID: -6494904546301798713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: effect_fire_explosion_sheet_8
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ca394ca6f7365d4baf9be40b2b0fbd6
+      internalID: -2557572776321238692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ab564cb91d2fd2149978139f13b8a362
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      effect_fire_explosion_sheet_0: 3341097193763820795
+      effect_fire_explosion_sheet_1: 2258295125871327435
+      effect_fire_explosion_sheet_2: -823120227653369352
+      effect_fire_explosion_sheet_3: -119116472234480114
+      effect_fire_explosion_sheet_4: -779298853172824851
+      effect_fire_explosion_sheet_5: -2364353028356555654
+      effect_fire_explosion_sheet_6: -4627547469989191796
+      effect_fire_explosion_sheet_7: -6494904546301798713
+      effect_fire_explosion_sheet_8: -2557572776321238692
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

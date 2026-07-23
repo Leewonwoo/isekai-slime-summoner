@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d0c7f5fba7e65f543bac5cda149e4f04
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 181726
+  packageName: Animated Sprite Outline
+  packageVersion: 1.01
+  assetPath: Assets/Animated Sprite Outline/Assets/Shaders/AnimatedSpriteOutline_Fire.shader
+  uploadId: 419303

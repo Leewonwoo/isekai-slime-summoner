@@ -1,0 +1,21 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/MerchantModal.uss" />
+    <Template name="MerchantCard" src="/Assets/UI/UXML/templates/MerchantCard.uxml" />
+    <VisualElement name="merchant-overlay" class="modal-overlay modal-overlay--hidden">
+        <VisualElement class="modal-backdrop" picking-mode="Ignore" />
+        <VisualElement class="merchant-panel">
+            <VisualElement class="modal-header">
+                <VisualElement>
+                    <Label class="modal-title" text="떠돌이 행상인" />
+                    <Label class="merchant-subtitle" text="러쉬 보너스로 필요한 물건을 준비하세요" />
+                </VisualElement>
+                <Button name="merchant-close-button" class="btn modal-close" text="상점 닫기" />
+            </VisualElement>
+            <VisualElement name="merchant-cards" class="merchant-cards">
+                <Instance template="MerchantCard" name="merchant-card-0" />
+                <Instance template="MerchantCard" name="merchant-card-1" />
+                <Instance template="MerchantCard" name="merchant-card-2" />
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

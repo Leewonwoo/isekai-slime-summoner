@@ -1,0 +1,354 @@
+/* 존 3분할: HUD ~8% / 필드 ~50%(grow) / 하단 패널 ~40% (SPEC §4.1) */
+.root {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+/* Absolute modal children do not size their template wrapper. */
+.modal-host {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#zone-top {
+    flex-basis: 8%;
+    flex-shrink: 0;
+}
+
+.zone-field {
+    flex-grow: 1;
+}
+
+#field-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#zone-bottom {
+    flex-basis: 40%;
+    flex-shrink: 0;
+}
+
+/* Full-screen summon reel modal. The world and bottom panel remain mounted underneath. */
+.summon-modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-modal-scrim);
+}
+
+.summon-modal__backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.summon-modal__panel {
+    position: relative;
+    width: var(--summon-modal-width);
+    height: var(--summon-modal-height);
+    min-height: 720px;
+    align-items: center;
+    justify-content: center;
+    padding-left: var(--summon-modal-content-inset);
+    padding-right: var(--summon-modal-content-inset);
+    padding-top: var(--summon-modal-content-inset);
+    padding-bottom: var(--summon-modal-content-inset);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/summon_roulette_panel_frame.png?fileID=21300000&guid=8f46bfcad52e79f46a985af0fe88b83f&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -unity-slice-left: var(--summon-modal-frame-slice);
+    -unity-slice-top: var(--summon-modal-frame-slice);
+    -unity-slice-right: var(--summon-modal-frame-slice);
+    -unity-slice-bottom: var(--summon-modal-frame-slice);
+    -unity-slice-scale: var(--summon-modal-frame-slice-scale);
+    border-width: 0;
+    border-radius: 0;
+}
+
+.summon-modal__title {
+    color: var(--color-text);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+}
+
+.summon-modal__subtitle {
+    margin-bottom: var(--gap-lg);
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
+.summon-modal-reel-viewport {
+    position: relative;
+    width: 90%;
+    height: var(--summon-modal-reel-height);
+    overflow: hidden;
+    flex-direction: row;
+    align-items: center;
+    padding-left: var(--summon-modal-reel-inset-x);
+    padding-right: var(--summon-modal-reel-inset-x);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/summon_roulette_reel_frame.png?fileID=21300000&guid=97d1a0fcf07cfc74b8b3ac78fd9ae232&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.summon-modal-reel-strip {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.summon-reel-card {
+    width: var(--summon-modal-card-width);
+    height: var(--summon-modal-card-height);
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    margin-right: var(--summon-modal-card-gap);
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-sm);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/bench_slot_frame.png?fileID=21300000&guid=162f6efbc056f5748b5a9b30af5c90de&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -unity-slice-left: 190px;
+    -unity-slice-top: 190px;
+    -unity-slice-right: 190px;
+    -unity-slice-bottom: 190px;
+    -unity-slice-scale: 0.1;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.summon-reel-card--final {
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/button_gold_frame.png?fileID=21300000&guid=d79c270c36f1d2f49917105daebae188&type=3");
+    -unity-slice-left: 180px;
+    -unity-slice-top: 160px;
+    -unity-slice-right: 180px;
+    -unity-slice-bottom: 160px;
+    -unity-slice-scale: 0.1;
+}
+
+.summon-reel-card__title {
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.summon-reel-card__subtitle {
+    color: var(--color-text-dim);
+    font-size: var(--font-small);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.summon-modal-center-marker {
+    display: none;
+}
+
+.summon-reel-card--final .summon-reel-card__title {
+    color: var(--color-ink);
+}
+
+.summon-reel-card--final .summon-reel-card__subtitle {
+    color: var(--color-ink-dim);
+}
+
+.summon-modal__result {
+    min-height: 72px;
+    margin-top: var(--gap-lg);
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.summon-modal__skip {
+    min-width: 300px;
+    margin-top: var(--gap-md);
+}
+
+/* Bench unit details. Kept in RootLayout so it can block both field and bottom-panel input. */
+.unit-detail-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 110;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-modal-scrim);
+}
+
+.unit-detail__backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.unit-detail__panel {
+    position: relative;
+    width: var(--unit-detail-width);
+    height: var(--unit-detail-height);
+    align-items: center;
+    padding-left: var(--unit-detail-content-inset);
+    padding-right: var(--unit-detail-content-inset);
+    padding-top: var(--unit-detail-content-inset);
+    padding-bottom: var(--unit-detail-content-inset);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/summon_roulette_panel_frame.png?fileID=21300000&guid=8f46bfcad52e79f46a985af0fe88b83f&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -unity-slice-left: var(--summon-modal-frame-slice);
+    -unity-slice-top: var(--summon-modal-frame-slice);
+    -unity-slice-right: var(--summon-modal-frame-slice);
+    -unity-slice-bottom: var(--summon-modal-frame-slice);
+    -unity-slice-scale: var(--summon-modal-frame-slice-scale);
+}
+
+.unit-detail__close {
+    position: absolute;
+    top: var(--gap-xl);
+    right: var(--gap-xl);
+    min-width: var(--touch-min);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    font-size: var(--font-caption);
+}
+
+.unit-detail__icon {
+    width: var(--unit-detail-icon-size);
+    height: var(--unit-detail-icon-size);
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.unit-detail__name {
+    width: 100%;
+    color: var(--color-text);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.unit-detail__rank {
+    color: var(--color-gold);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.unit-detail__tags {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: var(--gap-sm);
+}
+
+.unit-detail__tag {
+    min-width: var(--touch-min);
+    margin-left: var(--gap-xs);
+    margin-right: var(--gap-xs);
+    padding-top: var(--gap-xs);
+    padding-bottom: var(--gap-xs);
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-sm);
+    border-width: 2px;
+    border-color: var(--color-panel);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-panel-deep);
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    -unity-text-align: middle-center;
+}
+
+.unit-detail__stats {
+    width: 100%;
+    margin-top: var(--gap-lg);
+}
+
+.unit-detail__stat-row {
+    min-height: var(--unit-detail-stat-row-height);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-panel);
+}
+
+.unit-detail__stat-name {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
+.unit-detail__stat-value {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.unit-detail__upgrade {
+    width: 100%;
+    min-height: var(--row-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--gap-lg);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    border-width: 3px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+}
+
+.unit-detail__upgrade-info {
+    flex-grow: 1;
+    margin-right: var(--gap-md);
+}
+
+.unit-detail__upgrade-level {
+    color: var(--color-ink);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.unit-detail__upgrade-values {
+    margin-top: var(--gap-xs);
+    color: var(--color-ink-dim);
+    font-size: var(--font-caption);
+}
+
+.unit-detail__upgrade-button {
+    min-width: var(--unit-detail-upgrade-button-width);
+}
+
+.unit-detail__hint {
+    margin-top: var(--gap-md);
+    color: var(--color-text-disabled);
+    font-size: var(--font-caption);
+    -unity-text-align: middle-center;
+}

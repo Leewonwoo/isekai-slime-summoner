@@ -1,0 +1,92 @@
+.modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-modal-scrim);
+}
+
+.modal-header {
+    min-height: var(--touch-min);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    color: var(--color-text);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+}
+
+.modal-close {
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+}
+
+.merchant-panel {
+    width: var(--modal-panel-width);
+    height: var(--modal-panel-height);
+    background-color: var(--color-panel);
+    border-width: var(--gap-sm);
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-xl);
+}
+
+.merchant-subtitle {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+}
+
+.merchant-cards {
+    flex-grow: 1;
+    justify-content: space-around;
+}
+
+.merchant-card {
+    min-height: var(--merchant-card-height);
+    background-color: var(--color-surface);
+    border-width: var(--gap-xs);
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-lg);
+}
+
+.merchant-card__category {
+    color: var(--color-ink-dim);
+    font-size: var(--font-caption);
+}
+
+.merchant-card__name {
+    color: var(--color-ink);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+}
+
+.merchant-card__description,
+.merchant-card__state {
+    color: var(--color-ink-dim);
+    font-size: var(--font-body);
+    white-space: normal;
+}
+
+.merchant-card__state {
+    color: var(--color-danger);
+}
+
+.merchant-card__buy {
+    min-height: var(--touch-min);
+    margin-top: var(--gap-md);
+}

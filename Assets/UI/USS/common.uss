@@ -1,0 +1,140 @@
+/* 2곳 이상에서 쓰는 공용 클래스만 (ui-guidelines §5-6) */
+
+.hidden {
+    display: none;
+}
+
+/* Full-screen modal layout remains valid while gameplay is paused on open. */
+.modal-overlay--hidden {
+    visibility: hidden;
+}
+
+/* 버튼 — 나무 판재 + 청키(하단 엣지) 문법 (ui-guidelines §4 스킨 문법 ①)
+   9-slice 나무 버튼 스프라이트 적용 전 플랫 근사 */
+.btn {
+    min-height: var(--touch-min);
+    background-color: var(--color-surface);
+    background-image: url("project://database/Assets/Art/UIFrames/button_wood_frame.png?fileID=21300000&guid=c1e919a2941cd8145823c35c00f0a717&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 180px;
+    -unity-slice-top: 160px;
+    -unity-slice-right: 180px;
+    -unity-slice-bottom: 160px;
+    -unity-slice-scale: 0.1;
+    border-radius: var(--radius-md);
+    border-width: 0;
+    border-color: var(--color-transparent);
+    border-bottom-width: 0;
+    border-bottom-color: var(--color-transparent);
+    color: var(--color-ink);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    padding-left: var(--gap-lg);
+    padding-right: var(--gap-lg);
+}
+
+.btn:active {
+    border-bottom-width: 0;
+    translate: 0 3px;
+    background-color: var(--color-surface-deep);
+}
+
+.btn--primary {
+    background-color: var(--color-gold);
+    background-image: url("project://database/Assets/Art/UIFrames/button_gold_frame.png?fileID=21300000&guid=d79c270c36f1d2f49917105daebae188&type=3");
+    color: var(--color-ink);
+}
+
+.btn--primary:active {
+    background-color: var(--color-gold-deep);
+}
+
+.btn--disabled {
+    background-color: var(--color-panel-deep);
+    background-image: none;
+    border-width: 3px;
+    border-color: var(--color-panel-deep);
+    border-bottom-width: 6px;
+    border-bottom-color: var(--color-bg);
+    color: var(--color-text-disabled);
+}
+
+/* 재화 캡슐 */
+.capsule {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-bg);
+    border-width: 2px;
+    border-color: var(--color-panel);
+    border-radius: var(--radius-lg);
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-md);
+    padding-top: var(--gap-xs);
+    padding-bottom: var(--gap-xs);
+}
+
+.capsule__icon {
+    width: var(--currency-icon-size);
+    height: var(--currency-icon-size);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    margin-right: var(--gap-sm);
+    border-width: 0;
+    border-color: var(--color-transparent);
+}
+
+.capsule__icon--gold {
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIIcons/icon_gold.png?fileID=21300000&guid=4320927bb70b32248bd96b79daee7f44&type=3");
+}
+
+.capsule__icon--gem {
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIIcons/icon_gem.png?fileID=21300000&guid=52f3ca30c62b1e641aa1895ebf8b627d&type=3");
+}
+
+.capsule__value {
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+/* 레드닷 */
+.reddot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: var(--color-reddot);
+}
+
+/* 게이지 (HP/EXP) — fill 너비는 C#에서 조작 (ui-guidelines 예외 ③) */
+.gauge {
+    height: 18px;
+    background-color: var(--color-bg);
+    border-width: 2px;
+    border-color: var(--color-panel);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.gauge__fill {
+    height: 100%;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-positive);
+}
+
+.gauge__fill--hp {
+    background-color: var(--color-positive);
+}
+
+.gauge__fill--exp {
+    background-color: var(--color-gem);
+}

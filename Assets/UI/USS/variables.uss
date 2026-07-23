@@ -1,0 +1,136 @@
+/* 디자인 토큰 — docs/ui-guidelines.md §4와 1:1. 값 변경은 문서 먼저. */
+/* 스킨: "척박한 숲" 픽셀 (돌 프레임 × 나무 판재, 2026-07-11 v2) */
+:root {
+    /* 배경/표면 — 바랜 돌 + 나무 판재 */
+    --color-bg: rgb(24, 21, 15);
+    --color-transparent: rgba(0, 0, 0, 0);
+    --color-panel: rgb(66, 63, 53);
+    --color-panel-deep: rgb(43, 41, 34);
+    --color-surface: rgb(198, 166, 106);
+    --color-surface-deep: rgb(151, 118, 62);
+    --color-border: rgb(112, 58, 40);
+    --color-modal-scrim: rgba(0, 0, 0, 0.72);
+
+    /* 텍스트 — 어두운 바탕엔 웜 화이트, 판재 위엔 잉크 */
+    --color-text: rgb(240, 234, 214);
+    --color-text-dim: rgb(178, 170, 144);
+    --color-text-disabled: rgb(124, 118, 99);
+    --color-ink: rgb(59, 42, 23);
+    --color-ink-dim: rgb(110, 86, 50);
+
+    /* 위협도 (필드/전투 상태 확장용) */
+    --color-danger: rgb(255, 82, 82);
+    --color-warning: rgb(255, 193, 7);
+    --color-muted: rgb(107, 114, 128);
+
+    /* 재화/액션 */
+    --color-gold: rgb(255, 192, 47);
+    --color-gold-deep: rgb(184, 128, 26);
+    --color-gem: rgb(79, 195, 247);
+
+    /* 등급 */
+    --color-rarity-normal: rgb(154, 163, 178);
+    --color-rarity-hero: rgb(164, 108, 255);
+    --color-rarity-legend: rgb(255, 179, 0);
+
+    /* 상태 */
+    --color-positive: rgb(76, 217, 100);
+    --color-reddot: rgb(255, 59, 48);
+    --color-overdrive: rgb(207, 105, 255);
+    --color-overdrive-deep: rgb(102, 43, 128);
+
+    /* 속성 미니 아이콘 (배지 안 표시 전용) */
+    --color-attr-none: rgb(154, 163, 178);
+    --color-attr-fire: rgb(255, 112, 67);
+    --color-attr-ice: rgb(79, 195, 247);
+    --color-attr-nature: rgb(129, 199, 132);
+
+    /* 간격/크기 (1080 기준 px) */
+    --gap-xs: 4px;
+    --gap-sm: 8px;
+    --gap-md: 16px;
+    --gap-lg: 24px;
+    --gap-xl: 32px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --touch-min: 96px;
+    --row-height: 128px;
+    --row-icon-size: 88px;
+    --tab-height: 112px;
+    --tab-button-width: 20%;
+    --tab-icon-size: 44px;
+    --tab-frame-slice-x: 56px;
+    --tab-frame-slice-y: 48px;
+    --tab-frame-slice-scale: 0.35;
+    --summoner-tab-profile-height: 180px;
+    --summoner-stat-line-height: 64px;
+
+    /* TopHUD 구조 (1080 기준) */
+    --top-hud-profile-width: 264px;
+    --top-hud-stage-width: 180px;
+    --wave-status-width: 200px;
+    --top-hud-settings-width: 104px;
+    --top-hud-settings-icon-size: 64px;
+    --currency-icon-size: 44px;
+    --top-hud-portrait-size: 96px;
+    --top-hud-portrait-radius: 48px;
+    --summoner-portrait-size: 104px;
+    --summoner-portrait-radius: 52px;
+    --portrait-ring-inset: 12px;
+    --skill-button-size: 128px;
+    --skill-button-radius: 64px;
+    --skill-button-icon-size: 56px;
+    --skill-button-label-size: 24px;
+    --skill-button-cooldown-size: 30px;
+    --codex-button-size: 96px;
+    --codex-slot-size: 188px;
+    --codex-slot-image-size: 72%;
+    --codex-detail-height: 280px;
+    --codex-detail-image-size: 220px;
+    --unlock-toast-inset-x: 25%;
+    --unlock-toast-top: 24%;
+    --modal-panel-width: 920px;
+    --modal-panel-height: 1450px;
+    --merchant-card-height: 300px;
+    --overdrive-gauge-width: 240px;
+    --overdrive-gauge-height: 24px;
+    --overdrive-gauge-bottom: 168px;
+    --combo-label-height: 52px;
+
+    /* BottomPanel 구조 (1080 기준) */
+    --bottom-panel-content-inset: 40px;
+    --bench-slot-state-border: 4px;
+    --bench-slot-size: 120px;
+    --gear-slot-width: 31%;
+    --summon-grid-slot-width: 188px;
+    --summon-grid-slot-height: 210px;
+    --summon-grid-icon-size: 112px;
+    --summon-merge-badge-height: 36px;
+    --panel-scrollbar-width: 16px;
+    --summon-side-width: 320px;
+    --summon-contract-panel-height: 96px;
+    --unit-detail-width: 760px;
+    --unit-detail-height: 1120px;
+    --unit-detail-icon-size: 200px;
+    --unit-detail-stat-row-height: 72px;
+    --unit-detail-content-inset: 72px;
+    --unit-detail-upgrade-button-width: 220px;
+    --summon-modal-width: 84%;
+    --summon-modal-height: 52%;
+    --summon-modal-content-inset: 72px;
+    --summon-modal-frame-slice: 112px;
+    --summon-modal-frame-slice-scale: 0.45;
+    --summon-modal-reel-height: 230px;
+    --summon-modal-reel-inset-x: 48px;
+    --summon-modal-card-width: 180px;
+    --summon-modal-card-height: 150px;
+    --summon-modal-card-gap: 0px;
+
+    /* 폰트 */
+    --font-small: 20px;
+    --font-display: 56px;
+    --font-title: 44px;
+    --font-body: 36px;
+    --font-caption: 28px;
+}

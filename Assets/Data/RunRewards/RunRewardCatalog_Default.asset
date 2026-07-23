@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6a6b7a5cd2e4e1499c772d7b4e01d91, type: 3}
+  m_Name: RunRewardCatalog_Default
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.RunRewardCatalog
+  rewards:
+  - rewardId: awaken-fireball
+    displayName: "화염구"
+    description: "자동공격이 범위 피해와 연소를 주는 화염구로 바뀌고, 클릭 지점에서 화염이 폭발합니다."
+    category: 0
+    effect: 0
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.95
+    secondaryValue: 2
+    tertiaryValue: 3
+    count: 0
+  - rewardId: awaken-ice-lance
+    displayName: "빙결창"
+    description: "자동공격이 적을 관통하고 둔화시키는 빙결창으로 바뀌며, 클릭 방향으로 얼음창을 발사합니다."
+    category: 0
+    effect: 1
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.3
+    secondaryValue: 2
+    tertiaryValue: 0
+    count: 3
+  - rewardId: awaken-thunder-slash
+    displayName: "뇌격참"
+    description: "자동공격이 자연 속성 뇌격으로 바뀌어 주변 적에게 전이되고, 클릭 지점에 낙뢰를 내립니다."
+    category: 0
+    effect: 2
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.65
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 2
+  - rewardId: summoner-multicast
+    displayName: "마력 분열"
+    description: "공격할 때 투사체를 짧은 간격으로 연속 발사합니다. 주변 적을 우선 추적하고 대상이 부족하면 같은 적을 공격합니다."
+    category: 1
+    effect: 3
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.65
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 1
+  - rewardId: fire-burning-core
+    displayName: "타오르는 핵"
+    description: "화염구의 연소 피해와 지속시간이 증가합니다."
+    category: 1
+    effect: 4
+    requiredAttack: 2
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 1.5
+    secondaryValue: 0.5
+    tertiaryValue: 0
+    count: 0
+  - rewardId: fire-great-burst
+    displayName: "대폭발"
+    description: "일정 횟수마다 더 크고 강한 화염구를 발사합니다."
+    category: 1
+    effect: 5
+    requiredAttack: 2
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 1.55
+    secondaryValue: 1.25
+    tertiaryValue: 0
+    count: 5
+  - rewardId: ice-absolute-pierce
+    displayName: "절대 관통"
+    description: "빙결창이 더 많은 적을 관통합니다."
+    category: 1
+    effect: 6
+    requiredAttack: 3
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 2
+  - rewardId: ice-deep-frost
+    displayName: "혹한"
+    description: "빙결창의 둔화율과 지속시간이 증가합니다."
+    category: 1
+    effect: 7
+    requiredAttack: 3
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.1
+    secondaryValue: 0.5
+    tertiaryValue: 0
+    count: 0
+  - rewardId: thunder-chain
+    displayName: "연쇄 뇌격"
+    description: "뇌격이 더 많은 적에게 전이되고 전이 피해가 증가합니다."
+    category: 1
+    effect: 8
+    requiredAttack: 4
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.05
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 2
+  - rewardId: thunder-overload
+    displayName: "과부하"
+    description: "일정 횟수마다 명중 지점에 강한 자연 속성 폭발을 일으킵니다."
+    category: 1
+    effect: 9
+    requiredAttack: 4
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 1.3
+    secondaryValue: 1.2
+    tertiaryValue: 0
+    count: 5
+  - rewardId: slime-revive
+    displayName: "끈질긴 젤리"
+    description: "각 슬라임이 웨이브마다 한 번 쓰러진 자리에서 부활합니다."
+    category: 2
+    effect: 10
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.35
+    secondaryValue: 0.2
+    tertiaryValue: 0
+    count: 0
+  - rewardId: slime-merge-frenzy
+    displayName: "합체 폭주"
+    description: "머지 성공 후 일정 시간 모든 슬라임의 공격속도가 증가합니다."
+    category: 2
+    effect: 11
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 10
+    secondaryValue: 0.3
+    tertiaryValue: 0.1
+    count: 0
+  - rewardId: slime-shield
+    displayName: "보호 젤"
+    description: "웨이브 시작 시 모든 슬라임이 최대 HP 비례 보호막을 얻습니다."
+    category: 2
+    effect: 12
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 2
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.2
+    secondaryValue: 0.15
+    tertiaryValue: 0
+    count: 0
+  - rewardId: summon-triple
+    displayName: "꽝 없는 3연 소환"
+    description: "계약서를 쓰지 않고 재화 꽝 없는 슬라임 소환을 3회 진행합니다."
+    category: 3
+    effect: 13
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 3
+  - rewardId: summon-merge-support
+    displayName: "합성 지원"
+    description: "보유 중인 슬라임과 같은 종류·성급을 1마리 지급합니다."
+    category: 3
+    effect: 14
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0
+    secondaryValue: 0
+    tertiaryValue: 0
+    count: 1
+  - rewardId: summon-jackpot-egg
+    displayName: "대박 슬라임 알"
+    description: "★1 70% / ★2 28% / ★3 2% 확률로 슬라임 한 마리를 지급합니다."
+    category: 3
+    effect: 15
+    requiredAttack: 0
+    icon: {fileID: 0}
+    maxLevel: 1
+    weight: 100
+    minimumSelection: 0
+    exclusiveGroup:
+    primaryValue: 0.28
+    secondaryValue: 0.02
+    tertiaryValue: 0
+    count: 1
