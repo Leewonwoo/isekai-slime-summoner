@@ -82,6 +82,20 @@ namespace CrossDefense.Editor
 
             VisualElement codexGrid = root.GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("codex-grid");
             if (codexGrid == null || codexGrid.childCount != 16) throw new InvalidOperationException("Codex grid is not 4x4/16 slots.");
+            VisualElement uiRoot = root.GetComponent<UIDocument>().rootVisualElement;
+            VisualElement codexHost = uiRoot.Q<VisualElement>("monster-codex-modal");
+            VisualElement merchantHost = uiRoot.Q<VisualElement>("merchant-modal");
+            VisualElement codexOverlay = uiRoot.Q<VisualElement>("codex-overlay");
+            VisualElement merchantOverlay = uiRoot.Q<VisualElement>("merchant-overlay");
+            float rootHeight = uiRoot.resolvedStyle.height;
+            if (codexHost == null || codexHost.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Codex modal host does not cover the screen.");
+            if (merchantHost == null || merchantHost.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Merchant modal host does not cover the screen.");
+            if (codexOverlay == null || codexOverlay.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Closed codex overlay lost its screen layout.");
+            if (merchantOverlay == null || merchantOverlay.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Closed merchant overlay lost its screen layout.");
 
             game.SetGameplayPause(GameplayPauseReason.MonsterCodex, true);
             game.SetGameplayPause(GameplayPauseReason.Merchant, true);

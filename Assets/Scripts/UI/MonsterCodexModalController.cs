@@ -28,7 +28,8 @@ namespace CrossDefense.UI
         MonsterCatalog _catalog;
         MonsterCodexProgression _progression;
         string _selectedId;
-        public bool IsVisible => !_overlay.ClassListContains("hidden");
+        const string HiddenClass = "modal-overlay--hidden";
+        public bool IsVisible => !_overlay.ClassListContains(HiddenClass);
         public event Action CloseRequested;
 
         public MonsterCodexModalController(VisualElement root)
@@ -55,10 +56,10 @@ namespace CrossDefense.UI
         public void Show()
         {
             Refresh();
-            _overlay.RemoveFromClassList("hidden");
+            _overlay.RemoveFromClassList(HiddenClass);
         }
 
-        public void Hide() => _overlay.AddToClassList("hidden");
+        public void Hide() => _overlay.AddToClassList(HiddenClass);
 
         public void Dispose()
         {

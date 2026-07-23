@@ -1,7 +1,7 @@
 <UXML xmlns="UnityEngine.UIElements">
     <Style src="/Assets/UI/USS/MerchantModal.uss" />
     <Template name="MerchantCard" src="/Assets/UI/UXML/templates/MerchantCard.uxml" />
-    <VisualElement name="merchant-overlay" class="modal-overlay hidden">
+    <VisualElement name="merchant-overlay" class="modal-overlay modal-overlay--hidden">
         <VisualElement class="modal-backdrop" picking-mode="Ignore" />
         <VisualElement class="merchant-panel">
             <VisualElement class="modal-header">

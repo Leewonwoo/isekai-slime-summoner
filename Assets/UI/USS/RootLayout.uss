@@ -5,6 +5,15 @@
     flex-direction: column;
 }
 
+/* Absolute modal children do not size their template wrapper. */
+.modal-host {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
 #zone-top {
     flex-basis: 8%;
     flex-shrink: 0;

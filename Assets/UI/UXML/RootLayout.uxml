@@ -70,7 +70,7 @@
                 <Label class="unit-detail__hint" text="슬롯을 길게 끌어 필드에 배치할 수 있습니다." picking-mode="Ignore" />
             </VisualElement>
         </VisualElement>
-        <Instance template="MonsterCodexModal" name="monster-codex-modal" />
-        <Instance template="MerchantModal" name="merchant-modal" />
+        <Instance template="MonsterCodexModal" name="monster-codex-modal" class="modal-host" />
+        <Instance template="MerchantModal" name="merchant-modal" class="modal-host" />
     </VisualElement>
 </UXML>

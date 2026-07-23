@@ -4,6 +4,11 @@
     display: none;
 }
 
+/* Full-screen modal layout remains valid while gameplay is paused on open. */
+.modal-overlay--hidden {
+    visibility: hidden;
+}
+
 /* 버튼 — 나무 판재 + 청키(하단 엣지) 문법 (ui-guidelines §4 스킨 문법 ①)
    9-slice 나무 버튼 스프라이트 적용 전 플랫 근사 */
 .btn {

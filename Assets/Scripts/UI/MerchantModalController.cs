@@ -21,7 +21,8 @@ namespace CrossDefense.UI
         readonly Button _close;
         readonly List<Card> _cards = new(3);
         MerchantManager _merchant;
-        public bool IsVisible => !_overlay.ClassListContains("hidden");
+        const string HiddenClass = "modal-overlay--hidden";
+        public bool IsVisible => !_overlay.ClassListContains(HiddenClass);
         public event Action CloseRequested;
         public event Action<int> PurchaseRequested;
 
@@ -64,7 +65,7 @@ namespace CrossDefense.UI
         public void Refresh()
         {
             bool open = _merchant?.IsOpen ?? false;
-            _overlay.EnableInClassList("hidden", !open);
+            _overlay.EnableInClassList(HiddenClass, !open);
             if (!open) return;
             for (int i = 0; i < _cards.Count; i++)
             {
