@@ -50,7 +50,7 @@ namespace CrossDefense.Data
     }
 
     /// <summary>소환 확률과 필드 전투를 함께 정의하는 아군 슬라임 데이터.</summary>
-    [CreateAssetMenu(fileName = "SummonUnitData", menuName = "Cross Defense/Data/Summon Unit", order = 20)]
+    [CreateAssetMenu(fileName = "SummonUnitData", menuName = "Isekai Slime Summoner/Data/Summon Unit", order = 20)]
     public sealed class SummonUnitData : ScriptableObject
     {
         [Header("Identity")]

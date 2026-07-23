@@ -1,4 +1,4 @@
-# UI/UX 시스템 지침 — UI Toolkit (Cross Defense)
+# UI/UX 시스템 지침 — UI Toolkit (Isekai Slime Summoner)
 
 > 모든 UI 작업(UXML/USS/C# 컨트롤러)은 이 문서를 따른다. SPEC §3.2~3.3, §4의 구현 규격판.
 > 여기 없는 값을 새로 정해야 하면 **이 문서에 먼저 추가하고** 코드를 쓴다. 문서에 없는 임의 값 사용 금지.

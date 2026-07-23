@@ -18,7 +18,7 @@ public class PipelineProbe : MonoBehaviour
     {
         GUI.skin.label.fontSize = Screen.height / 40;
         GUILayout.BeginArea(new Rect(20, 20, Screen.width - 40, Screen.height - 40));
-        GUILayout.Label("Cross Defense — pipeline probe");
+        GUILayout.Label("Isekai Slime Summoner — pipeline probe");
         GUILayout.Label($"Screen: {Screen.width}x{Screen.height} ({Screen.orientation})");
         GUILayout.Label($"FPS: {_fps:F0}");
         GUILayout.Label($"Unity {Application.unityVersion} / {Application.platform}");

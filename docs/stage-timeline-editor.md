@@ -2,10 +2,10 @@
 
 ## Open
 
-- `Cross Defense > Stage Timeline Editor`: opens the editor window directly.
+- `Isekai Slime Summoner > Stage Timeline Editor`: opens the editor window directly.
 - Select a `StageTimeline` asset and use `Open Stage Timeline Editor` in the Inspector.
-- `Cross Defense > Create Starter Stage Timeline`: creates a 20-wave sample timeline, a shared balance profile, and starter monster profiles.
-- `Assets > Create > Cross Defense > Stage Timeline`: creates an empty timeline asset.
+- `Isekai Slime Summoner > Create Starter Stage Timeline`: creates a 20-wave sample timeline, a shared balance profile, and starter monster profiles.
+- `Assets > Create > Isekai Slime Summoner > Stage Timeline`: creates an empty timeline asset.
 
 ## Data model
 

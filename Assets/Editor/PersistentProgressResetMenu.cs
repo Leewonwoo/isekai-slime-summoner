@@ -6,7 +6,7 @@ namespace CrossDefense.Editor
 {
     public static class PersistentProgressResetMenu
     {
-        const string MenuPath = "Cross Defense/Debug/영구 진행 초기화";
+        const string MenuPath = "Isekai Slime Summoner/Debug/영구 진행 초기화";
 
         [MenuItem(MenuPath)]
         static void ResetPersistentProgress()

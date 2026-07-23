@@ -1,4 +1,4 @@
-# CrossLoad Defense — 십자 디펜스 (Cross Defense)
+# Isekai Slime Summoner
 
 NAN 2026 (NHN Game × AI Hackathon) 사전 과제. 1인 개발, 마감 **2026-08-10**.
 

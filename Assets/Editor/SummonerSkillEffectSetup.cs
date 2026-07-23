@@ -19,7 +19,7 @@ namespace CrossDefense.Editor
             "Assets/Art/Projectiles/effect_explosion_slime_star3_eruption_sheet.png";
         const string AegisPath = "Assets/Art/Projectiles/effect_star3_impact_neutral.png";
 
-        [MenuItem("Cross Defense/Setup/Summoner Skill Effects")]
+        [MenuItem("Isekai Slime Summoner/Setup/Summoner Skill Effects")]
         public static void Apply()
         {
             ConfigureNineFrameSheet(MeteorPath, new Vector2(0.5f, 0.5f));

@@ -14,7 +14,7 @@ namespace CrossDefense.Editor
     /// </summary>
     public static class EditModeTestHarness
     {
-        [MenuItem("Cross Defense/Tests/Run Legacy EditMode Tests")]
+        [MenuItem("Isekai Slime Summoner/Tests/Run Legacy EditMode Tests")]
         public static void Run()
         {
             Type[] testTypes = AppDomain.CurrentDomain.GetAssemblies()

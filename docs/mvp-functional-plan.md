@@ -1,4 +1,4 @@
-# Cross Defense 기능 단위 MVP 계획서
+# Isekai Slime Summoner 기능 단위 MVP 계획서
 
 ## 1. 목적
 

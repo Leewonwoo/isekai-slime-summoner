@@ -56,7 +56,7 @@ namespace CrossDefense.Data
         }
     }
 
-    [CreateAssetMenu(fileName = "MerchantCatalog", menuName = "Cross Defense/Data/Merchant Catalog", order = 43)]
+    [CreateAssetMenu(fileName = "MerchantCatalog", menuName = "Isekai Slime Summoner/Data/Merchant Catalog", order = 43)]
     public sealed class MerchantCatalog : ScriptableObject
     {
         [SerializeField] EquipmentCatalog equipmentCatalog;

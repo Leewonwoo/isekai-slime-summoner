@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: wonucode
-  productName: Cross Defense
+  productName: Isekai Slime Summoner
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -719,14 +719,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: CrossLoad_Defense
+  metroPackageName: IsekaiSlimeSummoner
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: CrossLoad_Defense
+  metroApplicationDescription: Isekai Slime Summoner
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -800,7 +800,7 @@ PlayerSettings:
   cloudProjectId: 7457c65f-b492-43b0-a14b-d27e3c48c32d
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: CrossLoad_Defense
+  projectName: Isekai Slime Summoner
   organizationId: dnjsdn404
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

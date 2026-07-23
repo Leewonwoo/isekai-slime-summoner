@@ -1,4 +1,4 @@
-# Cross Defense 단계별 구현 체크리스트
+# Isekai Slime Summoner 단계별 구현 체크리스트
 
 ## Roulette summon vertical slice
 

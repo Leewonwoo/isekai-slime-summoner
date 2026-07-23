@@ -117,7 +117,7 @@ namespace CrossDefense.Data
     }
 
     /// <summary>5웨이브 3택의 표시 정보, 호환 조건과 효과 수치를 한 에셋에서 관리한다.</summary>
-    [CreateAssetMenu(fileName = "RunRewardCatalog", menuName = "Cross Defense/Data/Run Reward Catalog", order = 31)]
+    [CreateAssetMenu(fileName = "RunRewardCatalog", menuName = "Isekai Slime Summoner/Data/Run Reward Catalog", order = 31)]
     public sealed class RunRewardCatalog : ScriptableObject
     {
         [SerializeField] List<RunRewardDefinition> rewards = new();

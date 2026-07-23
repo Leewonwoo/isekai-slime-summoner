@@ -21,7 +21,7 @@ namespace CrossDefense.Editor
                 var options = new BuildPlayerOptions
                 {
                     scenes = scenes,
-                    locationPathName = "Builds/CrossDefense-feature-smoke.apk",
+                    locationPathName = "Builds/IsekaiSlimeSummoner-feature-smoke.apk",
                     target = BuildTarget.Android,
                     options = BuildOptions.None,
                 };

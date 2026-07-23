@@ -1,4 +1,4 @@
-# 십자 디펜스 (Cross Defense)
+# Isekai Slime Summoner
 
 > 룰렛으로 슬라임을 소환하고 자유롭게 배치·머지해, 중앙의 소환사를 고블린 군단으로부터 지키는 모바일 디펜스 게임
 
@@ -6,7 +6,7 @@ NAN 2026 (NHN Game × AI Hackathon) 사전 과제를 위해 개발 중인 1인 U
 
 장르는 **자유 배치 소환 디펜스 × 로그라이크 × 키우기**이며, AI는 코드·에셋·밸런싱을 만드는 개발 도구로만 활용합니다. 런타임 LLM API는 사용하지 않습니다.
 
-![십자 디펜스 플레이 화면](Assets/Screenshots/dopamine_hud_playmode.png)
+![Isekai Slime Summoner 플레이 화면](Assets/Screenshots/dopamine_hud_playmode.png)
 
 ## 핵심 플레이
 
@@ -49,8 +49,8 @@ NAN 2026 (NHN Game × AI Hackathon) 사전 과제를 위해 개발 중인 1인 U
 ### 에디터 실행
 
 ```bash
-git clone https://github.com/Leewonwoo/CrossLoad_Defense.git
-cd CrossLoad_Defense
+git clone https://github.com/Leewonwoo/isekai-slime-summoner.git
+cd isekai-slime-summoner
 git lfs pull
 ```
 
@@ -70,7 +70,7 @@ Windows 명령줄 검증 빌드는 다음 에디터 메서드를 사용합니다
   -logFile "Logs/android-build.log"
 ```
 
-결과 APK는 `Builds/CrossDefense-feature-smoke.apk`에 생성됩니다.
+결과 APK는 `Builds/IsekaiSlimeSummoner-feature-smoke.apk`에 생성됩니다.
 
 ## 프로젝트 구조
 

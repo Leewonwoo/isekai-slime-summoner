@@ -24,7 +24,7 @@ namespace CrossDefense.Editor
         Vector2 _waveScroll;
         Vector2 _detailScroll;
 
-        [MenuItem("Cross Defense/Stage Timeline Editor", priority = 0)]
+        [MenuItem("Isekai Slime Summoner/Stage Timeline Editor", priority = 0)]
         public static void OpenWindow()
         {
             var window = GetWindow<StageTimelineEditorWindow>();
@@ -44,7 +44,7 @@ namespace CrossDefense.Editor
             window.Show();
         }
 
-        [MenuItem("Assets/Create/Cross Defense/Stage Timeline", false, 20)]
+        [MenuItem("Assets/Create/Isekai Slime Summoner/Stage Timeline", false, 20)]
         static void CreateTimelineAsset()
         {
             EnsureFolder("Assets", "Data");
@@ -57,7 +57,7 @@ namespace CrossDefense.Editor
             OpenWindow(timeline);
         }
 
-        [MenuItem("Cross Defense/Create Starter Stage Timeline", priority = 10)]
+        [MenuItem("Isekai Slime Summoner/Create Starter Stage Timeline", priority = 10)]
         static void CreateStarterTimeline()
         {
             EnsureFolder("Assets", "Data");

@@ -43,7 +43,7 @@ namespace CrossDefense.EditorTools
             "Assets/Data/Monsters/Monster_GoblinWarlord.asset",
         };
 
-        [MenuItem("Cross Defense/Repair Stage 01 Timeline", priority = 12)]
+        [MenuItem("Isekai Slime Summoner/Repair Stage 01 Timeline", priority = 12)]
         public static void RepairStage01()
         {
             var timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(StagePath);

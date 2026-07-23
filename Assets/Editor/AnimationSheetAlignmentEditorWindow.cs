@@ -49,7 +49,7 @@ namespace CrossDefense.Editor
         int FrameCount => Mathf.Max(1, _columns * _rows);
         bool HasPendingOffsets => _frameOffsets.Any(offset => offset != Vector2Int.zero);
 
-        [MenuItem("Cross Defense/Animation Sheet Alignment", priority = 1)]
+        [MenuItem("Isekai Slime Summoner/Animation Sheet Alignment", priority = 1)]
         public static void OpenWindow()
         {
             var window = GetWindow<AnimationSheetAlignmentEditorWindow>();

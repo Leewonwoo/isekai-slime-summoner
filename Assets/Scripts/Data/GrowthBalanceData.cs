@@ -26,7 +26,7 @@ namespace CrossDefense.Data
     /// <summary>
     /// 소환사 영구 성장과 런 전용 강화의 비용·배율을 한 곳에서 조정하는 데이터다.
     /// </summary>
-    [CreateAssetMenu(fileName = "GrowthBalance", menuName = "Cross Defense/Data/Growth Balance", order = 30)]
+    [CreateAssetMenu(fileName = "GrowthBalance", menuName = "Isekai Slime Summoner/Data/Growth Balance", order = 30)]
     public sealed class GrowthBalanceData : ScriptableObject
     {
         [Header("Permanent Summoner Level")]

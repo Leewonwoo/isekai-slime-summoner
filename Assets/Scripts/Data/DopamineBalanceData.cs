@@ -5,7 +5,7 @@ namespace CrossDefense.Data
     /// <summary>콤보와 오버드라이브의 충전·지속·메테오 수치를 조정하는 데이터다.</summary>
     [CreateAssetMenu(
         fileName = "DopamineBalance",
-        menuName = "Cross Defense/Data/Dopamine Balance",
+        menuName = "Isekai Slime Summoner/Data/Dopamine Balance",
         order = 32)]
     public sealed class DopamineBalanceData : ScriptableObject
     {

@@ -5,7 +5,7 @@
 ## 실행
 
 1. Unity Project 창에서 `*_sheet.png`를 선택한다.
-2. 메뉴 `Cross Defense > Animation Sheet Alignment`를 연다.
+2. 메뉴 `Isekai Slime Summoner > Animation Sheet Alignment`를 연다.
 3. Validation과 Onion Skin 미리보기를 확인한다.
 4. 메타데이터 교정이 필요하면 `고정 Grid + Import Settings 적용`을 누른다.
 5. `Reference`에서 기준 프레임을 정하고, 고칠 프레임을 선택한다.

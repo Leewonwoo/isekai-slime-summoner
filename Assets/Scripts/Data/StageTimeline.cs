@@ -8,7 +8,7 @@ namespace CrossDefense.Data
     public enum PostWaveEvent { None, Merchant }
 
     /// <summary>Reusable stage-wide balance knobs. Assign one profile to many stages to tune them together.</summary>
-    [CreateAssetMenu(fileName = "StageBalanceProfile", menuName = "Cross Defense/Data/Stage Balance Profile", order = 11)]
+    [CreateAssetMenu(fileName = "StageBalanceProfile", menuName = "Isekai Slime Summoner/Data/Stage Balance Profile", order = 11)]
     public sealed class StageBalanceProfile : ScriptableObject
     {
         [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
@@ -176,7 +176,7 @@ namespace CrossDefense.Data
     /// <summary>
     /// Runtime stage data. The editor changes this asset only; the game loop can consume the read-only properties.
     /// </summary>
-    [CreateAssetMenu(fileName = "StageTimeline", menuName = "Cross Defense/Data/Stage Timeline", order = 0)]
+    [CreateAssetMenu(fileName = "StageTimeline", menuName = "Isekai Slime Summoner/Data/Stage Timeline", order = 0)]
     public sealed class StageTimeline : ScriptableObject
     {
         [Header("Stage")]

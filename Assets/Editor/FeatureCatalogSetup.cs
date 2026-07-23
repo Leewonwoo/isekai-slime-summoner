@@ -27,7 +27,7 @@ namespace CrossDefense.Editor
             "Monster_GoblinSporeShaman",
         };
 
-        [MenuItem("Cross Defense/Setup/Apply Codex Rush Merchant Data")]
+        [MenuItem("Isekai Slime Summoner/Setup/Apply Codex Rush Merchant Data")]
         public static void Apply()
         {
             EquipmentCatalog equipment = EnsureEquipmentCatalog();

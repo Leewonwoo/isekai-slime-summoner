@@ -12,7 +12,7 @@ namespace CrossDefense.Editor
             "Assets/Art/UIIcons/icon_skill_aegis.png",
         };
 
-        [MenuItem("Cross Defense/Setup/Summoner Skill Icons")]
+        [MenuItem("Isekai Slime Summoner/Setup/Summoner Skill Icons")]
         public static void Apply()
         {
             int configured = 0;

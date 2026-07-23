@@ -9,7 +9,7 @@ namespace CrossDefense.Editor
     {
         const string SheetPath = "Assets/Art/Enemies/effect_goblin_death_sheet.png";
 
-        [MenuItem("Cross Defense/Setup/Goblin Death Effect")]
+        [MenuItem("Isekai Slime Summoner/Setup/Goblin Death Effect")]
         public static void Apply()
         {
             SummonerSkillEffectSetup.ConfigureNineFrameSheet(

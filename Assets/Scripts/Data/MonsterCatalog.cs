@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CrossDefense.Data
 {
-    [CreateAssetMenu(fileName = "MonsterCatalog", menuName = "Cross Defense/Data/Monster Catalog", order = 42)]
+    [CreateAssetMenu(fileName = "MonsterCatalog", menuName = "Isekai Slime Summoner/Data/Monster Catalog", order = 42)]
     public sealed class MonsterCatalog : ScriptableObject
     {
         [SerializeField] List<MonsterData> monsters = new();

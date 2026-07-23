@@ -5,7 +5,7 @@ namespace CrossDefense.Data
     public enum EquipmentSlot { Weapon, Armor, Accessory }
     public enum EquipmentEffect { SummonerDamage, SummonerMaxHp, SummonerAttackSpeed, CriticalChance, JackpotChance }
 
-    [CreateAssetMenu(fileName = "Equipment", menuName = "Cross Defense/Data/Equipment", order = 40)]
+    [CreateAssetMenu(fileName = "Equipment", menuName = "Isekai Slime Summoner/Data/Equipment", order = 40)]
     public sealed class EquipmentData : ScriptableObject
     {
         [SerializeField] string equipmentId = "equipment";

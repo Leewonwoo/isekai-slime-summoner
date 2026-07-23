@@ -21,7 +21,7 @@ namespace CrossDefense.Data
         Nature,
     }
 
-    [CreateAssetMenu(fileName = "MonsterData", menuName = "Cross Defense/Data/Monster Profile", order = 10)]
+    [CreateAssetMenu(fileName = "MonsterData", menuName = "Isekai Slime Summoner/Data/Monster Profile", order = 10)]
     public sealed class MonsterData : ScriptableObject
     {
         [Header("Identity")]
