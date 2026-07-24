@@ -32,6 +32,7 @@ namespace CrossDefense.UI
         public BottomPanelController BottomPanel { get; private set; }
         public SummonRouletteView SummonRoulette { get; private set; }
         public SummonUnitDetailView SummonUnitDetail { get; private set; }
+        public SlimeCodexModalController SlimeCodexModal { get; private set; }
         public MonsterCodexModalController MonsterCodexModal { get; private set; }
         public MerchantModalController MerchantModal { get; private set; }
 
@@ -44,9 +45,11 @@ namespace CrossDefense.UI
             BottomPanel = new BottomPanelController(_root, upgradeRowTemplate);
             SummonRoulette = new SummonRouletteView(_root);
             SummonUnitDetail = new SummonUnitDetailView(_root);
+            SlimeCodexModal = new SlimeCodexModalController(_root);
             MonsterCodexModal = new MonsterCodexModalController(_root);
             MerchantModal = new MerchantModalController(_root);
             SummonUnitDetail.LevelUpRequested += OnSlimeLevelUpRequested;
+            SlimeCodexModal.CloseRequested += OnSlimeCodexCloseRequested;
             MonsterCodexModal.CloseRequested += OnCodexCloseRequested;
             MerchantModal.CloseRequested += OnMerchantCloseRequested;
             MerchantModal.PurchaseRequested += OnMerchantPurchaseRequested;
@@ -93,6 +96,8 @@ namespace CrossDefense.UI
                     _gameManager.RunTraits.Changed -= OnRunTraitsChanged;
                 if (_gameManager.SummonerSkills != null)
                     _gameManager.SummonerSkills.StateChanged -= RefreshSkillUI;
+                if (_gameManager.SummonerBuffs != null)
+                    _gameManager.SummonerBuffs.StateChanged -= RefreshSkillUI;
                 if (_gameManager.Dopamine != null)
                     _gameManager.Dopamine.StateChanged -= OnDopamineStateChanged;
                 if (_gameManager.Equipment != null)
@@ -102,6 +107,7 @@ namespace CrossDefense.UI
                 _gameManager.RegisterGoldScreenPositionProvider(null);
                 _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.SlimeCodex, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.Merchant, false);
             }
@@ -120,7 +126,9 @@ namespace CrossDefense.UI
             if (FieldOverlay != null)
             {
                 FieldOverlay.SkillRequested -= OnSkillRequested;
-                FieldOverlay.CodexRequested -= OnCodexRequested;
+                FieldOverlay.BuffSkillRequested -= OnBuffSkillRequested;
+                FieldOverlay.SlimeCodexRequested -= OnSlimeCodexRequested;
+                FieldOverlay.MonsterCodexRequested -= OnCodexRequested;
             }
             _traitChoicePopupOpen = false;
             _traitChoicePopup?.Hide();
@@ -131,6 +139,11 @@ namespace CrossDefense.UI
             }
             TopHUD?.Dispose();
             FieldOverlay?.Dispose();
+            if (SlimeCodexModal != null)
+            {
+                SlimeCodexModal.CloseRequested -= OnSlimeCodexCloseRequested;
+                SlimeCodexModal.Dispose();
+            }
             if (MonsterCodexModal != null)
             {
                 MonsterCodexModal.CloseRequested -= OnCodexCloseRequested;
@@ -168,6 +181,8 @@ namespace CrossDefense.UI
                 _gameManager.RunTraits.Changed += OnRunTraitsChanged;
             if (_gameManager.SummonerSkills != null)
                 _gameManager.SummonerSkills.StateChanged += RefreshSkillUI;
+            if (_gameManager.SummonerBuffs != null)
+                _gameManager.SummonerBuffs.StateChanged += RefreshSkillUI;
             if (_gameManager.Dopamine != null)
                 _gameManager.Dopamine.StateChanged += OnDopamineStateChanged;
             if (_gameManager.Equipment != null)
@@ -175,7 +190,9 @@ namespace CrossDefense.UI
             if (_gameManager.RunRelics != null)
                 _gameManager.RunRelics.Changed += OnRunRelicsChanged;
             FieldOverlay.SkillRequested += OnSkillRequested;
-            FieldOverlay.CodexRequested += OnCodexRequested;
+            FieldOverlay.BuffSkillRequested += OnBuffSkillRequested;
+            FieldOverlay.SlimeCodexRequested += OnSlimeCodexRequested;
+            FieldOverlay.MonsterCodexRequested += OnCodexRequested;
             BottomPanel.SummonRequested += OnSummonRequested;
             BottomPanel.BenchSlotSelected += OnBenchSlotSelected;
             BottomPanel.BenchDragStarted += OnBenchDragStarted;
@@ -184,6 +201,7 @@ namespace CrossDefense.UI
             BottomPanel.RunUpgradeRequested += OnRunUpgradeRequested;
             BottomPanel.SkillEquipRequested += OnSkillEquipRequested;
             BottomPanel.EquipmentEquipRequested += OnEquipmentEquipRequested;
+            SlimeCodexModal.Bind(_gameManager.SummonManager.Pool, _gameManager.SummonerProgression);
             MonsterCodexModal.Bind(_gameManager.MonsterCatalog, _gameManager.MonsterCodex);
             MerchantModal.Bind(_gameManager.Merchant);
             _gameManager.RegisterGoldScreenPositionProvider(TopHUD.GetGoldScreenPosition);
@@ -260,6 +278,20 @@ namespace CrossDefense.UI
         }
 
         void OnSkillRequested() => _gameManager?.SummonerSkills?.PressSkillButton();
+        void OnBuffSkillRequested(int slotIndex) =>
+            _gameManager?.SummonerBuffs?.PressSkillButton(slotIndex);
+
+        void OnSlimeCodexRequested()
+        {
+            SlimeCodexModal?.Show();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.SlimeCodex, true);
+        }
+
+        void OnSlimeCodexCloseRequested()
+        {
+            SlimeCodexModal?.Hide();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.SlimeCodex, false);
+        }
 
         void OnCodexRequested()
         {
@@ -303,15 +335,16 @@ namespace CrossDefense.UI
         void RefreshEquipmentUI() =>
             BottomPanel?.SetEquipmentData(_gameManager?.Equipment, _gameManager?.RunRelics);
 
-        void OnSkillEquipRequested(SummonerSkillId id)
+        void OnSkillEquipRequested(SummonerBuffId id)
         {
-            if (_gameManager?.SummonerSkillLoadout?.TryEquip(id) == true)
+            if (_gameManager?.SummonerBuffLoadout?.TryToggle(id) == true)
                 RefreshSkillUI();
         }
 
         void RefreshSkillUI()
         {
             if (_gameManager?.SummonerSkills == null ||
+                _gameManager.SummonerBuffs == null ||
                 _gameManager.SummonerProgression == null)
                 return;
             SummonerSkillController skills = _gameManager.SummonerSkills;
@@ -321,7 +354,18 @@ namespace CrossDefense.UI
                 skills.IsTargeting);
             BottomPanel.SetSkillRows(
                 _gameManager.SummonerProgression.Snapshot.Level,
-                skills.EquippedSkill);
+                _gameManager.SummonerBuffLoadout?.Equipped);
+            for (int i = 0; i < SummonerBuffCatalog.MaxEquipped; i++)
+            {
+                SummonerBuffId? id = _gameManager.SummonerBuffs.EquippedAt(i);
+                FieldOverlay.SetBuffSkillState(
+                    i,
+                    id.HasValue ? SummonerBuffCatalog.Get(id.Value) : null,
+                    id.HasValue
+                        ? _gameManager.SummonerBuffs.RemainingCooldown(id.Value)
+                        : 0f,
+                    id.HasValue && _gameManager.SummonerBuffs.IsActive(id.Value));
+            }
         }
 
         void OnDopamineStateChanged(DopamineSnapshot _) => RefreshDopamineUI();
@@ -726,7 +770,9 @@ namespace CrossDefense.UI
         void Update()
         {
             if (Keyboard.current?.escapeKey.wasPressedThisFrame != true) return;
-            if (MonsterCodexModal?.IsVisible == true)
+            if (SlimeCodexModal?.IsVisible == true)
+                OnSlimeCodexCloseRequested();
+            else if (MonsterCodexModal?.IsVisible == true)
                 OnCodexCloseRequested();
             else if (MerchantModal?.IsVisible == true)
                 OnMerchantCloseRequested();

@@ -1,0 +1,126 @@
+.modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-modal-scrim);
+}
+
+.slime-codex-panel {
+    width: var(--modal-panel-width);
+    height: var(--modal-panel-height);
+    background-color: var(--color-panel);
+    border-width: var(--gap-sm);
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-xl);
+}
+
+.modal-header {
+    min-height: var(--touch-min);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    color: var(--color-text);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+}
+
+.modal-close {
+    min-width: var(--touch-min);
+    min-height: var(--touch-min);
+}
+
+.slime-codex-grid-scroll {
+    flex-grow: 1;
+}
+
+.slime-codex-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.slime-codex-slot {
+    width: var(--codex-slot-size);
+    height: var(--codex-slot-size);
+    margin: var(--gap-sm);
+    background-color: var(--color-panel-deep);
+    border-width: var(--gap-xs);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+}
+
+.slime-codex-slot--selected {
+    border-color: var(--color-gold);
+}
+
+.slime-codex-slot__image {
+    width: var(--codex-slot-image-size);
+    height: var(--codex-slot-image-size);
+}
+
+.slime-codex-slot__name,
+.slime-codex-slot__unknown,
+.slime-codex-slot__unlock {
+    color: var(--color-text);
+    font-size: var(--font-small);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.slime-codex-slot__unknown {
+    font-size: var(--font-display);
+}
+
+.slime-codex-slot__unlock {
+    color: var(--color-text-dim);
+}
+
+.slime-codex-detail {
+    min-height: var(--codex-detail-height);
+    flex-direction: row;
+    background-color: var(--color-panel-deep);
+    border-radius: var(--radius-md);
+    padding: var(--gap-md);
+}
+
+.slime-codex-detail__image {
+    width: var(--codex-detail-image-size);
+    height: var(--codex-detail-image-size);
+    margin-right: var(--gap-lg);
+}
+
+.slime-codex-detail__text {
+    flex-grow: 1;
+}
+
+.slime-codex-detail__name {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.slime-codex-detail__attribute,
+.slime-codex-detail__stats {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    margin-top: var(--gap-sm);
+    white-space: normal;
+}

@@ -1,0 +1,23 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/SlimeCodexModal.uss" />
+    <VisualElement name="slime-codex-overlay" class="modal-overlay modal-overlay--hidden">
+        <VisualElement class="modal-backdrop" picking-mode="Ignore" />
+        <VisualElement class="slime-codex-panel">
+            <VisualElement class="modal-header">
+                <Label class="modal-title" text="슬라임 도감" />
+                <Button name="slime-codex-close-button" class="btn modal-close" text="닫기" />
+            </VisualElement>
+            <ScrollView name="slime-codex-grid-scroll" class="panel-scroll slime-codex-grid-scroll" mode="Vertical">
+                <VisualElement name="slime-codex-grid" class="slime-codex-grid" />
+            </ScrollView>
+            <VisualElement name="slime-codex-detail" class="slime-codex-detail">
+                <Image name="slime-codex-detail-image" class="slime-codex-detail__image" />
+                <VisualElement class="slime-codex-detail__text">
+                    <Label name="slime-codex-detail-name" class="slime-codex-detail__name" text="슬롯을 선택하세요" />
+                    <Label name="slime-codex-detail-attribute" class="slime-codex-detail__attribute" text="" />
+                    <Label name="slime-codex-detail-stats" class="slime-codex-detail__stats" text="" />
+                </VisualElement>
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

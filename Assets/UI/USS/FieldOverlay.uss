@@ -47,10 +47,15 @@
     font-size: var(--font-title);
 }
 
-.overdrive-gauge {
+.overdrive-cluster {
     position: absolute;
-    right: var(--gap-lg);
+    right: var(--overdrive-gauge-right);
     bottom: var(--overdrive-gauge-bottom);
+    width: var(--overdrive-status-width);
+    align-items: flex-end;
+}
+
+.overdrive-gauge {
     width: var(--overdrive-gauge-width);
     height: var(--overdrive-gauge-height);
     overflow: hidden;
@@ -69,30 +74,51 @@
 .overdrive-gauge__fill {
     position: absolute;
     left: 0;
-    top: 0;
+    right: 0;
     bottom: 0;
-    width: 0;
+    height: 0;
     background-color: var(--color-overdrive);
     border-radius: var(--radius-sm);
 }
 
 .overdrive-gauge__label {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    width: var(--overdrive-status-width);
+    height: var(--overdrive-status-height);
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: var(--gap-sm);
     color: var(--color-text);
     font-size: var(--font-small);
     -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-right;
+}
+
+.overdrive-gauge__tick {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--overdrive-gauge-tick-height);
+    background-color: var(--color-overdrive-deep);
+}
+
+.overdrive-gauge__tick--quarter {
+    bottom: 25%;
+}
+
+.overdrive-gauge__tick--half {
+    bottom: 50%;
+}
+
+.overdrive-gauge__tick--three-quarter {
+    bottom: 75%;
 }
 
 .overdrive--charging .overdrive-gauge__label {
     color: var(--color-transparent);
 }
 
-.overdrive--ready {
+.overdrive--ready .overdrive-gauge {
     border-left-color: var(--color-overdrive);
     border-right-color: var(--color-overdrive);
     border-top-color: var(--color-overdrive);
@@ -103,11 +129,15 @@
     color: var(--color-text);
 }
 
-.codex-button {
+.codex-button-stack {
     position: absolute;
     right: var(--gap-lg);
     top: var(--gap-lg);
-    width: var(--codex-button-size);
+    width: var(--codex-button-width);
+}
+
+.codex-button {
+    width: var(--codex-button-width);
     height: var(--codex-button-size);
     color: var(--color-ink);
     background-color: var(--color-surface);
@@ -116,6 +146,10 @@
     border-radius: var(--radius-lg);
     font-size: var(--font-caption);
     -unity-font-style: bold;
+}
+
+.slime-codex-button {
+    margin-bottom: var(--gap-md);
 }
 
 .codex-button:active {
@@ -167,6 +201,10 @@
     padding-right: 0;
     padding-top: 0;
     padding-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .skill-button:active {
@@ -216,4 +254,93 @@
 
 .skill-button--targeting {
     background-color: var(--color-surface-deep);
+}
+
+.buff-skill-cluster {
+    position: absolute;
+    right: var(--buff-skill-cluster-right);
+    bottom: var(--buff-skill-cluster-bottom);
+    flex-direction: row;
+}
+
+.buff-skill-button {
+    width: var(--buff-skill-button-size);
+    height: var(--buff-skill-button-size);
+    margin-left: var(--gap-sm);
+    border-radius: var(--buff-skill-button-radius);
+    background-color: var(--color-panel-deep);
+    background-image: url("project://database/Assets/Art/UIFrames/frame_ring.png?fileID=21300000&guid=9603ecb7000a32e47a1b0382e5871157&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.buff-skill-button:active {
+    background-color: var(--color-surface-deep);
+}
+
+.buff-skill-button__icon {
+    width: var(--buff-skill-icon-size);
+    height: var(--buff-skill-icon-size);
+    flex-shrink: 0;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+}
+
+.buff-skill-button__name {
+    color: var(--color-gold);
+    font-size: var(--font-small);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.buff-skill-button__cooldown {
+    position: absolute;
+    color: var(--color-text);
+    font-size: var(--skill-button-cooldown-size);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.buff-skill-button--cooldown {
+    opacity: 0.72;
+}
+
+.buff-skill-button--active {
+    background-color: var(--color-positive);
+}
+
+.buff-skill-button--empty {
+    opacity: 0.45;
+}
+
+.buff-icon--aegis {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_skill_aegis.png");
+}
+
+.buff-icon--life {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_hp.png");
+}
+
+.buff-icon--command {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_aspd.png");
+}
+
+.buff-icon--resonance {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_tab_gear.png");
+}
+
+.buff-icon--time {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_crit.png");
 }

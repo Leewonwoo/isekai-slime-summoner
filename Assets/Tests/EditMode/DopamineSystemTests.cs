@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
 using CrossDefense.Core;
 using CrossDefense.Data;
+using CrossDefense.UI;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CrossDefense.Tests.EditMode
 {
@@ -142,6 +144,29 @@ namespace CrossDefense.Tests.EditMode
 
             Assert.That(asset, Is.Not.Null);
             Assert.That(asset.MeteorCount, Is.EqualTo(20));
+        }
+
+        [Test]
+        public void FieldOverlayController_ChargesVerticalGaugeByHeight()
+        {
+            var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/UI/UXML/FieldOverlay.uxml");
+            Assert.That(tree, Is.Not.Null);
+
+            TemplateContainer root = tree.CloneTree();
+            var controller = new FieldOverlayController(root);
+            controller.SetDopamineState(
+                new DopamineSnapshot(0, 0f, 50, 100, false, 0f, 0),
+                _balance);
+
+            VisualElement fill = root.Q<VisualElement>("overdrive-gauge-fill");
+            Assert.That(fill.style.height.value.unit, Is.EqualTo(LengthUnit.Percent));
+            Assert.That(fill.style.height.value.value, Is.EqualTo(50f).Within(0.01f));
+            Assert.That(
+                root.Query<VisualElement>(className: "overdrive-gauge__tick").ToList().Count,
+                Is.EqualTo(3));
+
+            controller.Dispose();
         }
 
         DopamineRuntime CreateReadyRuntime()

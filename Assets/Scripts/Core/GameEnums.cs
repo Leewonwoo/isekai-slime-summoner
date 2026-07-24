@@ -51,5 +51,6 @@ namespace CrossDefense
         SummonRoulette = 1 << 1,
         MonsterCodex = 1 << 2,
         Merchant = 1 << 3,
+        SlimeCodex = 1 << 4,
     }
 }

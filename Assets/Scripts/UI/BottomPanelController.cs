@@ -94,13 +94,14 @@ namespace CrossDefense.UI
         readonly ScrollView _upgradeList;
         readonly ScrollView _skillList;
         readonly Dictionary<string, GrowthRowBinding> _upgradeRows = new();
-        readonly Dictionary<SummonerSkillId, SkillRowBinding> _skillRows = new();
+        readonly Dictionary<SummonerBuffId, SkillRowBinding> _skillRows = new();
         readonly List<EquipmentRowBinding> _equipmentRows = new();
         readonly ScrollView _equipmentList;
         readonly Label _gearWeapon;
         readonly Label _gearArmor;
         readonly Label _gearAccessory;
         readonly Label _runRelicList;
+        readonly Label _skillLoadoutCount;
         readonly Label _benchCount;
         readonly Label _summonContractCount;
         readonly Label _summonProbability;
@@ -127,7 +128,7 @@ namespace CrossDefense.UI
         public event Action<SummonUnitInstance, Vector2> BenchDragMoved;
         public event Action<SummonUnitInstance, Vector2> BenchDragEnded;
         public event Action<RunUpgradeType> RunUpgradeRequested;
-        public event Action<SummonerSkillId> SkillEquipRequested;
+        public event Action<SummonerBuffId> SkillEquipRequested;
         public event Action<string> EquipmentEquipRequested;
         public bool IsSummonAnimating => _isSummonAnimating;
 
@@ -151,6 +152,7 @@ namespace CrossDefense.UI
             _gearArmor = root.Q<Label>("gear-slot-armor");
             _gearAccessory = root.Q<Label>("gear-slot-accessory");
             _runRelicList = root.Q<Label>("run-relic-list");
+            _skillLoadoutCount = root.Q<Label>("skill-loadout-count");
             _benchCount = root.Q<Label>("bench-count");
             _summonContractCount = root.Q<Label>("summon-contract-count");
             _summonProbability = root.Q<Label>("summon-prob");
@@ -225,31 +227,41 @@ namespace CrossDefense.UI
         public void SetGrowthRows(IReadOnlyList<GrowthRowModel> rows) =>
             SyncGrowthRows(_upgradeList, _upgradeRows, rows);
 
-        public void SetSkillRows(int summonerLevel, SummonerSkillId equipped)
+        public void SetSkillRows(
+            int summonerLevel,
+            IReadOnlyList<SummonerBuffId> equipped)
         {
-            foreach (SummonerSkillDefinition definition in SummonerSkillCatalog.All)
+            int equippedCount = equipped?.Count ?? 0;
+            if (_skillLoadoutCount != null)
+                _skillLoadoutCount.text =
+                    $"소환사 버프 · {equippedCount}/{SummonerBuffCatalog.MaxEquipped} 장착";
+
+            foreach (SummonerBuffDefinition definition in SummonerBuffCatalog.All)
             {
                 if (!_skillRows.TryGetValue(definition.Id, out SkillRowBinding binding))
                     continue;
-                bool unlocked = SummonerSkillCatalog.IsUnlocked(definition.Id, summonerLevel);
-                bool isEquipped = definition.Id == equipped;
+                bool unlocked = SummonerBuffCatalog.IsUnlocked(definition.Id, summonerLevel);
+                bool isEquipped = IsBuffEquipped(equipped, definition.Id);
+                bool hasOpenSlot = equippedCount < SummonerBuffCatalog.MaxEquipped;
                 string values = unlocked
                     ? $"{definition.Description} · {definition.Cooldown:0}초"
                     : $"Lv.{definition.UnlockLevel} 해금 · {definition.Description}";
                 binding.View.Bind(
                     definition.DisplayName,
                     values,
-                    !unlocked ? "잠김" : isEquipped ? "장착 중" : "장착",
+                    !unlocked ? "잠김" :
+                    isEquipped ? "해제" :
+                    hasOpenSlot ? "장착" : "3/3",
                     SkillRowIconClass(definition.Id));
-                binding.View.SetAffordable(unlocked && !isEquipped);
+                binding.View.SetAffordable(unlocked && (isEquipped || hasOpenSlot));
             }
         }
 
         public void SetEquipmentData(EquipmentProgression equipment, RunRelicInventory relics)
         {
-            _gearWeapon.text = SlotText("무기", equipment?.Equipped(EquipmentSlot.Weapon));
-            _gearArmor.text = SlotText("방어구", equipment?.Equipped(EquipmentSlot.Armor));
-            _gearAccessory.text = SlotText("장신구", equipment?.Equipped(EquipmentSlot.Accessory));
+            _gearWeapon.text = SlotText("공격 신물", equipment?.Equipped(EquipmentSlot.Weapon));
+            _gearArmor.text = SlotText("수호 신물", equipment?.Equipped(EquipmentSlot.Armor));
+            _gearAccessory.text = SlotText("보조 신물", equipment?.Equipped(EquipmentSlot.Accessory));
 
             foreach (EquipmentRowBinding binding in _equipmentRows) binding.Dispose();
             _equipmentRows.Clear();
@@ -283,11 +295,26 @@ namespace CrossDefense.UI
         static string SlotText(string slotName, EquipmentData item) =>
             item == null ? $"{slotName}\n비어 있음" : $"{slotName}\n{item.DisplayName}";
 
-        static string SkillRowIconClass(SummonerSkillId id) => id switch
+        static bool IsBuffEquipped(
+            IReadOnlyList<SummonerBuffId> equipped,
+            SummonerBuffId id)
         {
-            SummonerSkillId.IceWall => "row__icon--skill-ice-wall",
-            SummonerSkillId.Aegis => "row__icon--skill-aegis",
-            _ => "row__icon--skill-meteor",
+            if (equipped == null)
+                return false;
+            for (int i = 0; i < equipped.Count; i++)
+                if (equipped[i] == id)
+                    return true;
+            return false;
+        }
+
+        static string SkillRowIconClass(SummonerBuffId id) => id switch
+        {
+            SummonerBuffId.Aegis => "row__icon--skill-aegis",
+            SummonerBuffId.LegionCommand => "row__icon--aspd",
+            SummonerBuffId.LifeBlessing => "row__icon--hp",
+            SummonerBuffId.ElementalResonance => "row__icon--skill-meteor",
+            SummonerBuffId.TimeAcceleration => "row__icon--crit",
+            _ => "row__icon--skill-aegis",
         };
 
         public void SetSummonerInfo(SummonerInfoModel model)
@@ -498,7 +525,7 @@ namespace CrossDefense.UI
             readonly Button _button;
             readonly Action _handler;
 
-            public SkillRowBinding(VisualElement root, SummonerSkillId id, Action<SummonerSkillId> onClicked)
+            public SkillRowBinding(VisualElement root, SummonerBuffId id, Action<SummonerBuffId> onClicked)
             {
                 View = new UpgradeRowView(root);
                 _button = View.ActionButton;
@@ -530,7 +557,7 @@ namespace CrossDefense.UI
         {
             if (_skillList == null || _upgradeRowTemplate == null)
                 return;
-            foreach (SummonerSkillDefinition definition in SummonerSkillCatalog.All)
+            foreach (SummonerBuffDefinition definition in SummonerBuffCatalog.All)
             {
                 VisualElement root = _upgradeRowTemplate.Instantiate();
                 var binding = new SkillRowBinding(

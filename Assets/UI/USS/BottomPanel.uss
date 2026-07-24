@@ -411,7 +411,14 @@
     min-height: var(--row-height);
 }
 
-/* ── 장비 탭 ───────────────────────── */
+/* ── 신물 탭 ───────────────────────── */
+.skill-tab__loadout {
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    margin-bottom: var(--gap-sm);
+}
+
 .gear-tab {
     flex-grow: 1;
     padding-top: var(--gap-md);

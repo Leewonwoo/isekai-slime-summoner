@@ -5,6 +5,7 @@
     <Template name="TopHUD" src="/Assets/UI/UXML/TopHUD.uxml" />
     <Template name="FieldOverlay" src="/Assets/UI/UXML/FieldOverlay.uxml" />
     <Template name="BottomPanel" src="/Assets/UI/UXML/BottomPanel.uxml" />
+    <Template name="SlimeCodexModal" src="/Assets/UI/UXML/SlimeCodexModal.uxml" />
     <Template name="MonsterCodexModal" src="/Assets/UI/UXML/MonsterCodexModal.uxml" />
     <Template name="MerchantModal" src="/Assets/UI/UXML/MerchantModal.uxml" />
     <VisualElement name="root" class="root" picking-mode="Ignore">
@@ -70,7 +71,8 @@
                 <Label class="unit-detail__hint" text="슬롯을 길게 끌어 필드에 배치할 수 있습니다." picking-mode="Ignore" />
             </VisualElement>
         </VisualElement>
-        <Instance template="MonsterCodexModal" name="monster-codex-modal" class="modal-host" />
-        <Instance template="MerchantModal" name="merchant-modal" class="modal-host" />
+        <Instance template="SlimeCodexModal" name="slime-codex-modal" class="modal-host" picking-mode="Ignore" />
+        <Instance template="MonsterCodexModal" name="monster-codex-modal" class="modal-host" picking-mode="Ignore" />
+        <Instance template="MerchantModal" name="merchant-modal" class="modal-host" picking-mode="Ignore" />
     </VisualElement>
 </UXML>

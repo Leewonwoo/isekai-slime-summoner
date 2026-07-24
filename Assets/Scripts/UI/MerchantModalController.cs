@@ -86,7 +86,7 @@ namespace CrossDefense.UI
         void OnClose() => CloseRequested?.Invoke();
         static string CategoryName(MerchantProductCategory category) => category switch
         {
-            MerchantProductCategory.Equipment => "영구 장비",
+            MerchantProductCategory.Equipment => "영구 신물",
             MerchantProductCategory.Relic => "런 유물",
             _ => "소모품",
         };

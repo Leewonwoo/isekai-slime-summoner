@@ -16,12 +16,20 @@ namespace CrossDefense.UI
         readonly VisualElement _overdriveGaugeFill;
         readonly Label _overdriveGaugeLabel;
         readonly Button _skillButton;
-        readonly Button _codexButton;
+        readonly Button _slimeCodexButton;
+        readonly Button _monsterCodexButton;
         readonly Label _unlockToast;
         readonly Label _skillName;
         readonly Label _skillCooldown;
         readonly VisualElement _skillIcon;
         readonly Action _skillClickHandler;
+        readonly VisualElement _buffSkillCluster;
+        readonly Button[] _buffSkillButtons = new Button[SummonerBuffCatalog.MaxEquipped];
+        readonly VisualElement[] _buffSkillIcons = new VisualElement[SummonerBuffCatalog.MaxEquipped];
+        readonly Label[] _buffSkillNames = new Label[SummonerBuffCatalog.MaxEquipped];
+        readonly Label[] _buffSkillCooldowns = new Label[SummonerBuffCatalog.MaxEquipped];
+        readonly Action[] _buffSkillClickHandlers = new Action[SummonerBuffCatalog.MaxEquipped];
+        readonly string[] _buffSkillIconClasses = new string[SummonerBuffCatalog.MaxEquipped];
         string _skillIconClass;
         StageWaveKind _waveKind;
         int _lastCombo;
@@ -29,25 +37,40 @@ namespace CrossDefense.UI
         IVisualElementScheduledItem _unlockToastReset;
 
         public event Action SkillRequested;
-        public event Action CodexRequested;
+        public event Action<int> BuffSkillRequested;
+        public event Action SlimeCodexRequested;
+        public event Action MonsterCodexRequested;
 
         public FieldOverlayController(VisualElement root)
         {
             _waveLabel = root.Q<Label>("wave-label");
             _remainingMonstersLabel = root.Q<Label>("remaining-monsters-label");
             _comboLabel = root.Q<Label>("combo-label");
-            _overdriveGauge = root.Q<VisualElement>("overdrive-gauge");
+            _overdriveGauge = root.Q<VisualElement>("overdrive-cluster");
             _overdriveGaugeFill = root.Q<VisualElement>("overdrive-gauge-fill");
             _overdriveGaugeLabel = root.Q<Label>("overdrive-gauge-label");
             _skillButton = root.Q<Button>("skill-button");
-            _codexButton = root.Q<Button>("codex-button");
+            _slimeCodexButton = root.Q<Button>("slime-codex-button");
+            _monsterCodexButton = root.Q<Button>("monster-codex-button");
             _unlockToast = root.Q<Label>("unlock-toast");
             _skillName = root.Q<Label>("skill-button-name");
             _skillCooldown = root.Q<Label>("skill-button-cooldown");
             _skillIcon = root.Q<VisualElement>("skill-button-icon");
+            _buffSkillCluster = root.Q<VisualElement>("buff-skill-cluster");
             _skillClickHandler = () => SkillRequested?.Invoke();
             _skillButton.clicked += _skillClickHandler;
-            _codexButton.clicked += OnCodexClicked;
+            for (int i = 0; i < SummonerBuffCatalog.MaxEquipped; i++)
+            {
+                int captured = i;
+                _buffSkillButtons[i] = root.Q<Button>($"buff-skill-button-{i}");
+                _buffSkillIcons[i] = root.Q<VisualElement>($"buff-skill-icon-{i}");
+                _buffSkillNames[i] = root.Q<Label>($"buff-skill-name-{i}");
+                _buffSkillCooldowns[i] = root.Q<Label>($"buff-skill-cooldown-{i}");
+                _buffSkillClickHandlers[i] = () => BuffSkillRequested?.Invoke(captured);
+                _buffSkillButtons[i].clicked += _buffSkillClickHandlers[i];
+            }
+            _slimeCodexButton.clicked += OnSlimeCodexClicked;
+            _monsterCodexButton.clicked += OnMonsterCodexClicked;
         }
 
         public void SetWave(int current, int remainingMonsters)
@@ -74,14 +97,21 @@ namespace CrossDefense.UI
                 () => _unlockToast.AddToClassList("hidden")).StartingIn(2600);
         }
 
-        public void SetSkillButtonVisible(bool visible) => _skillButton.EnableInClassList("hidden", !visible);
+        public void SetSkillButtonVisible(bool visible)
+        {
+            _skillButton.EnableInClassList("hidden", !visible);
+            _buffSkillCluster.EnableInClassList("hidden", !visible);
+        }
 
         public void Dispose()
         {
             _comboMilestoneReset?.Pause();
             _unlockToastReset?.Pause();
             _skillButton.clicked -= _skillClickHandler;
-            _codexButton.clicked -= OnCodexClicked;
+            for (int i = 0; i < _buffSkillButtons.Length; i++)
+                _buffSkillButtons[i].clicked -= _buffSkillClickHandlers[i];
+            _slimeCodexButton.clicked -= OnSlimeCodexClicked;
+            _monsterCodexButton.clicked -= OnMonsterCodexClicked;
         }
 
         public void SetDopamineState(
@@ -106,7 +136,7 @@ namespace CrossDefense.UI
             float fill = snapshot.IsActive && balance != null
                 ? snapshot.ActiveTimeRemaining / balance.OverdriveDuration
                 : snapshot.GaugeProgress;
-            _overdriveGaugeFill.style.width = Length.Percent(Mathf.Clamp01(fill) * 100f);
+            _overdriveGaugeFill.style.height = Length.Percent(Mathf.Clamp01(fill) * 100f);
             _overdriveGauge.EnableInClassList("overdrive--charging", !snapshot.IsReady && !snapshot.IsActive);
             _overdriveGauge.EnableInClassList("overdrive--ready", snapshot.IsReady);
             _overdriveGauge.EnableInClassList("overdrive--active", snapshot.IsActive);
@@ -134,6 +164,47 @@ namespace CrossDefense.UI
             _skillButton.SetEnabled(targeting || remainingCooldown <= 0f);
         }
 
+        public void SetBuffSkillState(
+            int slotIndex,
+            SummonerBuffDefinition? definition,
+            float remainingCooldown,
+            bool active)
+        {
+            if (slotIndex < 0 || slotIndex >= _buffSkillButtons.Length)
+                return;
+
+            Button button = _buffSkillButtons[slotIndex];
+            VisualElement icon = _buffSkillIcons[slotIndex];
+            if (!string.IsNullOrEmpty(_buffSkillIconClasses[slotIndex]))
+                icon.RemoveFromClassList(_buffSkillIconClasses[slotIndex]);
+
+            bool assigned = definition.HasValue;
+            if (assigned)
+            {
+                SummonerBuffDefinition value = definition.Value;
+                string iconClass = BuffIconClass(value.Id);
+                _buffSkillIconClasses[slotIndex] = iconClass;
+                icon.AddToClassList(iconClass);
+                _buffSkillNames[slotIndex].text = BuffShortName(value.Id);
+                _buffSkillCooldowns[slotIndex].text = remainingCooldown > 0f
+                    ? Mathf.CeilToInt(remainingCooldown).ToString()
+                    : string.Empty;
+            }
+            else
+            {
+                _buffSkillIconClasses[slotIndex] = string.Empty;
+                _buffSkillNames[slotIndex].text = "비어 있음";
+                _buffSkillCooldowns[slotIndex].text = string.Empty;
+            }
+
+            button.EnableInClassList("buff-skill-button--empty", !assigned);
+            button.EnableInClassList(
+                "buff-skill-button--cooldown",
+                assigned && remainingCooldown > 0f);
+            button.EnableInClassList("buff-skill-button--active", assigned && active);
+            button.SetEnabled(assigned && remainingCooldown <= 0f);
+        }
+
         static string SkillIconClass(SummonerSkillId id) => id switch
         {
             SummonerSkillId.IceWall => "skill-icon--ice-wall",
@@ -141,6 +212,27 @@ namespace CrossDefense.UI
             _ => "skill-icon--meteor",
         };
 
-        void OnCodexClicked() => CodexRequested?.Invoke();
+        static string BuffIconClass(SummonerBuffId id) => id switch
+        {
+            SummonerBuffId.Aegis => "buff-icon--aegis",
+            SummonerBuffId.LegionCommand => "buff-icon--command",
+            SummonerBuffId.LifeBlessing => "buff-icon--life",
+            SummonerBuffId.ElementalResonance => "buff-icon--resonance",
+            SummonerBuffId.TimeAcceleration => "buff-icon--time",
+            _ => "buff-icon--aegis",
+        };
+
+        static string BuffShortName(SummonerBuffId id) => id switch
+        {
+            SummonerBuffId.Aegis => "보호막",
+            SummonerBuffId.LegionCommand => "지휘",
+            SummonerBuffId.LifeBlessing => "치유",
+            SummonerBuffId.ElementalResonance => "공명",
+            SummonerBuffId.TimeAcceleration => "가속",
+            _ => string.Empty,
+        };
+
+        void OnSlimeCodexClicked() => SlimeCodexRequested?.Invoke();
+        void OnMonsterCodexClicked() => MonsterCodexRequested?.Invoke();
     }
 }

@@ -83,25 +83,50 @@ namespace CrossDefense.Editor
             VisualElement codexGrid = root.GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("codex-grid");
             if (codexGrid == null || codexGrid.childCount != 16) throw new InvalidOperationException("Codex grid is not 4x4/16 slots.");
             VisualElement uiRoot = root.GetComponent<UIDocument>().rootVisualElement;
+            VisualElement overdriveGauge = uiRoot.Q<VisualElement>("overdrive-gauge");
+            VisualElement skillButton = uiRoot.Q<VisualElement>("skill-button");
+            if (overdriveGauge == null ||
+                Mathf.Abs(overdriveGauge.resolvedStyle.width - 48f) > 1f ||
+                Mathf.Abs(overdriveGauge.resolvedStyle.height - 128f) > 1f)
+                throw new InvalidOperationException("Overdrive gauge is not the approved 48x128 vertical tank.");
+            if (skillButton == null ||
+                Mathf.Abs(overdriveGauge.worldBound.yMax - skillButton.worldBound.yMax) > 1f ||
+                Mathf.Abs(skillButton.worldBound.xMin - overdriveGauge.worldBound.xMax - 16f) > 1f)
+                throw new InvalidOperationException("Overdrive gauge is not bottom-aligned 16px left of the skill button.");
+            if (overdriveGauge.Query<VisualElement>(className: "overdrive-gauge__tick").ToList().Count != 3)
+                throw new InvalidOperationException("Overdrive gauge does not have three quarter ticks.");
+            VisualElement slimeCodexGrid = uiRoot.Q<VisualElement>("slime-codex-grid");
+            if (slimeCodexGrid == null || slimeCodexGrid.childCount != 8)
+                throw new InvalidOperationException("Slime codex grid is not 8 slots.");
+            VisualElement slimeCodexHost = uiRoot.Q<VisualElement>("slime-codex-modal");
             VisualElement codexHost = uiRoot.Q<VisualElement>("monster-codex-modal");
             VisualElement merchantHost = uiRoot.Q<VisualElement>("merchant-modal");
+            VisualElement slimeCodexOverlay = uiRoot.Q<VisualElement>("slime-codex-overlay");
             VisualElement codexOverlay = uiRoot.Q<VisualElement>("codex-overlay");
             VisualElement merchantOverlay = uiRoot.Q<VisualElement>("merchant-overlay");
             float rootHeight = uiRoot.resolvedStyle.height;
+            if (slimeCodexHost == null || slimeCodexHost.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Slime codex modal host does not cover the screen.");
             if (codexHost == null || codexHost.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Codex modal host does not cover the screen.");
             if (merchantHost == null || merchantHost.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Merchant modal host does not cover the screen.");
+            if (slimeCodexHost.pickingMode != PickingMode.Ignore ||
+                codexHost.pickingMode != PickingMode.Ignore ||
+                merchantHost.pickingMode != PickingMode.Ignore)
+                throw new InvalidOperationException("A closed modal host is blocking screen input.");
+            if (slimeCodexOverlay == null || slimeCodexOverlay.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Closed slime codex overlay lost its screen layout.");
             if (codexOverlay == null || codexOverlay.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Closed codex overlay lost its screen layout.");
             if (merchantOverlay == null || merchantOverlay.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Closed merchant overlay lost its screen layout.");
 
+            game.SetGameplayPause(GameplayPauseReason.SlimeCodex, true);
             game.SetGameplayPause(GameplayPauseReason.MonsterCodex, true);
-            game.SetGameplayPause(GameplayPauseReason.Merchant, true);
-            game.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
+            game.SetGameplayPause(GameplayPauseReason.SlimeCodex, false);
             if (!game.IsGameplayPaused || Time.timeScale != 0f) throw new InvalidOperationException("Overlapping pause reasons resumed too early.");
-            game.SetGameplayPause(GameplayPauseReason.Merchant, false);
+            game.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
             if (game.IsGameplayPaused || Time.timeScale == 0f) throw new InvalidOperationException("Gameplay did not resume after the last pause reason.");
 
             if (!game.BeginMerchant(8)) throw new InvalidOperationException("Merchant did not open.");

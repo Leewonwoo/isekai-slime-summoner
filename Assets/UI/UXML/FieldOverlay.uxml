@@ -6,12 +6,37 @@
             <Label name="remaining-monsters-label" class="field-overlay__remaining" text="잔여 몬스터 24" picking-mode="Ignore" />
             <Label name="combo-label" class="field-overlay__combo hidden" text="" picking-mode="Ignore" />
         </VisualElement>
-        <VisualElement name="overdrive-gauge" class="overdrive-gauge overdrive--charging" picking-mode="Ignore">
-            <VisualElement name="overdrive-gauge-fill" class="overdrive-gauge__fill" picking-mode="Ignore" />
+        <VisualElement name="overdrive-cluster" class="overdrive-cluster overdrive--charging" picking-mode="Ignore">
             <Label name="overdrive-gauge-label" class="overdrive-gauge__label" text="" picking-mode="Ignore" />
+            <VisualElement name="overdrive-gauge" class="overdrive-gauge" picking-mode="Ignore">
+                <VisualElement name="overdrive-gauge-fill" class="overdrive-gauge__fill" picking-mode="Ignore" />
+                <VisualElement class="overdrive-gauge__tick overdrive-gauge__tick--quarter" picking-mode="Ignore" />
+                <VisualElement class="overdrive-gauge__tick overdrive-gauge__tick--half" picking-mode="Ignore" />
+                <VisualElement class="overdrive-gauge__tick overdrive-gauge__tick--three-quarter" picking-mode="Ignore" />
+            </VisualElement>
         </VisualElement>
-        <Button name="codex-button" class="codex-button" text="도감" tooltip="몬스터 도감" />
+        <VisualElement name="codex-button-stack" class="codex-button-stack" picking-mode="Ignore">
+            <Button name="slime-codex-button" class="codex-button slime-codex-button" text="슬라임 도감" tooltip="슬라임 도감" />
+            <Button name="monster-codex-button" class="codex-button" text="몬스터 도감" tooltip="몬스터 도감" />
+        </VisualElement>
         <Label name="unlock-toast" class="unlock-toast hidden" text="새 슬라임 해금" picking-mode="Ignore" />
+        <VisualElement name="buff-skill-cluster" class="buff-skill-cluster" picking-mode="Ignore">
+            <Button name="buff-skill-button-0" class="buff-skill-button">
+                <VisualElement name="buff-skill-icon-0" class="buff-skill-button__icon" picking-mode="Ignore" />
+                <Label name="buff-skill-name-0" class="buff-skill-button__name" text="" picking-mode="Ignore" />
+                <Label name="buff-skill-cooldown-0" class="buff-skill-button__cooldown" text="" picking-mode="Ignore" />
+            </Button>
+            <Button name="buff-skill-button-1" class="buff-skill-button">
+                <VisualElement name="buff-skill-icon-1" class="buff-skill-button__icon" picking-mode="Ignore" />
+                <Label name="buff-skill-name-1" class="buff-skill-button__name" text="" picking-mode="Ignore" />
+                <Label name="buff-skill-cooldown-1" class="buff-skill-button__cooldown" text="" picking-mode="Ignore" />
+            </Button>
+            <Button name="buff-skill-button-2" class="buff-skill-button">
+                <VisualElement name="buff-skill-icon-2" class="buff-skill-button__icon" picking-mode="Ignore" />
+                <Label name="buff-skill-name-2" class="buff-skill-button__name" text="" picking-mode="Ignore" />
+                <Label name="buff-skill-cooldown-2" class="buff-skill-button__cooldown" text="" picking-mode="Ignore" />
+            </Button>
+        </VisualElement>
         <Button name="skill-button" class="skill-button">
             <VisualElement name="skill-button-icon" class="skill-button__icon" picking-mode="Ignore" />
             <Label name="skill-button-name" class="skill-button__name" text="메테오" picking-mode="Ignore" />
