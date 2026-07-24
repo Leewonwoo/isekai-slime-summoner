@@ -103,6 +103,43 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void GrowthProgression_RestoresRunAndSlimeUpgradeLevels()
+        {
+            const string savedJson =
+                "{\"version\":1,\"runUpgrades\":[{\"type\":0,\"level\":3},{\"type\":1,\"level\":2}],\"slimeUpgrades\":[{\"unitId\":\"punch-slime\",\"level\":4}]}";
+            var summonManager = new SummonManager(null, new SummonUnitData[0], 0f, 0f, 0, 12);
+
+            var growth = new GrowthManager(
+                null,
+                summonManager,
+                _balance,
+                loadJson: () => savedJson);
+
+            Assert.That(growth.GetRunUpgradeLevel(RunUpgradeType.AttackPower), Is.EqualTo(3));
+            Assert.That(growth.GetRunUpgradeLevel(RunUpgradeType.AttackSpeed), Is.EqualTo(2));
+
+            SummonUnitUpgradeState slime = summonManager.GetUnitUpgradeState("punch-slime");
+            Assert.That(slime.Level, Is.EqualTo(4));
+            Assert.That(slime.DamageMultiplier, Is.EqualTo(_balance.SlimeDamageMultiplier(4)));
+            Assert.That(slime.AttackSpeedMultiplier, Is.EqualTo(_balance.SlimeAttackSpeedMultiplier(4)));
+        }
+
+        [Test]
+        public void GrowthProgression_InvalidSaveFallsBackToBaseline()
+        {
+            var summonManager = new SummonManager(null, new SummonUnitData[0], 0f, 0f, 0, 12);
+
+            var growth = new GrowthManager(
+                null,
+                summonManager,
+                _balance,
+                loadJson: () => "{\"version\":999,\"runUpgrades\":[{\"type\":0,\"level\":20}]}");
+
+            Assert.That(growth.GetRunUpgradeLevel(RunUpgradeType.AttackPower), Is.Zero);
+            Assert.That(summonManager.GetUnitUpgradeState("punch-slime").Level, Is.EqualTo(1));
+        }
+
+        [Test]
         public void PermanentTraits_SummonerLevelCreatesThreeDeterministicChoices()
         {
             int summonerLevel = 3;
@@ -223,8 +260,46 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Meteor).Cooldown, Is.EqualTo(22f));
             Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).UnlockLevel, Is.EqualTo(8));
             Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).Cooldown, Is.EqualTo(26f));
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Aegis).UnlockLevel, Is.EqualTo(15));
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Aegis).Cooldown, Is.EqualTo(32f));
+            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.Meteor), Is.True);
+            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.IceWall), Is.True);
+            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.Aegis), Is.False);
+        }
+
+        [Test]
+        public void SummonerBuffLoadout_EquipsThreeUnlockedBuffsAndPersists()
+        {
+            int level = 16;
+            string saved = null;
+            var loadout = new SummonerBuffLoadout(
+                () => level,
+                () => string.Empty,
+                json => saved = json);
+
+            Assert.That(loadout.Equipped, Is.EqualTo(new[]
+            {
+                SummonerBuffId.Aegis,
+                SummonerBuffId.LegionCommand,
+                SummonerBuffId.LifeBlessing,
+            }));
+            Assert.That(loadout.TryToggle(SummonerBuffId.ElementalResonance), Is.False);
+            Assert.That(loadout.TryToggle(SummonerBuffId.Aegis), Is.True);
+            Assert.That(loadout.TryToggle(SummonerBuffId.ElementalResonance), Is.True);
+            Assert.That(loadout.Equipped.Count, Is.EqualTo(SummonerBuffCatalog.MaxEquipped));
+
+            var restored = new SummonerBuffLoadout(() => level, () => saved);
+            Assert.That(restored.Equipped, Is.EquivalentTo(loadout.Equipped));
+        }
+
+        [Test]
+        public void SummonerBuffCatalog_UsesApprovedUnlocksDurationsAndCooldowns()
+        {
+            Assert.That(SummonerBuffCatalog.All.Count, Is.EqualTo(5));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.Aegis).UnlockLevel, Is.EqualTo(1));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.Aegis).Cooldown, Is.EqualTo(32f));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.LifeBlessing).Duration, Is.EqualTo(8f));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.LifeBlessing).Cooldown, Is.EqualTo(48f));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.TimeAcceleration).UnlockLevel, Is.EqualTo(16));
+            Assert.That(SummonerBuffCatalog.Get(SummonerBuffId.TimeAcceleration).Cooldown, Is.EqualTo(55f));
         }
 
         [Test]

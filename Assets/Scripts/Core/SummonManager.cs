@@ -255,6 +255,9 @@ namespace CrossDefense.Core
             return state;
         }
 
+        public IEnumerable<SummonUnitUpgradeState> EnumerateUnitUpgradeStates() =>
+            _unitUpgrades.Values;
+
         public bool ApplyUnitUpgrade(
             string unitId,
             int level,

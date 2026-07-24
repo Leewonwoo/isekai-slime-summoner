@@ -13,6 +13,8 @@ namespace CrossDefense.Core
             SummonerProgression.DefaultPlayerPrefsKey,
             PermanentTraitProgression.DefaultPlayerPrefsKey,
             SummonerSkillLoadout.DefaultPlayerPrefsKey,
+            SummonerBuffLoadout.DefaultPlayerPrefsKey,
+            GrowthManager.DefaultPlayerPrefsKey,
             MonsterCodexProgression.DefaultPlayerPrefsKey,
             EquipmentProgression.DefaultPlayerPrefsKey,
         };

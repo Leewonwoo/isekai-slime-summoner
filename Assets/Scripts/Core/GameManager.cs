@@ -133,6 +133,8 @@ namespace CrossDefense.Core
         GrowthManager _growthManager;
         SummonerSkillLoadout _summonerSkillLoadout;
         SummonerSkillController _summonerSkillController;
+        SummonerBuffLoadout _summonerBuffLoadout;
+        SummonerBuffController _summonerBuffController;
         DopamineController _dopamineController;
         MonsterCodexProgression _monsterCodex;
         EquipmentProgression _equipment;
@@ -166,6 +168,8 @@ namespace CrossDefense.Core
         public GrowthManager Growth => _growthManager;
         public SummonerSkillLoadout SummonerSkillLoadout => _summonerSkillLoadout;
         public SummonerSkillController SummonerSkills => _summonerSkillController;
+        public SummonerBuffLoadout SummonerBuffLoadout => _summonerBuffLoadout;
+        public SummonerBuffController SummonerBuffs => _summonerBuffController;
         public DopamineController Dopamine => _dopamineController;
         public MonsterCatalog MonsterCatalog => monsterCatalog;
         public MonsterCodexProgression MonsterCodex => _monsterCodex;
@@ -203,7 +207,8 @@ namespace CrossDefense.Core
         public float SlimeAttackSpeedMultiplier =>
             RunAttackSpeedMultiplier *
             (_permanentTraits?.Snapshot.SlimeAttackSpeedMultiplier ?? 1f) *
-            (_runRelics?.AttackSpeedMultiplier ?? 1f);
+            (_runRelics?.AttackSpeedMultiplier ?? 1f) *
+            (_summonerBuffController?.SlimeAttackSpeedMultiplier ?? 1f);
         public bool IsRunTraitChoicePending => _runTraits?.IsChoicePending ?? false;
         public bool IsMerchantOpen => _merchant?.IsOpen ?? false;
         public CombatProjectileService Projectiles => _summonedUnitManager?.Projectiles;
@@ -319,6 +324,8 @@ namespace CrossDefense.Core
             _permanentTraits.Changed += OnPermanentTraitsChanged;
             _summonerSkillLoadout = SummonerSkillLoadout.CreatePersistent(
                 () => _summonerProgression.Snapshot.Level);
+            _summonerBuffLoadout = SummonerBuffLoadout.CreatePersistent(
+                () => _summonerProgression.Snapshot.Level);
             if (monsterCatalog == null)
             {
                 _runtimeMonsterCatalog = MonsterCatalog.CreateRuntime(stageTimeline?.EnumerateMonsters());
@@ -382,7 +389,7 @@ namespace CrossDefense.Core
                 directRankOneChanceProvider: () => DirectRankOneChance,
                 capacityProvider: () => SummonSlotCapacity,
                 summonerLevelProvider: () => _summonerProgression?.Snapshot.Level ?? 1);
-            _growthManager = new GrowthManager(this, _summonManager, growthBalance);
+            _growthManager = GrowthManager.CreatePersistent(this, _summonManager, growthBalance);
             _merchant = new MerchantManager(this, merchantCatalog, _equipment, _runRelics);
 
             _summonedUnitManager = GetComponent<SummonedUnitManager>();
@@ -408,6 +415,16 @@ namespace CrossDefense.Core
                 runtimeMeteorProjectileSprite,
                 runtimeMeteorEffectFrames,
                 runtimeIceWallEffectFrames,
+                runtimeAegisEffectSprite != null
+                    ? runtimeAegisEffectSprite
+                    : runtimeStar3NeutralEffectSprite);
+
+            _summonerBuffController = GetComponent<SummonerBuffController>();
+            if (_summonerBuffController == null)
+                _summonerBuffController = gameObject.AddComponent<SummonerBuffController>();
+            _summonerBuffController.Initialize(
+                this,
+                _summonerBuffLoadout,
                 runtimeAegisEffectSprite != null
                     ? runtimeAegisEffectSprite
                     : runtimeStar3NeutralEffectSprite);
@@ -654,6 +671,8 @@ namespace CrossDefense.Core
             _summonerProgression?.Flush();
             _permanentTraits?.Flush();
             _summonerSkillLoadout?.Flush();
+            _summonerBuffLoadout?.Flush();
+            _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
             Scene scene = SceneManager.GetActiveScene();
@@ -728,7 +747,8 @@ namespace CrossDefense.Core
         {
             float permanentDamage = Mathf.Max(0f, baseDamage) *
                                     (_permanentTraits?.Snapshot.SlimeDamageMultiplier ?? 1f) *
-                                    (_runRelics?.DamageMultiplier ?? 1f);
+                                    (_runRelics?.DamageMultiplier ?? 1f) *
+                                    (_summonerBuffController?.SlimeDamageMultiplier ?? 1f);
             return _growthManager?.ModifyPlayerDamage(permanentDamage) ?? permanentDamage;
         }
 
@@ -940,6 +960,7 @@ namespace CrossDefense.Core
 
         void OnSummonerProgressionChanged(SummonerProgressionSnapshot snapshot)
         {
+            _summonerBuffLoadout?.EnsureUnlockedSlotsFilled();
             RecalculateEffectiveCoreHp(true);
         }
 
@@ -984,6 +1005,8 @@ namespace CrossDefense.Core
                 _permanentTraits.Changed -= OnPermanentTraitsChanged;
             }
             _summonerSkillLoadout?.Flush();
+            _summonerBuffLoadout?.Flush();
+            _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
             if (_equipment != null) _equipment.Changed -= OnEquipmentChanged;
@@ -1015,6 +1038,8 @@ namespace CrossDefense.Core
                 _summonerProgression?.Flush();
                 _permanentTraits?.Flush();
                 _summonerSkillLoadout?.Flush();
+                _summonerBuffLoadout?.Flush();
+                _growthManager?.Flush();
                 _monsterCodex?.Flush();
                 _equipment?.Flush();
             }
@@ -1025,6 +1050,8 @@ namespace CrossDefense.Core
             _summonerProgression?.Flush();
             _permanentTraits?.Flush();
             _summonerSkillLoadout?.Flush();
+            _summonerBuffLoadout?.Flush();
+            _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
         }

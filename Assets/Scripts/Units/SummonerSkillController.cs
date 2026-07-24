@@ -20,6 +20,9 @@ namespace CrossDefense.Units
             public Vector2 Center;
             public Vector2 Axis;
             public float ExpiresAt;
+            public float DamageMultiplier;
+            public float Radius;
+            public float SlowDuration;
             public readonly HashSet<MonsterController> Hit = new();
         }
 
@@ -94,7 +97,11 @@ namespace CrossDefense.Units
                 {
                     SummonerSkillId key = _cooldownKeys[i];
                     float previous = _cooldowns[key];
-                    float next = Mathf.Max(0f, previous - Time.deltaTime);
+                    float recoveryMultiplier =
+                        _gameManager.SummonerBuffs?.RelicCooldownRecoveryMultiplier ?? 1f;
+                    float next = Mathf.Max(
+                        0f,
+                        previous - Time.deltaTime * recoveryMultiplier);
                     _cooldowns[key] = next;
                     changed |= Mathf.CeilToInt(previous) != Mathf.CeilToInt(next);
                 }
@@ -143,14 +150,34 @@ namespace CrossDefense.Units
                 return false;
 
             SummonerSkillDefinition definition = EquippedDefinition;
+            float damageMultiplier = 1f;
+            float radiusMultiplier = 1f;
+            float statusDurationMultiplier = 1f;
+            bool amplified = _gameManager.SummonerBuffs != null &&
+                _gameManager.SummonerBuffs.GetRelicAmplification(
+                    out damageMultiplier,
+                    out radiusMultiplier,
+                    out statusDurationMultiplier);
             bool cast = definition.Id switch
             {
-                SummonerSkillId.Meteor => CastMeteor(worldPoint, definition),
-                SummonerSkillId.IceWall => CastIceWall(worldPoint, definition),
+                SummonerSkillId.Meteor => CastMeteor(
+                    worldPoint,
+                    definition,
+                    damageMultiplier,
+                    radiusMultiplier,
+                    statusDurationMultiplier),
+                SummonerSkillId.IceWall => CastIceWall(
+                    worldPoint,
+                    definition,
+                    damageMultiplier,
+                    radiusMultiplier,
+                    statusDurationMultiplier),
                 _ => false,
             };
             if (!cast)
                 return false;
+            if (amplified)
+                _gameManager.SummonerBuffs.ConsumeRelicAmplification();
             _targeting = false;
             SetPreviewVisible(false);
             StartCooldown(definition);
@@ -191,16 +218,21 @@ namespace CrossDefense.Units
             StateChanged?.Invoke();
         }
 
-        bool CastMeteor(Vector3 worldPoint, SummonerSkillDefinition definition)
+        bool CastMeteor(
+            Vector3 worldPoint,
+            SummonerSkillDefinition definition,
+            float damageMultiplier,
+            float radiusMultiplier,
+            float statusDurationMultiplier)
         {
             return LaunchMeteor(
                 worldPoint,
-                definition.DamageMultiplier,
-                definition.Radius,
+                definition.DamageMultiplier * damageMultiplier,
+                definition.Radius * radiusMultiplier,
                 0.3f,
-                3f,
+                3f * statusDurationMultiplier,
                 MeteorVisualScale,
-                1.8f);
+                1.8f * radiusMultiplier);
         }
 
         public bool TryCastOverdriveMeteor(
@@ -287,7 +319,12 @@ namespace CrossDefense.Units
                 scale,
                 18f);
 
-        bool CastIceWall(Vector3 worldPoint, SummonerSkillDefinition definition)
+        bool CastIceWall(
+            Vector3 worldPoint,
+            SummonerSkillDefinition definition,
+            float damageMultiplier,
+            float radiusMultiplier,
+            float statusDurationMultiplier)
         {
             if (_gameManager.Summoner == null)
                 return false;
@@ -299,7 +336,10 @@ namespace CrossDefense.Units
             {
                 Center = worldPoint,
                 Axis = wallAxis,
-                ExpiresAt = Time.time + definition.Duration,
+                ExpiresAt = Time.time + definition.Duration * statusDurationMultiplier,
+                DamageMultiplier = definition.DamageMultiplier * damageMultiplier,
+                Radius = definition.Radius * radiusMultiplier,
+                SlowDuration = 2.5f * statusDurationMultiplier,
             });
             float rotation = Mathf.Atan2(wallAxis.y, wallAxis.x) * Mathf.Rad2Deg - 90f;
             float animationDuration = (_iceWallFrames?.Length ?? 0) / 18f;
@@ -309,7 +349,9 @@ namespace CrossDefense.Units
                 Color.white,
                 1.55f,
                 18f,
-                Mathf.Max(0f, definition.Duration - animationDuration),
+                Mathf.Max(
+                    0f,
+                    definition.Duration * statusDurationMultiplier - animationDuration),
                 rotation);
             TickIceWalls();
             return true;
@@ -329,14 +371,7 @@ namespace CrossDefense.Units
 
         void TickIceWalls()
         {
-            SummonerSkillDefinition definition = SummonerSkillCatalog.Get(SummonerSkillId.IceWall);
             float baseDamage = _summonerAttack != null ? _summonerAttack.AttackDamage : 12f;
-            DamagePacket packet = new(
-                this,
-                _gameManager.ModifySummonerDamage(baseDamage * definition.DamageMultiplier),
-                MonsterAttribute.Ice,
-                0.6f,
-                2.5f);
             BuildMonsterBuffer();
             for (int zoneIndex = _iceWalls.Count - 1; zoneIndex >= 0; zoneIndex--)
             {
@@ -350,9 +385,15 @@ namespace CrossDefense.Units
                 {
                     MonsterController monster = _monsterBuffer[i];
                     if (zone.Hit.Contains(monster) ||
-                        DistanceToWall(monster.transform.position, zone.Center, zone.Axis) > definition.Radius)
+                        DistanceToWall(monster.transform.position, zone.Center, zone.Axis) > zone.Radius)
                         continue;
                     zone.Hit.Add(monster);
+                    DamagePacket packet = new(
+                        this,
+                        _gameManager.ModifySummonerDamage(baseDamage * zone.DamageMultiplier),
+                        MonsterAttribute.Ice,
+                        0.6f,
+                        zone.SlowDuration);
                     monster.ApplyDamage(packet);
                 }
             }

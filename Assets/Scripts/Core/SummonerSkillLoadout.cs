@@ -51,6 +51,7 @@ namespace CrossDefense.Core
         public bool TryEquip(SummonerSkillId id)
         {
             if (!Enum.IsDefined(typeof(SummonerSkillId), id) ||
+                !SummonerSkillCatalog.IsRelicSkill(id) ||
                 !SummonerSkillCatalog.IsUnlocked(id, _levelProvider?.Invoke() ?? 1))
                 return false;
             if (EquippedSkill == id)
@@ -80,7 +81,8 @@ namespace CrossDefense.Core
                     !Enum.IsDefined(typeof(SummonerSkillId), data.equippedSkill))
                     return;
                 SummonerSkillId loaded = (SummonerSkillId)data.equippedSkill;
-                if (SummonerSkillCatalog.IsUnlocked(loaded, _levelProvider?.Invoke() ?? 1))
+                if (SummonerSkillCatalog.IsRelicSkill(loaded) &&
+                    SummonerSkillCatalog.IsUnlocked(loaded, _levelProvider?.Invoke() ?? 1))
                     EquippedSkill = loaded;
             }
             catch (ArgumentException)

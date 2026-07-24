@@ -53,7 +53,7 @@ MonoBehaviour:
   m_Name: weapon-ember
   m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.EquipmentData
   equipmentId: weapon-ember
-  displayName: "\uBD88\uC528 \uC9C0\uD321\uC774"
+  displayName: "\uBD89\uC740 \uC9C0\uD321\uC774"
   description: "\uC18C\uD658\uC0AC \uACF5\uACA9\uB825 +14%"
   slot: 0
   effect: 0

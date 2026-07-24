@@ -66,7 +66,7 @@ namespace CrossDefense.Data
                 26f, 1.2f, 0.55f, 4f,
                 "4초 벽 지대 · 빙결 120% · 둔화 60% 2.5초"),
             new(
-                SummonerSkillId.Aegis, "소환사 보호막", 15, SummonerSkillTargeting.Instant,
+                SummonerSkillId.Aegis, "소환사 보호막", 1, SummonerSkillTargeting.Instant,
                 32f, 0f, 0f, 6f,
                 "최대 HP 35% 보호막 · 6초"),
         };
@@ -83,5 +83,8 @@ namespace CrossDefense.Data
 
         public static bool IsUnlocked(SummonerSkillId id, int summonerLevel) =>
             summonerLevel >= Get(id).UnlockLevel;
+
+        public static bool IsRelicSkill(SummonerSkillId id) =>
+            id == SummonerSkillId.Meteor || id == SummonerSkillId.IceWall;
     }
 }

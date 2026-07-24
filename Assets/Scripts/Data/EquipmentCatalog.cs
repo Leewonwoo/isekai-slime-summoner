@@ -24,7 +24,7 @@ namespace CrossDefense.Data
             catalog.equipment = new List<EquipmentData>
             {
                 EquipmentData.CreateRuntime("weapon-oak", "참나무 지팡이", EquipmentSlot.Weapon, EquipmentEffect.SummonerDamage, 0.08f, 80, "소환사 공격력 +8%"),
-                EquipmentData.CreateRuntime("weapon-ember", "불씨 지팡이", EquipmentSlot.Weapon, EquipmentEffect.SummonerDamage, 0.14f, 120, "소환사 공격력 +14%"),
+                EquipmentData.CreateRuntime("weapon-ember", "붉은 지팡이", EquipmentSlot.Weapon, EquipmentEffect.SummonerDamage, 0.14f, 120, "소환사 공격력 +14%"),
                 EquipmentData.CreateRuntime("weapon-arcane", "비전 지팡이", EquipmentSlot.Weapon, EquipmentEffect.SummonerDamage, 0.22f, 180, "소환사 공격력 +22%"),
                 EquipmentData.CreateRuntime("armor-leather", "가죽 외투", EquipmentSlot.Armor, EquipmentEffect.SummonerMaxHp, 0.10f, 80, "소환사 최대 HP +10%"),
                 EquipmentData.CreateRuntime("armor-bark", "나무껍질 갑옷", EquipmentSlot.Armor, EquipmentEffect.SummonerMaxHp, 0.18f, 120, "소환사 최대 HP +18%"),

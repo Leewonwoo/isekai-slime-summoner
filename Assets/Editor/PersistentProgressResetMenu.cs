@@ -13,7 +13,7 @@ namespace CrossDefense.Editor
         {
             bool confirmed = EditorUtility.DisplayDialog(
                 "영구 진행 초기화",
-                "소환사 레벨·영구 특성·스킬 장착·몬스터 도감·장비를 초기화합니다.\n현재 런 데이터도 처음부터 다시 시작합니다.",
+                "소환사 레벨·영구 특성·버프 장착·몬스터 도감·신물을 초기화합니다.\n현재 런 데이터도 처음부터 다시 시작합니다.",
                 "초기화",
                 "취소");
             if (!confirmed)

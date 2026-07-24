@@ -9,7 +9,7 @@ namespace CrossDefense.Data
     public sealed class EquipmentData : ScriptableObject
     {
         [SerializeField] string equipmentId = "equipment";
-        [SerializeField] string displayName = "장비";
+        [SerializeField] string displayName = "신물";
         [SerializeField] string description;
         [SerializeField] EquipmentSlot slot;
         [SerializeField] EquipmentEffect effect;
