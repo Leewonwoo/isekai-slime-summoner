@@ -204,6 +204,7 @@ Assets/Scripts/UI/
 - TopHUD 프레임 배경은 UI 요소 전체를 채우도록 `background-size: 100% 100%`와 `background-repeat: no-repeat`을 사용한다.
 - TopHUD 스테이지 정보는 프로필·재화의 Flex 폭과 분리해 HUD 가로 **50% 정중앙**에 절대 배치한다. `--top-hud-stage-width`를 유지하고 `translate: -50% 0`으로 자체 너비의 절반만큼 보정해 긴 닉네임과 겹치지 않게 한다.
 - TopHUD 설정 버튼 아이콘: `Assets/Art/UIIcons/icon_settings.png` — **64×64px**로 중앙 정렬하고 버튼 텍스트는 표시하지 않는다. 터치 영역은 유지하되 버튼 배경과 테두리는 투명하게 표시한다. 원본은 `ArtSource/ui-icons/icon_settings.png`.
+- 필드 우상단 설정 버튼 아래에 `×1.0 / ×1.5` 배속 토글을 둔다. ×1.5 상태는 금색 배경으로 강조하고 선택값은 `PlayerPrefs`에 저장한다. 모달 일시정지 중에는 `Time.timeScale=0`을 유지하며 마지막 일시정지 사유가 해제되면 선택했던 배속으로 복원한다.
 - BottomPanel 콘텐츠 프레임: `Assets/Art/UIFrames/bottom_panel_content_frame.png` — `.tab-content`에 적용, slice left/right/top/bottom **92px**, scale **0.4**, 내부 안전 여백 **40px**. 원본은 `ArtSource/ui-frames/bottom_panel_content_frame.png`.
 - 벤치·신물 공용 슬롯 프레임: `Assets/Art/UIFrames/bench_slot_frame.png` — `.bench-slot`에 적용, slice left/right/top/bottom **190px**, scale **0.1**. 기본 상태 테두리는 투명, 합성 가능 상태는 **4px** 초록 CSS 테두리를 이미지 위에 표시한다. 원본은 `ArtSource/ui-frames/bench_slot_frame.png`.
 - 공용 버튼 프레임: `Assets/Art/UIFrames/button_wood_frame.png`은 `.btn`, `button_gold_frame.png`은 `.btn--primary`에 적용한다. 두 이미지 모두 slice left/right **180px**, top/bottom **160px**, scale **0.1**. 비활성 `.btn--disabled`는 배경 이미지를 제거하고 기존 회색 플랫 스타일을 사용한다. 원본은 `ArtSource/ui-frames/`에 보존한다.
@@ -328,9 +329,9 @@ public class TopHUDController
 - **도감 버튼 스택**: FieldOverlay의 TopHUD 아래 우상단에 **200×96px** 버튼 2개를 세로 배치한다. 위는 `슬라임 도감`, 아래는 `몬스터 도감`이며 버튼 간격은 `--gap-md`를 사용한다.
 - **슬라임 도감**: 전체화면 스크림 안의 920×1450 패널에 소환 풀 8종을 4열 슬롯으로 배치한다. 잠긴 슬롯은 `?`와 `Lv.N 해금`, 해금 슬롯은 ★1 이미지·이름을 표시한다. 상세 영역은 속성·희귀도·공격 방식, ★1 HP·공격력·공속·사거리·이동속도와 ★3 스킬명·쿨다운을 보여준다. 팝업 동안 `GameplayPauseReason.SlimeCodex`로 게임플레이를 정지한다.
 - **몬스터 도감**: `몬스터 도감` 버튼에서 연다. 전체화면 스크림 안의 920×1450 패널에 4×4 슬롯 그리드와 상세 영역을 배치한다. 미조우 슬롯은 `?`만 표시하고 팝업 동안 게임플레이를 정지한다.
-- **행상인**: RootLayout 내부 전체화면 팝업으로 신물·소모품·런 유물 카드 3장을 세로 배치한다. 가격·효과·품절·구매 불가 사유를 항상 표시하고 닫기 버튼을 제공한다.
+- **행상인**: RootLayout 내부 전체화면 팝업으로 장비·소모품·전리품 카드 3장을 세로 배치한다. 가격·효과·품절·구매 불가 사유를 항상 표시하고 닫기 버튼을 제공한다.
 - **전체화면 모달 호스트**: `RootLayout`에 `<Instance>`로 삽입하는 모달은 래퍼 `TemplateContainer`에 `.modal-host`와 `picking-mode="Ignore"`를 적용한다. 래퍼는 화면 전체 영역을 유지하되 직접 터치 대상이 되지 않고, 열린 모달의 자식 버튼만 입력받아야 한다. 일시정지를 동반하는 모달은 닫힘 상태에 공용 `.hidden`(`display: none`) 대신 `.modal-overlay--hidden`(`visibility: hidden`)을 사용해 첫 표시 전에도 화면 크기 레이아웃을 유지한다. Play Mode 검사에서 닫힌 오버레이와 호스트가 모두 루트 높이의 90% 이상이고 호스트 `pickingMode`가 `Ignore`인지 확인한다.
-- **신물 탭**: 소환사 공격·수호·보조 신물 장착 슬롯 3개, 영구 보유 신물 스크롤 목록, 현재 런 유물 목록 순서로 배치한다. 내부 `Equipment*` 타입과 저장 키는 호환을 위해 유지할 수 있지만 화면에는 `장비`를 노출하지 않는다. 신물과 유물의 계산·가격 규칙은 컨트롤러가 아니라 런타임 서비스가 제공한다.
+- **가방 탭**: 내부를 `장비 / 신물 / 전리품`으로 구분한다. 장비는 무기·방어구·장신구 슬롯과 보유 목록, 신물은 장착 신물과 고유 공격 선택, 전리품은 이번 도전의 행상인 전리품과 5웨이브 특성을 표시한다. 내부 `Equipment*`·`RunRelic*` 타입과 저장 키는 호환을 위해 유지할 수 있다.
 - **소환사 영구 성장**: 소환사 EXP는 획득 즉시 자동으로 레벨에 반영한다. 소환사 탭은 저장된 영구 Lv와 현재 EXP/요구 EXP 게이지, 실제 적용 능력치와 특성 텍스트만 표시하며 레벨업 버튼이나 공용 강화 행을 사용하지 않는다.
 - **터치 타깃**: 상호작용 요소는 최소 `--touch-min`(96px) 확보.
 
