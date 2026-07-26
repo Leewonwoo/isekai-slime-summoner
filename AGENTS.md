@@ -14,7 +14,7 @@ NAN 2026 (NHN Game × AI Hackathon) 사전 과제. 1인 개발, 마감 **2026-08
 
 - Unity **6000.3.5f2**, 2D URP 템플릿, Input System
 - 빌드 타깃: **Android APK (모바일 빌드)** — 2026-07-11 사용자 결정으로 WebGL에서 변경
-  - 세로 고정 (Portrait, 1080×1920 기준), IL2CPP + ARM64, 패키지 `com.wonucode.crossdefense`
+  - 세로 고정 (Portrait, 1080×1920 기준), IL2CPP + ARM64, 제품명 `isekaislimesummoner`, 패키지 `com.nenestudio.isekaislimesummoner`
   - ⚠️ SPEC §3/§7의 원래 제출 요건은 "링크 클릭만으로 브라우저 플레이"(WebGL) — 접수 요강에서 APK 허용 여부 확인 필요
 - UI: **UI Toolkit** (HUD/하단 패널/배지) + 월드 오브젝트 SpriteRenderer (필드/유닛/몹/투사체)
   - 필드를 UI Toolkit으로 그리지 말 것
