@@ -171,9 +171,18 @@ namespace CrossDefense.Core
 
         public float ModifyPlayerDamage(float baseDamage, float bonusCriticalChance = 0f)
         {
+            return ModifyPlayerDamage(baseDamage, bonusCriticalChance, out _);
+        }
+
+        public float ModifyPlayerDamage(
+            float baseDamage,
+            float bonusCriticalChance,
+            out bool critical)
+        {
             float damage = Mathf.Max(0f, baseDamage) * RunDamageMultiplier;
             float criticalChance = Mathf.Clamp01(CriticalChance + Mathf.Max(0f, bonusCriticalChance));
-            if (criticalChance > 0f && _random.NextDouble() < criticalChance)
+            critical = criticalChance > 0f && _random.NextDouble() < criticalChance;
+            if (critical)
                 damage *= _balance.CriticalDamageMultiplier;
             return damage;
         }
@@ -212,11 +221,15 @@ namespace CrossDefense.Core
             return JsonUtility.ToJson(data);
         }
 
-        public void Flush() => _flushSaves?.Invoke();
+        public void Flush()
+        {
+            Save();
+        }
 
         void Save()
         {
             _saveJson?.Invoke(ToJson());
+            _flushSaves?.Invoke();
         }
 
         void Load(string json)

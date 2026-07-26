@@ -199,6 +199,9 @@ namespace CrossDefense.UI
             MonsterAttribute.Fire => "화염",
             MonsterAttribute.Ice => "빙결",
             MonsterAttribute.Nature => "자연",
+            MonsterAttribute.Lightning => "전기",
+            MonsterAttribute.Water => "물",
+            MonsterAttribute.Wind => "바람",
             _ => "무속성",
         };
 

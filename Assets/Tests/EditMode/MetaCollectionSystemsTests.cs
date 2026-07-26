@@ -115,24 +115,31 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void Merchant_OffersAreDeterministicExcludeOwnedAndFallbackWhenComplete()
+        public void Merchant_OffersUseInjectedRandomAndExcludeOwnedEquipment()
         {
             EquipmentCatalog equipmentCatalog = Track(EquipmentCatalog.CreateRuntimeDefault());
             MerchantCatalog merchantCatalog = Track(MerchantCatalog.CreateRuntimeDefault(equipmentCatalog));
+            RelicCatalog relicCatalog = Track(RelicCatalog.CreateRuntimeDefault());
             var equipment = new EquipmentProgression(equipmentCatalog);
             var relics = new RunRelicInventory();
-            var first = new MerchantManager(null, merchantCatalog, equipment, relics);
-            var second = new MerchantManager(null, merchantCatalog, equipment, relics);
+            var permanentRelics = new RelicProgression(relicCatalog);
+            var first = new MerchantManager(
+                null, merchantCatalog, equipment, permanentRelics, relics,
+                new System.Random(2026));
+            var second = new MerchantManager(
+                null, merchantCatalog, equipment, permanentRelics, relics,
+                new System.Random(2026));
 
             first.Open(18, 2026);
             second.Open(18, 2026);
             Assert.That(first.Offers.Select(offer => offer.Id), Is.EqualTo(second.Offers.Select(offer => offer.Id)));
             Assert.That(first.Offers.Count, Is.EqualTo(3));
-            Assert.That(first.Offers[0].Category, Is.EqualTo(MerchantProductCategory.Equipment));
+            Assert.That(first.Offers.Select(offer => offer.Id).Distinct().Count(), Is.EqualTo(3));
 
             foreach (EquipmentData item in equipmentCatalog.Equipment) equipment.Acquire(item);
             first.Open(18, 2026);
-            Assert.That(first.Offers[0].Category, Is.EqualTo(MerchantProductCategory.Consumable));
+            Assert.That(first.Offers, Has.None.Matches<MerchantOffer>(
+                offer => offer.Category == MerchantProductCategory.Equipment));
         }
 
         [Test]
@@ -140,30 +147,38 @@ namespace CrossDefense.Tests.EditMode
         {
             EquipmentCatalog equipmentCatalog = Track(EquipmentCatalog.CreateRuntimeDefault());
             MerchantCatalog merchantCatalog = Track(MerchantCatalog.CreateRuntimeDefault(equipmentCatalog));
+            RelicCatalog relicCatalog = Track(RelicCatalog.CreateRuntimeDefault());
             var equipment = new EquipmentProgression(equipmentCatalog);
             var relics = new RunRelicInventory();
+            var permanentRelics = new RelicProgression(relicCatalog);
             GameObject host = Track(new GameObject("merchant-test-host"));
             host.SetActive(false);
             GameManager game = host.AddComponent<GameManager>();
-            var merchant = new MerchantManager(game, merchantCatalog, equipment, relics);
+            var merchant = new MerchantManager(
+                game, merchantCatalog, equipment, permanentRelics, relics,
+                new System.Random(1));
             merchant.Open(8, 2026);
+            int offerIndex = merchant.Offers
+                .Select((offer, index) => new { offer, index })
+                .First(entry => entry.offer.Category == MerchantProductCategory.Equipment)
+                .index;
 
             Assert.That(game.Gold, Is.Zero);
-            Assert.That(merchant.TryPurchase(0), Is.False);
-            Assert.That(merchant.Offers[0].Purchased, Is.False);
+            Assert.That(merchant.TryPurchase(offerIndex), Is.False);
+            Assert.That(merchant.Offers[offerIndex].Purchased, Is.False);
 
             FieldInfo goldField = typeof(GameManager).GetField("_gold",
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(goldField, Is.Not.Null);
             goldField.SetValue(game, 1000);
-            int expectedGold = 1000 - merchant.Offers[0].Price;
+            int expectedGold = 1000 - merchant.Offers[offerIndex].Price;
 
-            Assert.That(merchant.TryPurchase(0), Is.True);
+            Assert.That(merchant.TryPurchase(offerIndex), Is.True);
             Assert.That(game.Gold, Is.EqualTo(expectedGold));
-            Assert.That(merchant.Offers[0].Purchased, Is.True);
-            Assert.That(equipment.IsOwned(merchant.Offers[0].Id), Is.True);
+            Assert.That(merchant.Offers[offerIndex].Purchased, Is.True);
+            Assert.That(equipment.IsOwned(merchant.Offers[offerIndex].Id), Is.True);
 
-            Assert.That(merchant.TryPurchase(0), Is.False);
+            Assert.That(merchant.TryPurchase(offerIndex), Is.False);
             Assert.That(game.Gold, Is.EqualTo(expectedGold));
         }
 
@@ -182,6 +197,109 @@ namespace CrossDefense.Tests.EditMode
             inventory.Clear();
             Assert.That(inventory.Owned, Is.Empty);
             Assert.That(inventory.DamageMultiplier, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void RunSession_RestoresCurrencyRelicsAndTraitDataForSameStage()
+        {
+            string saved = null;
+            bool deleted = false;
+            bool flushed = false;
+            var persistence = new RunSessionProgression(
+                () => saved,
+                json => saved = json,
+                () =>
+                {
+                    saved = null;
+                    deleted = true;
+                },
+                () => flushed = true);
+            var source = new RunSessionSaveData
+            {
+                stageId = "stage-01",
+                waveIndex = 7,
+                gold = 321,
+                summonContracts = 9,
+                coreHp = 72f,
+                runRelicIds = new List<string> { "relic-power", "relic-gold" },
+                runTraits = new RunTraitProgressionSaveData
+                {
+                    totalChoiceCount = 2,
+                    clearedWave = 10,
+                    attackArchetype = (int)SummonerAttackArchetype.Fireball,
+                    levels = new List<RunTraitLevelSaveData>
+                    {
+                        new() { rewardId = "fire-burn", level = 2 },
+                    },
+                },
+            };
+
+            persistence.Save(source, true);
+
+            Assert.That(flushed, Is.True);
+            Assert.That(persistence.TryLoad("stage-01", out RunSessionSaveData restored), Is.True);
+            Assert.That(restored.waveIndex, Is.EqualTo(7));
+            Assert.That(restored.gold, Is.EqualTo(321));
+            Assert.That(restored.summonContracts, Is.EqualTo(9));
+            Assert.That(restored.runRelicIds, Is.EquivalentTo(source.runRelicIds));
+            Assert.That(restored.runTraits.attackArchetype,
+                Is.EqualTo((int)SummonerAttackArchetype.Fireball));
+            Assert.That(persistence.TryLoad("another-stage", out _), Is.False);
+
+            persistence.Clear(true);
+            Assert.That(deleted, Is.True);
+            Assert.That(saved, Is.Null);
+        }
+
+        [Test]
+        public void Wallet_RestoresGoldIndependentlyFromRunSession()
+        {
+            string saved = null;
+            var wallet = new WalletProgression(
+                10,
+                saveJson: json => saved = json);
+
+            wallet.SetGold(345);
+
+            var restored = new WalletProgression(
+                0,
+                loadJson: () => saved);
+            Assert.That(restored.Gold, Is.EqualTo(345));
+        }
+
+        [Test]
+        public void RunRelicsAndTraits_RestoreOnlyKnownCatalogEntries()
+        {
+            EquipmentCatalog equipment = Track(EquipmentCatalog.CreateRuntimeDefault());
+            MerchantCatalog merchant = Track(MerchantCatalog.CreateRuntimeDefault(equipment));
+            var relics = new RunRelicInventory();
+            relics.Restore(
+                new[] { "relic-power", "missing", "relic-power" },
+                merchant.FindRelic);
+            Assert.That(relics.Owned.Select(item => item.Id),
+                Is.EquivalentTo(new[] { "relic-power" }));
+
+            RunRewardCatalog rewards = Track(RunRewardCatalog.CreateRuntimeDefault());
+            RunRewardDefinition persistentReward =
+                rewards.Rewards.First(item => item != null && !item.IsImmediate);
+            var traits = new RunTraitProgression(rewards, 2026);
+            traits.Restore(new RunTraitProgressionSaveData
+            {
+                totalChoiceCount = 3,
+                clearedWave = 15,
+                attackArchetype = (int)SummonerAttackArchetype.Fireball,
+                levels = new List<RunTraitLevelSaveData>
+                {
+                    new() { rewardId = persistentReward.RewardId, level = 1 },
+                    new() { rewardId = "missing", level = 99 },
+                },
+            });
+
+            Assert.That(traits.TotalChoiceCount, Is.EqualTo(3));
+            Assert.That(traits.ClearedWave, Is.EqualTo(15));
+            Assert.That(traits.AttackArchetype, Is.EqualTo(SummonerAttackArchetype.Fireball));
+            Assert.That(traits.GetLevel(persistentReward.RewardId), Is.EqualTo(1));
+            Assert.That(traits.GetLevel("missing"), Is.Zero);
         }
 
         [Test]

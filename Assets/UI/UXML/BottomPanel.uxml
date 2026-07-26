@@ -6,6 +6,13 @@
     <Template name="GearTab" src="/Assets/UI/UXML/tabs/GearTab.uxml" />
     <Template name="SummonerTab" src="/Assets/UI/UXML/tabs/SummonerTab.uxml" />
     <VisualElement name="bottom-panel" class="bottom-panel">
+        <VisualElement name="tab-content" class="tab-content">
+            <Instance template="SummonTab" name="page-summon" class="tab-page" />
+            <Instance template="UpgradeTab" name="page-upgrade" class="tab-page hidden" />
+            <Instance template="SkillTab" name="page-skill" class="tab-page hidden" />
+            <Instance template="GearTab" name="page-gear" class="tab-page hidden" />
+            <Instance template="SummonerTab" name="page-summoner" class="tab-page hidden" />
+        </VisualElement>
         <VisualElement name="tab-bar" class="tab-bar">
             <Button name="tab-summon" class="tab-bar__button tab-bar__button--active">
                 <VisualElement class="tab-bar__content" picking-mode="Ignore">
@@ -29,7 +36,7 @@
             <Button name="tab-gear" class="tab-bar__button">
                 <VisualElement class="tab-bar__content" picking-mode="Ignore">
                     <VisualElement class="tab-bar__icon tab-bar__icon--gear" picking-mode="Ignore" />
-                    <Label class="tab-bar__label" text="신물" picking-mode="Ignore" />
+                    <Label class="tab-bar__label" text="가방" picking-mode="Ignore" />
                 </VisualElement>
                 <VisualElement name="reddot-gear" class="reddot hidden" picking-mode="Ignore" />
             </Button>
@@ -39,13 +46,6 @@
                     <Label class="tab-bar__label" text="소환사" picking-mode="Ignore" />
                 </VisualElement>
             </Button>
-        </VisualElement>
-        <VisualElement name="tab-content" class="tab-content">
-            <Instance template="SummonTab" name="page-summon" class="tab-page" />
-            <Instance template="UpgradeTab" name="page-upgrade" class="tab-page hidden" />
-            <Instance template="SkillTab" name="page-skill" class="tab-page hidden" />
-            <Instance template="GearTab" name="page-gear" class="tab-page hidden" />
-            <Instance template="SummonerTab" name="page-summoner" class="tab-page hidden" />
         </VisualElement>
     </VisualElement>
 </UXML>

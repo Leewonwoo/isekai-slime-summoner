@@ -5,6 +5,22 @@ using UnityEngine;
 
 namespace CrossDefense.Core
 {
+    [Serializable]
+    public sealed class RunTraitLevelSaveData
+    {
+        public string rewardId;
+        public int level;
+    }
+
+    [Serializable]
+    public sealed class RunTraitProgressionSaveData
+    {
+        public int totalChoiceCount;
+        public int clearedWave;
+        public int attackArchetype;
+        public List<RunTraitLevelSaveData> levels = new();
+    }
+
     public readonly struct RunTraitChoice
     {
         public RunRewardDefinition Reward { get; }
@@ -165,6 +181,56 @@ namespace CrossDefense.Core
             return acquired;
         }
 
+        public RunTraitProgressionSaveData CaptureSaveData()
+        {
+            var data = new RunTraitProgressionSaveData
+            {
+                totalChoiceCount = Mathf.Max(0, _totalChoiceCount),
+                clearedWave = Mathf.Max(0, _clearedWave),
+                attackArchetype = (int)_attackArchetype,
+            };
+            foreach (var pair in _levels)
+            {
+                if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value <= 0)
+                    continue;
+                data.levels.Add(new RunTraitLevelSaveData
+                {
+                    rewardId = pair.Key,
+                    level = pair.Value,
+                });
+            }
+            return data;
+        }
+
+        public void Restore(RunTraitProgressionSaveData data)
+        {
+            _levels.Clear();
+            _currentChoices.Clear();
+            _choicePending = false;
+            _clearedWave = Mathf.Max(0, data?.clearedWave ?? 0);
+            _totalChoiceCount = Mathf.Max(0, data?.totalChoiceCount ?? 0);
+            _attackArchetype = data != null &&
+                               Enum.IsDefined(typeof(SummonerAttackArchetype), data.attackArchetype)
+                ? (SummonerAttackArchetype)data.attackArchetype
+                : SummonerAttackArchetype.EnergyBolt;
+
+            if (data?.levels == null)
+                return;
+
+            for (int i = 0; i < data.levels.Count; i++)
+            {
+                RunTraitLevelSaveData entry = data.levels[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.rewardId))
+                    continue;
+                RunRewardDefinition reward = _catalog.Find(entry.rewardId);
+                if (reward == null || reward.IsImmediate)
+                    continue;
+                int level = Mathf.Clamp(entry.level, 0, reward.MaxLevel);
+                if (level > 0)
+                    _levels[reward.RewardId] = level;
+            }
+        }
+
         public bool BeginChoice(int clearedWave)
         {
             if (_choicePending || clearedWave <= 0)
@@ -294,7 +360,7 @@ namespace CrossDefense.Core
                     break;
                 case SummonerAttackArchetype.ThunderSlash:
                     awakening = _catalog.Find(RunRewardEffect.AwakenThunderSlash);
-                    attribute = MonsterAttribute.Nature;
+                    attribute = MonsterAttribute.Lightning;
                     pierceCount = 1 + Mathf.Max(0, awakening?.Count ?? 2);
                     chainDamage = awakening?.PrimaryValue ?? 0.65f;
                     RunRewardDefinition chain = _catalog.Find(RunRewardEffect.ThunderChain);
@@ -366,7 +432,8 @@ namespace CrossDefense.Core
             for (int i = 0; i < rewards.Count && _currentChoices.Count < 3; i++)
             {
                 RunRewardDefinition reward = rewards[i];
-                if (reward?.Category == RunRewardCategory.Awakening)
+                if (reward?.Category == RunRewardCategory.Awakening &&
+                    reward.Trigger == RunRewardTrigger.Milestone)
                     AddChoice(reward);
             }
         }
@@ -398,7 +465,8 @@ namespace CrossDefense.Core
             for (int i = 0; i < rewards.Count; i++)
             {
                 RunRewardDefinition reward = rewards[i];
-                if (reward == null || reward.Category == RunRewardCategory.Awakening)
+                if (reward == null || reward.Trigger != RunRewardTrigger.Milestone ||
+                    reward.Category == RunRewardCategory.Awakening)
                     continue;
                 if (category.HasValue && reward.Category != category.Value)
                     continue;

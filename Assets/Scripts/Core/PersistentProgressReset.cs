@@ -17,6 +17,9 @@ namespace CrossDefense.Core
             GrowthManager.DefaultPlayerPrefsKey,
             MonsterCodexProgression.DefaultPlayerPrefsKey,
             EquipmentProgression.DefaultPlayerPrefsKey,
+            RelicProgression.DefaultPlayerPrefsKey,
+            RunSessionProgression.DefaultPlayerPrefsKey,
+            WalletProgression.DefaultPlayerPrefsKey,
         };
 
         public static IReadOnlyList<string> PersistentKeys => Keys;

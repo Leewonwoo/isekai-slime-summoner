@@ -166,6 +166,7 @@ namespace CrossDefense.UI
             _detailStats.text =
                 $"★1 HP {unit.BaseMaxHp:N0} · 공격 {unit.BaseDamage:N0} · 초당 공격 {unit.AttacksPerSecond:0.##}\n" +
                 $"사거리 {unit.AttackRange:0.##} · 이동 {unit.MoveSpeed:0.##}\n" +
+                $"{MatchupText(unit.Attribute)}\n" +
                 star3;
         }
 
@@ -187,8 +188,29 @@ namespace CrossDefense.UI
             MonsterAttribute.Fire => "화염",
             MonsterAttribute.Ice => "빙결",
             MonsterAttribute.Nature => "자연",
+            MonsterAttribute.Lightning => "전기",
+            MonsterAttribute.Water => "물",
+            MonsterAttribute.Wind => "바람",
             _ => "무",
         };
+
+        static string MatchupText(MonsterAttribute attribute)
+        {
+            if (attribute == MonsterAttribute.None)
+                return "약점 없음 · 반감 없음";
+            return $"약점 {AttributeList(ElementalMatchup.GetWeakAgainst(attribute))} · " +
+                   $"반감 동일 속성/{AttributeList(ElementalMatchup.GetStrongAgainst(attribute))}";
+        }
+
+        static string AttributeList(IReadOnlyList<MonsterAttribute> attributes)
+        {
+            if (attributes == null || attributes.Count == 0)
+                return "없음";
+            var names = new string[attributes.Count];
+            for (int i = 0; i < attributes.Count; i++)
+                names[i] = AttributeName(attributes[i]);
+            return string.Join("·", names);
+        }
 
         static string RarityName(SummonUnitRarity rarity) => rarity switch
         {

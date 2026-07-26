@@ -15,13 +15,22 @@ namespace CrossDefense.Core
 
         public DopamineBalanceData Balance => _runtime?.Balance;
         public DopamineSnapshot Snapshot => _runtime?.Snapshot ?? default;
+        public float SummonerDamageMultiplier =>
+            Snapshot.IsActive && Balance != null
+                ? Balance.OverdriveDamageMultiplier
+                : 1f;
+        public float SummonerAttackSpeedMultiplier =>
+            Snapshot.IsActive && Balance != null
+                ? Balance.OverdriveAttackSpeedMultiplier
+                : 1f;
         public event Action<DopamineSnapshot> StateChanged;
 
         public void Initialize(
             GameManager gameManager,
             SummonerSkillController skills,
             DopamineBalanceData balance,
-            int randomSeed)
+            int randomSeed,
+            int startingGauge = 0)
         {
             if (_gameManager != null)
                 _gameManager.PhaseChanged -= OnPhaseChanged;
@@ -30,7 +39,7 @@ namespace CrossDefense.Core
 
             _gameManager = gameManager;
             _skills = skills;
-            _runtime = new DopamineRuntime(balance);
+            _runtime = new DopamineRuntime(balance, startingGauge);
             _random = new System.Random(unchecked(randomSeed ^ 0x4F564552));
             _runtime.Changed += OnRuntimeChanged;
             if (_gameManager != null)
@@ -46,7 +55,7 @@ namespace CrossDefense.Core
             _runtime.Tick(
                 Time.deltaTime,
                 _gameManager.LivingMonsterCount > 0,
-                TryDropMeteor);
+                ActivateOverdrive);
         }
 
         void OnDestroy()
@@ -64,12 +73,12 @@ namespace CrossDefense.Core
                 return;
             _runtime.RegisterDefeat();
             if (!_gameManager.IsGameplayPaused)
-                _runtime.Tick(0f, _gameManager.LivingMonsterCount > 0, TryDropMeteor);
+                _runtime.Tick(0f, _gameManager.LivingMonsterCount > 0, ActivateOverdrive);
         }
 
-        bool TryDropMeteor() =>
+        bool ActivateOverdrive() =>
             _skills != null &&
-            _skills.TryCastOverdriveMeteor(_runtime.Balance, _random);
+            _skills.ResetCooldownAndAutoCastRelic(_random);
 
         void OnPhaseChanged(RunPhase phase)
         {

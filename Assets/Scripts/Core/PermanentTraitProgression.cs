@@ -91,6 +91,8 @@ namespace CrossDefense.Core
             PermanentTraitType.SlimeHaste,
             PermanentTraitType.LuckySummon,
             PermanentTraitType.SummonCapacity,
+            PermanentTraitType.EquipmentSupply,
+            PermanentTraitType.RelicDiscovery,
         };
 
         static readonly PermanentTraitType[][] ChoiceGroups =
@@ -110,6 +112,8 @@ namespace CrossDefense.Core
             {
                 PermanentTraitType.CoreVitality,
                 PermanentTraitType.LuckySummon,
+                PermanentTraitType.EquipmentSupply,
+                PermanentTraitType.RelicDiscovery,
             },
         };
 
@@ -117,6 +121,7 @@ namespace CrossDefense.Core
         readonly Func<int> _summonerLevelProvider;
         readonly Action<string> _saveJson;
         readonly Action _flush;
+        readonly Func<PermanentTraitType, bool> _availabilityProvider;
         readonly Dictionary<PermanentTraitType, int> _levels = new();
 
         public PermanentTraitSnapshot Snapshot => BuildSnapshot();
@@ -142,19 +147,22 @@ namespace CrossDefense.Core
             Func<int> summonerLevelProvider,
             Func<string> loadJson = null,
             Action<string> saveJson = null,
-            Action flush = null)
+            Action flush = null,
+            Func<PermanentTraitType, bool> availabilityProvider = null)
         {
             _balance = balance != null ? balance : GrowthBalanceData.CreateRuntimeDefault();
             _summonerLevelProvider = summonerLevelProvider;
             _saveJson = saveJson;
             _flush = flush;
+            _availabilityProvider = availabilityProvider;
             Load(loadJson?.Invoke());
         }
 
         public static PermanentTraitProgression CreatePersistent(
             GrowthBalanceData balance,
             Func<int> summonerLevelProvider,
-            string playerPrefsKey = DefaultPlayerPrefsKey)
+            string playerPrefsKey = DefaultPlayerPrefsKey,
+            Func<PermanentTraitType, bool> availabilityProvider = null)
         {
             string safeKey = string.IsNullOrWhiteSpace(playerPrefsKey)
                 ? DefaultPlayerPrefsKey
@@ -164,7 +172,8 @@ namespace CrossDefense.Core
                 summonerLevelProvider,
                 () => PlayerPrefs.GetString(safeKey, string.Empty),
                 json => PlayerPrefs.SetString(safeKey, json),
-                PlayerPrefs.Save);
+                PlayerPrefs.Save,
+                availabilityProvider);
         }
 
         public int GetLevel(PermanentTraitType type) =>
@@ -184,7 +193,7 @@ namespace CrossDefense.Core
                 for (int i = 0; i < group.Length; i++)
                 {
                     PermanentTraitType type = group[i];
-                    if (GetLevel(type) < MaxLevel(type))
+                    if (GetLevel(type) < MaxLevel(type) && IsAvailable(type))
                         available.Add(type);
                 }
                 if (available.Count > 0)
@@ -197,7 +206,8 @@ namespace CrossDefense.Core
                 for (int i = 0; i < AllTypes.Length; i++)
                 {
                     PermanentTraitType type = AllTypes[i];
-                    if (GetLevel(type) < MaxLevel(type) && !offeredTypes.Contains(type))
+                    if (GetLevel(type) < MaxLevel(type) &&
+                        IsAvailable(type) && !offeredTypes.Contains(type))
                         fallback.Add(type);
                 }
                 while (offeredTypes.Count < 3 && fallback.Count > 0)
@@ -241,6 +251,9 @@ namespace CrossDefense.Core
         public int MaxLevel(PermanentTraitType type) =>
             type == PermanentTraitType.SummonCapacity
                 ? _balance.PermanentSummonCapacityMaxLevel
+                : type == PermanentTraitType.EquipmentSupply ||
+                  type == PermanentTraitType.RelicDiscovery
+                    ? 100
                 : 10;
 
         public string GetDisplayName(PermanentTraitType type)
@@ -254,6 +267,8 @@ namespace CrossDefense.Core
                 PermanentTraitType.SlimeHaste => "용병단 기민함",
                 PermanentTraitType.LuckySummon => "계약의 행운",
                 PermanentTraitType.SummonCapacity => "지휘 확장",
+                PermanentTraitType.EquipmentSupply => "장비 보급",
+                PermanentTraitType.RelicDiscovery => "신물 발견",
                 _ => "알 수 없는 특성",
             };
         }
@@ -261,6 +276,10 @@ namespace CrossDefense.Core
         public string GetCurrentEffect(PermanentTraitType type)
         {
             int level = GetLevel(type);
+            if (type == PermanentTraitType.EquipmentSupply)
+                return $"영구 장비 획득 {level:N0}회";
+            if (type == PermanentTraitType.RelicDiscovery)
+                return $"신물 획득·승급 {level:N0}회";
             if (type == PermanentTraitType.SummonCapacity)
                 return $"슬라임 슬롯 +{_balance.PermanentSummonCapacityBonus(level):N0}";
             float total = _balance.PermanentTraitValuePerLevel(type) * Mathf.Max(0, level) * 100f;
@@ -294,6 +313,18 @@ namespace CrossDefense.Core
         PermanentTraitChoice BuildChoice(PermanentTraitType type)
         {
             int currentLevel = GetLevel(type);
+            if (type == PermanentTraitType.EquipmentSupply)
+                return new PermanentTraitChoice(
+                    type,
+                    GetDisplayName(type),
+                    "미보유 장비 1개를 영구 획득합니다.",
+                    currentLevel);
+            if (type == PermanentTraitType.RelicDiscovery)
+                return new PermanentTraitChoice(
+                    type,
+                    GetDisplayName(type),
+                    "속성 신물을 획득하거나 보유 신물을 1단계 영구 승급합니다.",
+                    currentLevel);
             if (type == PermanentTraitType.SummonCapacity)
             {
                 int slotIncrease = _balance.PermanentSummonCapacityBonus(currentLevel + 1) -
@@ -328,6 +359,14 @@ namespace CrossDefense.Core
                 PermanentTraitType.SummonCapacity => "슬라임 슬롯",
                 _ => "효과",
             };
+        }
+
+        bool IsAvailable(PermanentTraitType type)
+        {
+            if (type != PermanentTraitType.EquipmentSupply &&
+                type != PermanentTraitType.RelicDiscovery)
+                return true;
+            return _availabilityProvider?.Invoke(type) ?? false;
         }
 
         void Load(string json)

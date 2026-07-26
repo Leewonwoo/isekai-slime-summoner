@@ -21,6 +21,8 @@ namespace CrossDefense.Data
         SlimeHaste,
         LuckySummon,
         SummonCapacity,
+        EquipmentSupply,
+        RelicDiscovery,
     }
 
     /// <summary>
@@ -73,7 +75,7 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float coreRecoveryPerLevel = 5f;
 
         [Header("Summon Capacity")]
-        [Min(1)] [SerializeField] int baseSummonCapacity = 8;
+        [Min(1)] [SerializeField] int baseSummonCapacity = 9;
         [Min(1)] [SerializeField] int maxSummonCapacity = 12;
         [Min(1)] [SerializeField] int runSummonCapacityMaxLevel = 4;
         [Min(1)] [SerializeField] int runSummonCapacityBaseCost = 80;

@@ -27,7 +27,7 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void DefaultBalance_MatchesApprovedComboAndMeteorValues()
+        public void DefaultBalance_MatchesApprovedComboAndOverdriveBuffValues()
         {
             Assert.That(_balance.ComboGraceSeconds, Is.EqualTo(2f));
             Assert.That(_balance.GaugePerKill(1), Is.EqualTo(3));
@@ -35,10 +35,8 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_balance.GaugePerKill(20), Is.EqualTo(8));
             Assert.That(_balance.GaugePerKill(30), Is.EqualTo(12));
             Assert.That(_balance.OverdriveDuration, Is.EqualTo(6f));
-            Assert.That(_balance.MeteorInterval, Is.EqualTo(0.3f));
-            Assert.That(_balance.MeteorCount, Is.EqualTo(20));
-            Assert.That(_balance.MeteorDamageMultiplier, Is.EqualTo(0.55f));
-            Assert.That(_balance.MeteorRadius, Is.EqualTo(1.35f));
+            Assert.That(_balance.OverdriveDamageMultiplier, Is.EqualTo(1.3f));
+            Assert.That(_balance.OverdriveAttackSpeedMultiplier, Is.EqualTo(1.5f));
         }
 
         [Test]
@@ -73,37 +71,27 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void Overdrive_DropsTwentyMeteorsAndCannotRechargeWhileActive()
+        public void Overdrive_ActivatesRelicOnceAndCannotRechargeWhileActive()
         {
             var runtime = CreateReadyRuntime();
-            int meteorCount = 0;
+            int activationCount = 0;
 
             runtime.Tick(0f, true, () =>
             {
-                meteorCount++;
+                activationCount++;
                 return true;
             });
 
             Assert.That(runtime.Snapshot.IsActive, Is.True);
             Assert.That(runtime.Snapshot.Gauge, Is.Zero);
-            Assert.That(meteorCount, Is.EqualTo(1));
+            Assert.That(activationCount, Is.EqualTo(1));
 
             runtime.RegisterDefeat();
             Assert.That(runtime.Snapshot.Gauge, Is.Zero);
 
-            for (int i = 0; i < 19; i++)
-                runtime.Tick(_balance.MeteorInterval, true, () =>
-                {
-                    meteorCount++;
-                    return true;
-                });
-            runtime.Tick(_balance.MeteorInterval + 0.01f, true, () =>
-            {
-                meteorCount++;
-                return true;
-            });
+            runtime.Tick(_balance.OverdriveDuration + 0.01f, true, () => false);
 
-            Assert.That(meteorCount, Is.EqualTo(20));
+            Assert.That(activationCount, Is.EqualTo(1));
             Assert.That(runtime.Snapshot.IsActive, Is.False);
             Assert.That(runtime.Snapshot.Gauge, Is.Zero);
         }
@@ -122,17 +110,22 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
-        public void Overdrive_FrameHitchCapsCatchUpDropsAtTwo()
+        public void Overdrive_FrameHitchDoesNotRepeatRelicActivation()
         {
             var runtime = CreateReadyRuntime();
-            int meteorCount = 0;
+            int activationCount = 0;
             runtime.Tick(1f, true, () =>
             {
-                meteorCount++;
+                activationCount++;
+                return true;
+            });
+            runtime.Tick(1f, true, () =>
+            {
+                activationCount++;
                 return true;
             });
 
-            Assert.That(meteorCount, Is.EqualTo(2));
+            Assert.That(activationCount, Is.EqualTo(1));
             Assert.That(runtime.Snapshot.IsActive, Is.True);
         }
 
@@ -143,7 +136,8 @@ namespace CrossDefense.Tests.EditMode
                 "Assets/Data/DopamineBalance_Default.asset");
 
             Assert.That(asset, Is.Not.Null);
-            Assert.That(asset.MeteorCount, Is.EqualTo(20));
+            Assert.That(asset.OverdriveDamageMultiplier, Is.EqualTo(1.3f));
+            Assert.That(asset.OverdriveAttackSpeedMultiplier, Is.EqualTo(1.5f));
         }
 
         [Test]
@@ -156,7 +150,7 @@ namespace CrossDefense.Tests.EditMode
             TemplateContainer root = tree.CloneTree();
             var controller = new FieldOverlayController(root);
             controller.SetDopamineState(
-                new DopamineSnapshot(0, 0f, 50, 100, false, 0f, 0),
+                new DopamineSnapshot(0, 0f, 50, 100, false, 0f),
                 _balance);
 
             VisualElement fill = root.Q<VisualElement>("overdrive-gauge-fill");
@@ -166,6 +160,24 @@ namespace CrossDefense.Tests.EditMode
                 root.Query<VisualElement>(className: "overdrive-gauge__tick").ToList().Count,
                 Is.EqualTo(3));
 
+            controller.Dispose();
+        }
+
+        [Test]
+        public void FieldOverlayController_ReflectsSelectedGameplaySpeed()
+        {
+            var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/UI/UXML/FieldOverlay.uxml");
+            TemplateContainer root = tree.CloneTree();
+            var controller = new FieldOverlayController(root);
+
+            controller.SetGameplaySpeed(1.5f);
+
+            Button speedButton = root.Q<Button>("speed-toggle-button");
+            Assert.That(speedButton.text, Is.EqualTo("×1.5"));
+            Assert.That(
+                speedButton.ClassListContains("speed-toggle-button--fast"),
+                Is.True);
             controller.Dispose();
         }
 

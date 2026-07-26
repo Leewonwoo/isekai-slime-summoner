@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CrossDefense.Data
 {
-    public enum MerchantProductCategory { Equipment, Consumable, Relic }
+    public enum MerchantProductCategory { Equipment, Relic, Consumable, Trophy }
     public enum ConsumableEffect { HealCorePercent, SummonContracts, RandomSlime }
     public enum RunRelicEffect { AllDamage, AllAttackSpeed, GoldReward, SummonerMaxHp, WaveContract, JackpotChance }
 
@@ -65,6 +65,16 @@ namespace CrossDefense.Data
         public EquipmentCatalog EquipmentCatalog => equipmentCatalog;
         public IReadOnlyList<ConsumableDefinition> Consumables => consumables;
         public IReadOnlyList<RunRelicDefinition> Relics => relics;
+
+        public RunRelicDefinition FindRelic(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id) || relics == null)
+                return null;
+            for (int i = 0; i < relics.Count; i++)
+                if (relics[i] != null && relics[i].Id == id)
+                    return relics[i];
+            return null;
+        }
 
         public static MerchantCatalog CreateRuntimeDefault(EquipmentCatalog equipment)
         {

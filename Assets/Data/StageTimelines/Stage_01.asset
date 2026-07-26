@@ -19,6 +19,7 @@ MonoBehaviour:
   randomizeDirectionWeights: 1
   directionWeightJitter: 0.15
   runTraitInterval: 5
+  startingOverdriveGauge: 0
   runRewardCatalog: {fileID: 11400000, guid: 56ce19d0ae7e41de9f270a539ec79763, type: 2}
   waves:
   - label: Wave 1

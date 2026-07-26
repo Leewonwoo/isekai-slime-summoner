@@ -1,4 +1,4 @@
-/* 존 3분할: HUD ~8% / 필드 ~50%(grow) / 하단 패널 ~40% (SPEC §4.1) */
+/* 2분할: 필드 45% / 하단 플레이어 패널 55% */
 .root {
     width: 100%;
     height: 100%;
@@ -14,13 +14,9 @@
     bottom: 0;
 }
 
-#zone-top {
-    flex-basis: 8%;
-    flex-shrink: 0;
-}
-
 .zone-field {
     flex-grow: 1;
+    min-height: 0;
 }
 
 #field-overlay {
@@ -32,7 +28,7 @@
 }
 
 #zone-bottom {
-    flex-basis: 40%;
+    flex-basis: 55%;
     flex-shrink: 0;
 }
 
@@ -46,7 +42,7 @@
     z-index: 100;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-modal-scrim);
+    background-color: var(--color-transparent);
 }
 
 .summon-modal__backdrop {
@@ -55,6 +51,7 @@
     top: 0;
     right: 0;
     bottom: 0;
+    background-color: var(--color-modal-scrim);
 }
 
 .summon-modal__panel {

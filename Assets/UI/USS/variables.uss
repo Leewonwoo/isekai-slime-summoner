@@ -57,21 +57,20 @@
     --touch-min: 96px;
     --row-height: 128px;
     --row-icon-size: 88px;
-    --tab-height: 112px;
+    --tab-height: 128px;
     --tab-button-width: 20%;
-    --tab-icon-size: 44px;
+    --tab-icon-size: 56px;
     --tab-frame-slice-x: 56px;
     --tab-frame-slice-y: 48px;
     --tab-frame-slice-scale: 0.35;
     --summoner-tab-profile-height: 180px;
     --summoner-stat-line-height: 64px;
 
-    /* TopHUD 구조 (1080 기준) */
-    --top-hud-profile-width: 264px;
-    --top-hud-stage-width: 180px;
+    /* 필드 HUD 구조 (1080 기준) */
+    --stage-overlay-width: 360px;
     --wave-status-width: 200px;
-    --top-hud-settings-width: 104px;
-    --top-hud-settings-icon-size: 64px;
+    --field-settings-size: 64px;
+    --field-settings-icon-size: 44px;
     --currency-icon-size: 44px;
     --top-hud-portrait-size: 96px;
     --top-hud-portrait-radius: 48px;
@@ -88,8 +87,8 @@
     --buff-skill-icon-size: 40px;
     --buff-skill-cluster-right: 24px;
     --buff-skill-cluster-bottom: 168px;
-    --codex-button-size: 96px;
-    --codex-button-width: 200px;
+    --codex-button-size: 64px;
+    --codex-button-width: 124px;
     --codex-slot-size: 188px;
     --codex-slot-image-size: 72%;
     --codex-detail-height: 280px;
@@ -109,6 +108,8 @@
     --combo-label-height: 52px;
 
     /* BottomPanel 구조 (1080 기준) */
+    --upgrade-tab-header-height: 92px;
+    --upgrade-tab-currency-width: 180px;
     --bottom-panel-content-inset: 40px;
     --bench-slot-state-border: 4px;
     --bench-slot-size: 120px;

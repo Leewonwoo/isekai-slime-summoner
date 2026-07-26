@@ -6,12 +6,16 @@
     border-top-color: var(--color-bg);
 }
 
-/* ── 탭바 — 활성 탭 = "눌려서 켜진 나무 버튼" (스킨 문법 ④) ── */
+/* ── 화면 하단 고정 대분류 내비게이션 ── */
 .tab-bar {
     flex-direction: row;
     height: var(--tab-height);
     flex-shrink: 0;
     background-color: var(--color-bg);
+    border-top-width: 3px;
+    border-top-color: var(--color-panel);
+    padding-left: var(--gap-xs);
+    padding-right: var(--gap-xs);
 }
 
 .tab-bar__button {
@@ -40,7 +44,7 @@
 
 .tab-bar__content {
     flex-grow: 1;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -49,7 +53,7 @@
     width: var(--tab-icon-size);
     height: var(--tab-icon-size);
     flex-shrink: 0;
-    margin-right: var(--gap-sm);
+    margin-bottom: var(--gap-xs);
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position-x: center;
@@ -58,7 +62,7 @@
 
 .tab-bar__label {
     color: var(--color-text-dim);
-    font-size: var(--font-body);
+    font-size: var(--font-caption);
     -unity-font-style: bold;
 }
 
@@ -88,6 +92,7 @@
 
 .tab-bar__button--active {
     background-image: url("project://database/Assets/Art/UIFrames/tab_button_active_frame.png?fileID=21300000&guid=fc9e0a70fc4b587479189c9e988950d6&type=3");
+    translate: 0 -8px;
 }
 
 .tab-bar__button--active .tab-bar__label {
@@ -127,10 +132,28 @@
     flex-grow: 1;
 }
 
-.upgrade-tab__title {
-    margin-top: var(--gap-sm);
+.upgrade-tab__header {
+    min-height: var(--upgrade-tab-header-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     margin-left: var(--gap-md);
     margin-right: var(--gap-md);
+    margin-bottom: var(--gap-sm);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    background-color: var(--color-bg);
+    border-bottom-width: 3px;
+    border-bottom-color: var(--color-panel);
+}
+
+.upgrade-tab__heading {
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.upgrade-tab__title {
     color: var(--color-text);
     font-size: var(--font-body);
     -unity-font-style: bold;
@@ -138,11 +161,15 @@
 
 .upgrade-tab__description {
     margin-top: var(--gap-xs);
-    margin-left: var(--gap-md);
-    margin-right: var(--gap-md);
-    margin-bottom: var(--gap-sm);
     color: var(--color-text-dim);
     font-size: var(--font-caption);
+}
+
+.upgrade-tab__currency {
+    min-width: var(--upgrade-tab-currency-width);
+    flex-shrink: 0;
+    justify-content: center;
+    margin-left: var(--gap-md);
 }
 
 /* ── 소환 탭 ───────────────────────── */
@@ -426,10 +453,16 @@
     padding-right: var(--gap-md);
 }
 
+.gear-tab__header {
+    flex-shrink: 0;
+    margin-bottom: var(--gap-sm);
+}
+
 .gear-tab__hint {
     color: var(--color-text-disabled);
     font-size: var(--font-caption);
     margin-bottom: var(--gap-sm);
+    white-space: normal;
 }
 
 .gear-tab__title,
@@ -445,28 +478,80 @@
     margin-top: var(--gap-sm);
 }
 
-.gear-tab__slots {
-    flex-direction: row;
-    flex-shrink: 0;
-    justify-content: space-between;
+.gear-tab__section--gold {
+    color: var(--color-gold);
 }
 
-.gear-tab__slot {
-    width: var(--gear-slot-width);
-    min-height: var(--touch-min);
-    color: var(--color-text);
-    background-color: var(--color-panel-deep);
-    border-width: var(--gap-xs);
+.gear-tab__categories {
+    flex-shrink: 0;
+    flex-direction: row;
+    margin-bottom: var(--gap-md);
+    background-color: var(--color-bg);
+    border-width: 2px;
     border-color: var(--color-border);
     border-radius: var(--radius-md);
-    font-size: var(--font-caption);
-    -unity-text-align: middle-center;
-    white-space: normal;
+    padding-top: var(--gap-xs);
+    padding-bottom: var(--gap-xs);
+    padding-left: var(--gap-xs);
+    padding-right: var(--gap-xs);
+}
+
+.gear-tab__category {
+    flex-grow: 1;
+    min-height: var(--touch-min);
+    margin-left: var(--gap-xs);
+    margin-right: var(--gap-xs);
+    border-width: 2px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-panel);
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.gear-tab__category--active {
+    background-color: var(--color-surface);
+    color: var(--color-gold);
+    border-color: var(--color-gold);
+}
+
+.gear-tab__page {
+    flex-grow: 1;
 }
 
 .gear-tab__inventory {
     flex-grow: 1;
     min-height: var(--row-height);
+}
+
+.gear-tab__equipped {
+    flex-shrink: 0;
+    background-color: var(--color-panel-deep);
+    border-width: 2px;
+    border-color: var(--color-gold);
+    border-radius: var(--radius-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-md);
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-md);
+}
+
+.gear-tab__equipped-name {
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.gear-tab__equipped-description {
+    margin-top: var(--gap-xs);
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    white-space: normal;
+}
+
+.gear-tab__trophy-page {
+    padding-bottom: var(--gap-md);
 }
 
 .gear-tab__relics {
@@ -594,6 +679,41 @@
 .summoner-tab__trait-text {
     margin-top: var(--gap-sm);
     color: var(--color-text);
+    font-size: var(--font-caption);
+    white-space: normal;
+}
+.catalog-info-row {
+    min-height: 92px;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-width: var(--gap-xs);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--gap-sm);
+    margin-bottom: var(--gap-sm);
+}
+
+.catalog-info-row__icon {
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    margin-right: var(--gap-md);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.catalog-info-row__copy {
+    flex-grow: 1;
+}
+
+.catalog-info-row__title {
+    color: var(--color-ink);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+}
+
+.catalog-info-row__description {
+    color: var(--color-ink-dim);
     font-size: var(--font-caption);
     white-space: normal;
 }

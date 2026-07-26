@@ -63,6 +63,9 @@ namespace CrossDefense.Tests.EditMode
                     GrowthManager.DefaultPlayerPrefsKey,
                     MonsterCodexProgression.DefaultPlayerPrefsKey,
                     EquipmentProgression.DefaultPlayerPrefsKey,
+                    RelicProgression.DefaultPlayerPrefsKey,
+                    RunSessionProgression.DefaultPlayerPrefsKey,
+                    WalletProgression.DefaultPlayerPrefsKey,
                 },
                 PersistentProgressReset.PersistentKeys);
         }

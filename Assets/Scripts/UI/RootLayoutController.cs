@@ -94,6 +94,8 @@ namespace CrossDefense.UI
                     _gameManager.PermanentTraits.Changed -= OnPermanentTraitsChanged;
                 if (_gameManager.RunTraits != null)
                     _gameManager.RunTraits.Changed -= OnRunTraitsChanged;
+                if (_gameManager.CombatBuild != null)
+                    _gameManager.CombatBuild.Changed -= OnCombatBuildChanged;
                 if (_gameManager.SummonerSkills != null)
                     _gameManager.SummonerSkills.StateChanged -= RefreshSkillUI;
                 if (_gameManager.SummonerBuffs != null)
@@ -104,6 +106,9 @@ namespace CrossDefense.UI
                     _gameManager.Equipment.Changed -= OnEquipmentChanged;
                 if (_gameManager.RunRelics != null)
                     _gameManager.RunRelics.Changed -= OnRunRelicsChanged;
+                if (_gameManager.Relics != null)
+                    _gameManager.Relics.Changed -= RefreshSkillUI;
+                _gameManager.GameplaySpeedChanged -= OnGameplaySpeedChanged;
                 _gameManager.RegisterGoldScreenPositionProvider(null);
                 _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
@@ -120,6 +125,7 @@ namespace CrossDefense.UI
                 BottomPanel.BenchDragEnded -= OnBenchDragEnded;
                 BottomPanel.RunUpgradeRequested -= OnRunUpgradeRequested;
                 BottomPanel.SkillEquipRequested -= OnSkillEquipRequested;
+                BottomPanel.RelicSkillEquipRequested -= OnRelicSkillEquipRequested;
                 BottomPanel.EquipmentEquipRequested -= OnEquipmentEquipRequested;
                 BottomPanel.Dispose();
             }
@@ -127,6 +133,7 @@ namespace CrossDefense.UI
             {
                 FieldOverlay.SkillRequested -= OnSkillRequested;
                 FieldOverlay.BuffSkillRequested -= OnBuffSkillRequested;
+                FieldOverlay.SpeedToggleRequested -= OnSpeedToggleRequested;
                 FieldOverlay.SlimeCodexRequested -= OnSlimeCodexRequested;
                 FieldOverlay.MonsterCodexRequested -= OnCodexRequested;
             }
@@ -179,6 +186,8 @@ namespace CrossDefense.UI
                 _gameManager.PermanentTraits.Changed += OnPermanentTraitsChanged;
             if (_gameManager.RunTraits != null)
                 _gameManager.RunTraits.Changed += OnRunTraitsChanged;
+            if (_gameManager.CombatBuild != null)
+                _gameManager.CombatBuild.Changed += OnCombatBuildChanged;
             if (_gameManager.SummonerSkills != null)
                 _gameManager.SummonerSkills.StateChanged += RefreshSkillUI;
             if (_gameManager.SummonerBuffs != null)
@@ -189,8 +198,12 @@ namespace CrossDefense.UI
                 _gameManager.Equipment.Changed += OnEquipmentChanged;
             if (_gameManager.RunRelics != null)
                 _gameManager.RunRelics.Changed += OnRunRelicsChanged;
+            if (_gameManager.Relics != null)
+                _gameManager.Relics.Changed += RefreshSkillUI;
+            _gameManager.GameplaySpeedChanged += OnGameplaySpeedChanged;
             FieldOverlay.SkillRequested += OnSkillRequested;
             FieldOverlay.BuffSkillRequested += OnBuffSkillRequested;
+            FieldOverlay.SpeedToggleRequested += OnSpeedToggleRequested;
             FieldOverlay.SlimeCodexRequested += OnSlimeCodexRequested;
             FieldOverlay.MonsterCodexRequested += OnCodexRequested;
             BottomPanel.SummonRequested += OnSummonRequested;
@@ -200,6 +213,7 @@ namespace CrossDefense.UI
             BottomPanel.BenchDragEnded += OnBenchDragEnded;
             BottomPanel.RunUpgradeRequested += OnRunUpgradeRequested;
             BottomPanel.SkillEquipRequested += OnSkillEquipRequested;
+            BottomPanel.RelicSkillEquipRequested += OnRelicSkillEquipRequested;
             BottomPanel.EquipmentEquipRequested += OnEquipmentEquipRequested;
             SlimeCodexModal.Bind(_gameManager.SummonManager.Pool, _gameManager.SummonerProgression);
             MonsterCodexModal.Bind(_gameManager.MonsterCatalog, _gameManager.MonsterCodex);
@@ -218,6 +232,9 @@ namespace CrossDefense.UI
             RefreshGrowthUI();
             RefreshSkillUI();
             RefreshDopamineUI();
+            FieldOverlay.SetGameplaySpeed(_gameManager.GameplaySpeed);
+            if (_gameManager.CombatBuild != null)
+                OnCombatBuildChanged(_gameManager.CombatBuild.Snapshot);
             TryShowTraitChoice();
         }
 
@@ -227,6 +244,8 @@ namespace CrossDefense.UI
             FieldOverlay.SetWave(current, _gameManager.LivingMonsterCount);
         }
         void OnLivingMonsterCountChanged(int count) => FieldOverlay.SetWave(_gameManager.CurrentWave, count);
+        void OnSpeedToggleRequested() => _gameManager?.ToggleGameplaySpeed();
+        void OnGameplaySpeedChanged(float speed) => FieldOverlay?.SetGameplaySpeed(speed);
         void OnGoldChanged(int amount)
         {
             TopHUD.SetGold(amount);
@@ -270,7 +289,6 @@ namespace CrossDefense.UI
                     FieldOverlay.ShowUnlockToast($"새 슬라임 해금!\n{string.Join(" · ", unlocked)}");
             }
             _lastUnlockLevel = snapshot.Level;
-            TopHUD.SetSummonerProfile("위대한 소환사", snapshot.Level);
             BottomPanel.SetDirectRankOneChance(_gameManager.DirectRankOneChance);
             RefreshSummonerUI(snapshot);
             RefreshSkillUI();
@@ -333,11 +351,20 @@ namespace CrossDefense.UI
         }
 
         void RefreshEquipmentUI() =>
-            BottomPanel?.SetEquipmentData(_gameManager?.Equipment, _gameManager?.RunRelics);
+            BottomPanel?.SetEquipmentData(
+                _gameManager?.Equipment,
+                _gameManager?.RunRelics,
+                BuildRunTraitText(_gameManager?.RunTraits, _gameManager?.CombatBuild));
 
         void OnSkillEquipRequested(SummonerBuffId id)
         {
             if (_gameManager?.SummonerBuffLoadout?.TryToggle(id) == true)
+                RefreshSkillUI();
+        }
+
+        void OnRelicSkillEquipRequested(RelicFamily family)
+        {
+            if (_gameManager?.Relics?.TryEquip(family) == true)
                 RefreshSkillUI();
         }
 
@@ -355,6 +382,7 @@ namespace CrossDefense.UI
             BottomPanel.SetSkillRows(
                 _gameManager.SummonerProgression.Snapshot.Level,
                 _gameManager.SummonerBuffLoadout?.Equipped);
+            BottomPanel.SetRelicData(_gameManager.Relics);
             for (int i = 0; i < SummonerBuffCatalog.MaxEquipped; i++)
             {
                 SummonerBuffId? id = _gameManager.SummonerBuffs.EquippedAt(i);
@@ -389,6 +417,15 @@ namespace CrossDefense.UI
         void OnRunTraitsChanged(RunTraitSnapshot snapshot)
         {
             RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
+            RefreshEquipmentUI();
+            if (snapshot.IsChoicePending)
+                TryShowTraitChoice();
+        }
+
+        void OnCombatBuildChanged(SummonerCombatBuildSnapshot snapshot)
+        {
+            RefreshSummonerUI(_gameManager.SummonerProgression.Snapshot);
+            RefreshEquipmentUI();
             if (snapshot.IsChoicePending)
                 TryShowTraitChoice();
         }
@@ -492,7 +529,7 @@ namespace CrossDefense.UI
                 $"{criticalChance * 100f:0.#}%",
                 $"{_gameManager.DirectRankOneChance * 100f:0.#}%",
                 BuildPermanentTraitText(traits),
-                BuildRunTraitText(runTraits)));
+                BuildRunTraitText(runTraits, _gameManager.CombatBuild)));
             BottomPanel.SetRedDot(
                 "summoner",
                 (_gameManager.PermanentTraits?.PendingChoiceCount ?? 0) > 0);
@@ -514,21 +551,39 @@ namespace CrossDefense.UI
                 : string.Join("\n", lines);
         }
 
-        static string BuildRunTraitText(RunTraitProgression traits)
+        static string BuildRunTraitText(
+            RunTraitProgression traits,
+            SummonerCombatBuildProgression combatBuild)
         {
-            if (traits == null)
-                return "획득한 런 특성이 없습니다.";
             var lines = new List<string>();
-            IReadOnlyList<RunRewardDefinition> rewards = traits.GetAcquiredRewards();
-            for (int i = 0; i < rewards.Count; i++)
+            if (combatBuild != null)
             {
-                RunRewardDefinition reward = rewards[i];
-                int level = traits.GetLevel(reward.RewardId);
-                if (level > 0)
-                    lines.Add($"• {reward.DisplayName} Lv.{level:N0} — {traits.GetCurrentEffect(reward)}");
+                IReadOnlyList<RunRewardDefinition> combatRewards = combatBuild.GetAcquiredRewards();
+                for (int i = 0; i < combatRewards.Count; i++)
+                {
+                    RunRewardDefinition reward = combatRewards[i];
+                    int level = combatBuild.GetLevel(reward.RewardId);
+                    if (level > 0)
+                        lines.Add(
+                            $"• [빌드] {reward.DisplayName} Lv.{level:N0} — " +
+                            combatBuild.GetCurrentEffect(reward));
+                }
+            }
+            if (traits != null)
+            {
+                IReadOnlyList<RunRewardDefinition> rewards = traits.GetAcquiredRewards();
+                for (int i = 0; i < rewards.Count; i++)
+                {
+                    RunRewardDefinition reward = rewards[i];
+                    int level = traits.GetLevel(reward.RewardId);
+                    if (level > 0)
+                        lines.Add(
+                            $"• [진화] {reward.DisplayName} Lv.{level:N0} — " +
+                            traits.GetCurrentEffect(reward));
+                }
             }
             return lines.Count == 0
-                ? "획득한 런 특성이 없습니다."
+                ? "획득한 도전 빌드가 없습니다."
                 : string.Join("\n", lines);
         }
 
@@ -560,6 +615,22 @@ namespace CrossDefense.UI
             if (_traitChoicePopup == null)
                 _traitChoicePopup = Instantiate(traitChoicePopupPrefab, transform);
 
+            SummonerCombatBuildProgression combatBuild = _gameManager.CombatBuild;
+            if (combatBuild != null && combatBuild.IsChoicePending)
+            {
+                IReadOnlyList<RunTraitChoice> combatChoices = combatBuild.GetCurrentChoices();
+                if (combatChoices.Count != 3)
+                    return false;
+                _traitChoicePopupOpen = true;
+                _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, true);
+                _traitChoicePopup.ShowSummonerLevelBuild(
+                    combatChoices,
+                    combatBuild.SummonerLevel,
+                    combatBuild.PendingChoiceCount,
+                    OnCombatBuildChoiceConfirmed);
+                return true;
+            }
+
             RunTraitProgression runTraits = _gameManager.RunTraits;
             if (runTraits != null && runTraits.IsChoicePending)
             {
@@ -590,7 +661,7 @@ namespace CrossDefense.UI
         void OnTraitChoiceConfirmed(PermanentTraitType type)
         {
             _traitChoicePopupOpen = false;
-            if (_gameManager?.PermanentTraits?.TryChoose(type) != true)
+            if (_gameManager?.TryChoosePermanentTrait(type) != true)
             {
                 _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 return;
@@ -616,6 +687,17 @@ namespace CrossDefense.UI
                 BottomPanel?.SetSummonAnimationState(true);
                 _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, true);
                 PlayNextRunRewardSummon();
+                return;
+            }
+            StartCoroutine(ShowNextTraitChoiceNextFrame());
+        }
+
+        void OnCombatBuildChoiceConfirmed(string rewardId)
+        {
+            _traitChoicePopupOpen = false;
+            if (_gameManager?.TryChooseCombatBuild(rewardId) != true)
+            {
+                _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
                 return;
             }
             StartCoroutine(ShowNextTraitChoiceNextFrame());
@@ -749,11 +831,9 @@ namespace CrossDefense.UI
         /// <summary>스캐폴딩 확인용 더미 상태 — 게임 로직 연결 시 제거</summary>
         void ApplyScaffoldDemoState()
         {
-            TopHUD.SetSummonerProfile("위대한 소환사", 12);
             TopHUD.SetStageName("고블린 숲");
             FieldOverlay.SetWave(1, 24);
             TopHUD.SetGold(150);
-            TopHUD.SetGems(12);
             BottomPanel.SetSummonContracts(10);
             BottomPanel.SetRedDot("upgrade", true);
         }
@@ -762,9 +842,27 @@ namespace CrossDefense.UI
         void ApplySafeArea(VisualElement root)
         {
             var safe = Screen.safeArea;
-            float panelPerPixel = 1080f / Screen.width; // Match Width(0) 기준 환산
-            root.style.paddingTop = (Screen.height - safe.yMax) * panelPerPixel;
-            root.style.paddingBottom = safe.yMin * panelPerPixel;
+            float screenWidth = Mathf.Max(1f, Screen.width);
+            float screenHeight = Mathf.Max(1f, Screen.height);
+            float safeYMin = Mathf.Clamp(safe.yMin, 0f, screenHeight);
+            float safeYMax = Mathf.Clamp(safe.yMax, safeYMin, screenHeight);
+            float panelPerPixel = 1080f / screenWidth; // Match Width(0) 기준 환산
+            float topInset = Mathf.Max(0f, screenHeight - safeYMax) * panelPerPixel;
+            float bottomInset = safeYMin * panelPerPixel;
+            root.style.paddingTop = topInset;
+            root.style.paddingBottom = bottomInset;
+
+            // Keep modal panels inside the safe area while their dimmed backdrops
+            // extend through the unsafe top and bottom screen regions.
+            ExtendModalBackdrop(root.Q<VisualElement>("summon-modal-backdrop"), topInset, bottomInset);
+            ExtendModalBackdrop(root.Q<VisualElement>("merchant-modal-backdrop"), topInset, bottomInset);
+        }
+
+        static void ExtendModalBackdrop(VisualElement backdrop, float topInset, float bottomInset)
+        {
+            if (backdrop == null) return;
+            backdrop.style.top = -topInset;
+            backdrop.style.bottom = -bottomInset;
         }
 
         void Update()

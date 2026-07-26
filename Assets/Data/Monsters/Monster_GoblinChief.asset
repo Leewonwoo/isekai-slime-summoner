@@ -17,9 +17,27 @@ MonoBehaviour:
   shape: 4
   attribute: 0
   sprite: {fileID: 21300000, guid: c9c5ef47dfca4453a1490ddf09ce6d36, type: 3}
-  moveFrames: []
+  moveFrames:
+  - {fileID: -1329307214231661710, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: -1766884322060910946, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: -602074311092291045, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: -7761862825188671508, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: -6059200008751233983, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: 3403739824195327076, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: 3856661844066315014, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: 5479473148923109894, guid: cff8713969abf1047848cf64f034f43c, type: 3}
+  - {fileID: -1420576479573877959, guid: cff8713969abf1047848cf64f034f43c, type: 3}
   moveAnimationFps: 9
-  attackFrames: []
+  attackFrames:
+  - {fileID: 7235309117263554447, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 4377250713000525266, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: -2485831851604151514, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 5405468509449178, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 3926076345273017207, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 3112800868494076901, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 8499567605862650302, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 2350166467697842373, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
+  - {fileID: 1976687555284555739, guid: a72a6f4007d37ae4fb6a3888f1e2afae, type: 3}
   attackAnimationFps: 18
   baseHp: 180
   moveSpeed: 0.75

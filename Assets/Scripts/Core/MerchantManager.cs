@@ -14,7 +14,10 @@ namespace CrossDefense.Core
         public int Price { get; }
         public EquipmentData Equipment { get; }
         public ConsumableDefinition Consumable { get; }
-        public RunRelicDefinition Relic { get; }
+        public RelicDefinition Relic { get; }
+        public RunRelicDefinition Trophy { get; }
+        public RelicFamily RelicFamily { get; }
+        public int RelicTargetRank { get; }
         public bool Purchased { get; internal set; }
 
         public MerchantOffer(EquipmentData item)
@@ -27,41 +30,61 @@ namespace CrossDefense.Core
             Category = MerchantProductCategory.Consumable; Consumable = item;
             Id = item.Id; DisplayName = item.DisplayName; Description = item.Description; Price = item.Price;
         }
-        public MerchantOffer(RunRelicDefinition item)
+        public MerchantOffer(RelicDefinition item, int targetRank)
         {
             Category = MerchantProductCategory.Relic; Relic = item;
+            RelicFamily = item.Family;
+            RelicTargetRank = Mathf.Clamp(targetRank, 1, item.MaxRank);
+            RelicRankDefinition rank = item.Rank(RelicTargetRank);
+            Id = $"{item.Id}-{RelicTargetRank}";
+            DisplayName = $"{rank.DisplayName} ★{RelicTargetRank}";
+            Description = RelicTargetRank == 1
+                ? $"신규 신물 획득 · {rank.SkillName}\n{rank.Description}"
+                : $"신물 승급 ★{RelicTargetRank - 1} → ★{RelicTargetRank} · {rank.SkillName}\n{rank.Description}";
+            Price = rank.Price;
+        }
+        public MerchantOffer(RunRelicDefinition item)
+        {
+            Category = MerchantProductCategory.Trophy; Trophy = item;
             Id = item.Id; DisplayName = item.DisplayName; Description = item.Description; Price = item.Price;
         }
     }
 
     public sealed class MerchantManager
     {
+        const int OfferCount = 3;
         readonly GameManager _game;
         readonly MerchantCatalog _catalog;
         readonly EquipmentProgression _equipment;
-        readonly RunRelicInventory _relics;
-        readonly List<MerchantOffer> _offers = new(3);
+        readonly RelicProgression _relics;
+        readonly RunRelicInventory _trophies;
+        readonly List<MerchantOffer> _offers = new(OfferCount);
+        readonly System.Random _random;
         public IReadOnlyList<MerchantOffer> Offers => _offers;
         public bool IsOpen { get; private set; }
         public event Action Changed;
 
         public MerchantManager(GameManager game, MerchantCatalog catalog,
-            EquipmentProgression equipment, RunRelicInventory relics)
+            EquipmentProgression equipment, RelicProgression relics, RunRelicInventory trophies,
+            System.Random random = null)
         {
-            _game = game; _catalog = catalog; _equipment = equipment; _relics = relics;
+            _game = game; _catalog = catalog; _equipment = equipment;
+            _relics = relics; _trophies = trophies;
+            _random = random ?? new System.Random(unchecked(
+                Environment.TickCount ^ Guid.NewGuid().GetHashCode()));
         }
 
         public void Open(int waveNumber, int stageSeed)
         {
             _offers.Clear();
-            var random = new System.Random(unchecked(stageSeed * 397 ^ waveNumber * 7919));
-            EquipmentData equipment = PickEquipment(random);
-            if (equipment != null) _offers.Add(new MerchantOffer(equipment));
-            else _offers.Add(new MerchantOffer(Pick(_catalog.Consumables, random)));
-            _offers.Add(new MerchantOffer(Pick(_catalog.Consumables, random)));
-            RunRelicDefinition relic = PickRelic(random);
-            if (relic != null) _offers.Add(new MerchantOffer(relic));
-            else _offers.Add(new MerchantOffer(Pick(_catalog.Consumables, random)));
+            List<MerchantOffer> candidates = BuildOfferPool();
+            int offerCount = Mathf.Min(OfferCount, candidates.Count);
+            for (int i = 0; i < offerCount; i++)
+            {
+                int candidateIndex = _random.Next(candidates.Count);
+                _offers.Add(candidates[candidateIndex]);
+                candidates.RemoveAt(candidateIndex);
+            }
             IsOpen = true;
             Changed?.Invoke();
         }
@@ -106,7 +129,8 @@ namespace CrossDefense.Core
         bool Apply(MerchantOffer offer)
         {
             if (offer.Equipment != null) return _equipment.Acquire(offer.Equipment);
-            if (offer.Relic != null) return _relics.TryAdd(offer.Relic);
+            if (offer.Relic != null) return _relics.TryAcquire(offer.RelicFamily);
+            if (offer.Trophy != null) return _trophies.TryAdd(offer.Trophy);
             if (offer.Consumable == null) return false;
             switch (offer.Consumable.Effect)
             {
@@ -122,25 +146,33 @@ namespace CrossDefense.Core
             }
         }
 
-        EquipmentData PickEquipment(System.Random random)
+        List<MerchantOffer> BuildOfferPool()
         {
-            var candidates = new List<EquipmentData>();
+            var candidates = new List<MerchantOffer>();
+
             if (_catalog?.EquipmentCatalog?.Equipment != null)
                 foreach (EquipmentData item in _catalog.EquipmentCatalog.Equipment)
-                    if (item != null && !_equipment.IsOwned(item.EquipmentId)) candidates.Add(item);
-            return candidates.Count == 0 ? null : candidates[random.Next(candidates.Count)];
-        }
+                    if (item != null && _equipment != null && !_equipment.IsOwned(item.EquipmentId))
+                        candidates.Add(new MerchantOffer(item));
 
-        RunRelicDefinition PickRelic(System.Random random)
-        {
-            var candidates = new List<RunRelicDefinition>();
-            if (_catalog?.Relics != null)
-                foreach (RunRelicDefinition relic in _catalog.Relics)
-                    if (relic != null && !_relics.Contains(relic.Id)) candidates.Add(relic);
-            return candidates.Count == 0 ? null : candidates[random.Next(candidates.Count)];
-        }
+            if (_relics?.Catalog?.Relics != null)
+                foreach (RelicDefinition relic in _relics.Catalog.Relics)
+                    if (relic != null && _relics.CanAcquire(relic.Family))
+                        candidates.Add(new MerchantOffer(
+                            relic,
+                            _relics.Rank(relic.Family) + 1));
 
-        static T Pick<T>(IReadOnlyList<T> source, System.Random random) where T : class =>
-            source == null || source.Count == 0 ? null : source[random.Next(source.Count)];
+            if (_catalog?.Consumables != null)
+                foreach (ConsumableDefinition consumable in _catalog.Consumables)
+                    if (consumable != null)
+                        candidates.Add(new MerchantOffer(consumable));
+
+            if (_catalog?.Relics != null && _trophies != null)
+                foreach (RunRelicDefinition trophy in _catalog.Relics)
+                    if (trophy != null && !_trophies.Contains(trophy.Id))
+                        candidates.Add(new MerchantOffer(trophy));
+
+            return candidates;
+        }
     }
 }

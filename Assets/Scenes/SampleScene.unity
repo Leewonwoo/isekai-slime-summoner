@@ -176,7 +176,7 @@ Transform:
   m_GameObject: {fileID: 257950157}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.94, z: 0}
   m_LocalScale: {x: 3.4394903, y: 3.4394903, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -825,7 +825,7 @@ Transform:
   m_GameObject: {fileID: 1839978295}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.26, z: 0}
+  m_LocalPosition: {x: 0, y: 4.32, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -892,6 +892,7 @@ MonoBehaviour:
   growthBalance: {fileID: 11400000, guid: bdc2782e003172949ad988967dd55bfc, type: 2}
   monsterCatalog: {fileID: 11400000, guid: c13494a960e27bd4ca8400b3374c0f94, type: 2}
   equipmentCatalog: {fileID: 11400000, guid: 160b1295ceedced46a7672a1ad4980c5, type: 2}
+  relicCatalog: {fileID: 11400000, guid: d50ab39155c097a4f98a325200709b62, type: 2}
   merchantCatalog: {fileID: 11400000, guid: 42c51469fd318ea4e8a95aabc9f681bf, type: 2}
   dopamineBalance: {fileID: 11400000, guid: f2cdf33cafc6413db89b0df4a54698f6, type: 2}
   summonPool: []

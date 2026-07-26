@@ -5,7 +5,7 @@ namespace CrossDefense.UI
     {
         public static string Gold(int value) => $"{value:N0}";
 
-        public static string Wave(int current) => $"WAVE {current}";
+        public static string Wave(int current) => $"DAY {current}";
 
         public static string RemainingMonsters(int value) => $"잔여 몬스터 {value:N0}";
 

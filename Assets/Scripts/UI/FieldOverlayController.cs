@@ -16,6 +16,7 @@ namespace CrossDefense.UI
         readonly VisualElement _overdriveGaugeFill;
         readonly Label _overdriveGaugeLabel;
         readonly Button _skillButton;
+        readonly Button _speedToggleButton;
         readonly Button _slimeCodexButton;
         readonly Button _monsterCodexButton;
         readonly Label _unlockToast;
@@ -38,6 +39,7 @@ namespace CrossDefense.UI
 
         public event Action SkillRequested;
         public event Action<int> BuffSkillRequested;
+        public event Action SpeedToggleRequested;
         public event Action SlimeCodexRequested;
         public event Action MonsterCodexRequested;
 
@@ -50,6 +52,7 @@ namespace CrossDefense.UI
             _overdriveGaugeFill = root.Q<VisualElement>("overdrive-gauge-fill");
             _overdriveGaugeLabel = root.Q<Label>("overdrive-gauge-label");
             _skillButton = root.Q<Button>("skill-button");
+            _speedToggleButton = root.Q<Button>("speed-toggle-button");
             _slimeCodexButton = root.Q<Button>("slime-codex-button");
             _monsterCodexButton = root.Q<Button>("monster-codex-button");
             _unlockToast = root.Q<Label>("unlock-toast");
@@ -69,6 +72,7 @@ namespace CrossDefense.UI
                 _buffSkillClickHandlers[i] = () => BuffSkillRequested?.Invoke(captured);
                 _buffSkillButtons[i].clicked += _buffSkillClickHandlers[i];
             }
+            _speedToggleButton.clicked += OnSpeedToggleClicked;
             _slimeCodexButton.clicked += OnSlimeCodexClicked;
             _monsterCodexButton.clicked += OnMonsterCodexClicked;
         }
@@ -76,7 +80,7 @@ namespace CrossDefense.UI
         public void SetWave(int current, int remainingMonsters)
         {
             _waveLabel.text = _waveKind == StageWaveKind.Rush
-                ? $"RUSH WAVE {current}"
+                ? $"RUSH DAY {current}"
                 : UIFormat.Wave(current);
             _remainingMonstersLabel.text = UIFormat.RemainingMonsters(remainingMonsters);
         }
@@ -110,6 +114,7 @@ namespace CrossDefense.UI
             _skillButton.clicked -= _skillClickHandler;
             for (int i = 0; i < _buffSkillButtons.Length; i++)
                 _buffSkillButtons[i].clicked -= _buffSkillClickHandlers[i];
+            _speedToggleButton.clicked -= OnSpeedToggleClicked;
             _slimeCodexButton.clicked -= OnSlimeCodexClicked;
             _monsterCodexButton.clicked -= OnMonsterCodexClicked;
         }
@@ -145,6 +150,13 @@ namespace CrossDefense.UI
                 : snapshot.IsReady ? "READY" : string.Empty;
         }
 
+        public void SetGameplaySpeed(float speed)
+        {
+            bool fast = speed >= 1.25f;
+            _speedToggleButton.text = fast ? "×1.5" : "×1.0";
+            _speedToggleButton.EnableInClassList("speed-toggle-button--fast", fast);
+        }
+
         public void SetSkillState(
             SummonerSkillDefinition definition,
             float remainingCooldown,
@@ -156,6 +168,10 @@ namespace CrossDefense.UI
                 _skillIcon.RemoveFromClassList(_skillIconClass);
             _skillIconClass = nextIconClass;
             _skillIcon.AddToClassList(_skillIconClass);
+            Sprite skillSprite = GameplayIconLibrary.Skill(definition.Id);
+            _skillIcon.style.backgroundImage = skillSprite != null
+                ? new StyleBackground(skillSprite)
+                : StyleKeyword.Null;
             _skillCooldown.text = remainingCooldown > 0f
                 ? Mathf.CeilToInt(remainingCooldown).ToString()
                 : string.Empty;
@@ -185,6 +201,10 @@ namespace CrossDefense.UI
                 string iconClass = BuffIconClass(value.Id);
                 _buffSkillIconClasses[slotIndex] = iconClass;
                 icon.AddToClassList(iconClass);
+                Sprite buffSprite = GameplayIconLibrary.Buff(value.Id);
+                icon.style.backgroundImage = buffSprite != null
+                    ? new StyleBackground(buffSprite)
+                    : StyleKeyword.Null;
                 _buffSkillNames[slotIndex].text = BuffShortName(value.Id);
                 _buffSkillCooldowns[slotIndex].text = remainingCooldown > 0f
                     ? Mathf.CeilToInt(remainingCooldown).ToString()
@@ -193,6 +213,7 @@ namespace CrossDefense.UI
             else
             {
                 _buffSkillIconClasses[slotIndex] = string.Empty;
+                icon.style.backgroundImage = StyleKeyword.Null;
                 _buffSkillNames[slotIndex].text = "비어 있음";
                 _buffSkillCooldowns[slotIndex].text = string.Empty;
             }
@@ -234,5 +255,6 @@ namespace CrossDefense.UI
 
         void OnSlimeCodexClicked() => SlimeCodexRequested?.Invoke();
         void OnMonsterCodexClicked() => MonsterCodexRequested?.Invoke();
+        void OnSpeedToggleClicked() => SpeedToggleRequested?.Invoke();
     }
 }

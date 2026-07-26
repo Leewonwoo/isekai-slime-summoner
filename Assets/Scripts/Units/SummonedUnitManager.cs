@@ -43,6 +43,7 @@ namespace CrossDefense.Units
         public IReadOnlyCollection<MonsterController> Monsters => _monsters;
         public CombatProjectileService Projectiles { get; private set; }
         public CombatEffectService Effects { get; private set; }
+        public SlimeAttackEffectService AttackEffects { get; private set; }
         public bool CanUnitsFight => _gameManager != null && !_gameManager.IsRunOver && _gameManager.Phase == RunPhase.InWave;
         public bool IsGameplayPaused => _gameManager?.IsGameplayPaused ?? false;
         public bool IsDragging => _draggedUnit != null || _benchPreview != null;
@@ -81,6 +82,9 @@ namespace CrossDefense.Units
             _unitRoot.SetParent(transform, false);
             Projectiles = new CombatProjectileService(transform, () => _monsters, () => CanUnitsFight);
             Effects = new CombatEffectService(transform, () => CanUnitsFight);
+            AttackEffects = new SlimeAttackEffectService(
+                transform,
+                () => CanUnitsFight && !IsGameplayPaused);
             _unitTemplate = RuntimePoolService.GetOrCreateTemplate(
                 "CrossDefenseSummonedUnit",
                 gameObject =>
@@ -402,6 +406,10 @@ namespace CrossDefense.Units
                 return false;
             healer.PresentSupportBuff();
             PresentDamageNumber(target.GetFloatingTextAnchor(), healed, DamageTextKind.Healing);
+            AttackEffects?.PlaySupport(
+                healer.Instance.Rank,
+                healer.GetHeadEffectAnchor(),
+                target.GetFloatingTextAnchor());
             return true;
         }
 

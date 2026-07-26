@@ -1,14 +1,35 @@
 <UXML xmlns="UnityEngine.UIElements">
     <VisualElement name="gear-tab" class="gear-tab">
-        <Label class="gear-tab__title" text="소환사 영구 신물" />
-        <VisualElement name="gear-slots" class="gear-tab__slots">
-            <Label name="gear-slot-weapon" class="gear-tab__slot" text="공격 신물&#10;비어 있음" />
-            <Label name="gear-slot-armor" class="gear-tab__slot" text="수호 신물&#10;비어 있음" />
-            <Label name="gear-slot-accessory" class="gear-tab__slot" text="보조 신물&#10;비어 있음" />
+        <VisualElement class="gear-tab__header">
+            <Label class="gear-tab__title" text="가방" />
         </VisualElement>
-        <Label class="gear-tab__section" text="보유 신물" />
-        <ScrollView name="equipment-list" class="row-list panel-scroll gear-tab__inventory" mode="Vertical" />
-        <Label class="gear-tab__section" text="이번 런 유물" />
-        <Label name="run-relic-list" class="gear-tab__relics" text="보유한 유물이 없습니다." />
+
+        <VisualElement name="gear-category-tabs" class="gear-tab__categories">
+            <Button name="gear-category-equipment" class="gear-tab__category gear-tab__category--active" text="장비" />
+            <Button name="gear-category-relic" class="gear-tab__category" text="신물" />
+            <Button name="gear-category-trophy" class="gear-tab__category" text="전리품" />
+        </VisualElement>
+
+        <VisualElement name="gear-page-equipment" class="gear-tab__page">
+            <ScrollView name="equipment-list" class="row-list panel-scroll gear-tab__inventory" mode="Vertical" />
+        </VisualElement>
+
+        <VisualElement name="gear-page-relic" class="gear-tab__page hidden">
+            <VisualElement class="gear-tab__equipped">
+                <Label class="gear-tab__section gear-tab__section--gold" text="장착 신물" />
+                <Label name="relic-equipped-name" class="gear-tab__equipped-name" text="신물 없음" />
+                <Label name="relic-equipped-description" class="gear-tab__equipped-description" text="장착한 신물의 고유 공격이 표시됩니다." />
+            </VisualElement>
+            <Label class="gear-tab__section" text="보유 신물" />
+            <ScrollView name="relic-skill-list" class="row-list panel-scroll gear-tab__inventory" mode="Vertical" />
+        </VisualElement>
+
+        <ScrollView name="gear-page-trophy" class="gear-tab__page gear-tab__trophy-page hidden" mode="Vertical">
+            <Label class="gear-tab__section gear-tab__section--gold" text="전리품" />
+            <Label class="gear-tab__hint" text="이번 도전에서만 적용되며 패배하거나 도전을 마치면 사라집니다." />
+            <VisualElement name="run-relic-list" class="gear-tab__relics" />
+            <Label class="gear-tab__section gear-tab__section--gold" text="획득 특성" />
+            <Label name="trophy-trait-list" class="gear-tab__relics" text="획득한 특성이 없습니다." />
+        </ScrollView>
     </VisualElement>
 </UXML>

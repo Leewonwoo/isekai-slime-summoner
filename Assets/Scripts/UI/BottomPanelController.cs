@@ -84,9 +84,12 @@ namespace CrossDefense.UI
         const float BenchDragThreshold = 22f;
 
         static readonly string[] TabKeys = { "summon", "upgrade", "skill", "gear", "summoner" };
+        static readonly string[] GearCategoryKeys = { "equipment", "relic", "trophy" };
 
         readonly Dictionary<string, Button> _tabButtons = new();
         readonly Dictionary<string, VisualElement> _tabPages = new();
+        readonly Dictionary<string, Button> _gearCategoryButtons = new();
+        readonly Dictionary<string, VisualElement> _gearCategoryPages = new();
         readonly VisualElement _root;
         readonly VisualElement _bench;
         readonly List<VisualElement> _benchSlots = new();
@@ -96,11 +99,13 @@ namespace CrossDefense.UI
         readonly Dictionary<string, GrowthRowBinding> _upgradeRows = new();
         readonly Dictionary<SummonerBuffId, SkillRowBinding> _skillRows = new();
         readonly List<EquipmentRowBinding> _equipmentRows = new();
+        readonly Dictionary<RelicFamily, RelicSkillRowBinding> _relicSkillRows = new();
         readonly ScrollView _equipmentList;
-        readonly Label _gearWeapon;
-        readonly Label _gearArmor;
-        readonly Label _gearAccessory;
-        readonly Label _runRelicList;
+        readonly ScrollView _relicSkillList;
+        readonly Label _relicEquippedName;
+        readonly Label _relicEquippedDescription;
+        readonly VisualElement _runRelicList;
+        readonly Label _trophyTraitList;
         readonly Label _skillLoadoutCount;
         readonly Label _benchCount;
         readonly Label _summonContractCount;
@@ -129,6 +134,7 @@ namespace CrossDefense.UI
         public event Action<SummonUnitInstance, Vector2> BenchDragEnded;
         public event Action<RunUpgradeType> RunUpgradeRequested;
         public event Action<SummonerBuffId> SkillEquipRequested;
+        public event Action<RelicFamily> RelicSkillEquipRequested;
         public event Action<string> EquipmentEquipRequested;
         public bool IsSummonAnimating => _isSummonAnimating;
 
@@ -144,14 +150,26 @@ namespace CrossDefense.UI
                 _tabPages[key] = root.Q<VisualElement>($"page-{key}");
                 button.clicked += () => SelectTab(captured);
             }
+            foreach (string key in GearCategoryKeys)
+            {
+                string captured = key;
+                Button button = root.Q<Button>($"gear-category-{key}");
+                VisualElement page = root.Q<VisualElement>($"gear-page-{key}");
+                if (button == null || page == null)
+                    continue;
+                _gearCategoryButtons[key] = button;
+                _gearCategoryPages[key] = page;
+                button.clicked += () => SelectGearCategory(captured);
+            }
 
             _bench = root.Q<VisualElement>("bench");
             BuildBenchSlots();
             _equipmentList = root.Q<ScrollView>("equipment-list");
-            _gearWeapon = root.Q<Label>("gear-slot-weapon");
-            _gearArmor = root.Q<Label>("gear-slot-armor");
-            _gearAccessory = root.Q<Label>("gear-slot-accessory");
-            _runRelicList = root.Q<Label>("run-relic-list");
+            _relicSkillList = root.Q<ScrollView>("relic-skill-list");
+            _relicEquippedName = root.Q<Label>("relic-equipped-name");
+            _relicEquippedDescription = root.Q<Label>("relic-equipped-description");
+            _runRelicList = root.Q<VisualElement>("run-relic-list");
+            _trophyTraitList = root.Q<Label>("trophy-trait-list");
             _skillLoadoutCount = root.Q<Label>("skill-loadout-count");
             _benchCount = root.Q<Label>("bench-count");
             _summonContractCount = root.Q<Label>("summon-contract-count");
@@ -175,6 +193,7 @@ namespace CrossDefense.UI
             SetSummonContracts(0);
 
             BuildSkillRows();
+            SelectGearCategory("equipment");
         }
 
         public void Dispose()
@@ -185,6 +204,9 @@ namespace CrossDefense.UI
             _skillRows.Clear();
             foreach (EquipmentRowBinding binding in _equipmentRows) binding.Dispose();
             _equipmentRows.Clear();
+            foreach (RelicSkillRowBinding binding in _relicSkillRows.Values)
+                binding.Dispose();
+            _relicSkillRows.Clear();
         }
 
         public void SelectTab(string key)
@@ -194,6 +216,18 @@ namespace CrossDefense.UI
                 bool active = tab == key;
                 _tabButtons[tab].EnableInClassList("tab-bar__button--active", active);
                 _tabPages[tab].EnableInClassList("hidden", !active);
+            }
+        }
+
+        public void SelectGearCategory(string key)
+        {
+            foreach (string category in GearCategoryKeys)
+            {
+                bool active = category == key;
+                if (_gearCategoryButtons.TryGetValue(category, out Button button))
+                    button.EnableInClassList("gear-tab__category--active", active);
+                if (_gearCategoryPages.TryGetValue(category, out VisualElement page))
+                    page.EnableInClassList("hidden", !active);
             }
         }
 
@@ -252,17 +286,16 @@ namespace CrossDefense.UI
                     !unlocked ? "잠김" :
                     isEquipped ? "해제" :
                     hasOpenSlot ? "장착" : "3/3",
-                    SkillRowIconClass(definition.Id));
+                    iconSprite: GameplayIconLibrary.Buff(definition.Id));
                 binding.View.SetAffordable(unlocked && (isEquipped || hasOpenSlot));
             }
         }
 
-        public void SetEquipmentData(EquipmentProgression equipment, RunRelicInventory relics)
+        public void SetEquipmentData(
+            EquipmentProgression equipment,
+            RunRelicInventory trophies,
+            string runTraitText = null)
         {
-            _gearWeapon.text = SlotText("공격 신물", equipment?.Equipped(EquipmentSlot.Weapon));
-            _gearArmor.text = SlotText("수호 신물", equipment?.Equipped(EquipmentSlot.Armor));
-            _gearAccessory.text = SlotText("보조 신물", equipment?.Equipped(EquipmentSlot.Accessory));
-
             foreach (EquipmentRowBinding binding in _equipmentRows) binding.Dispose();
             _equipmentRows.Clear();
             _equipmentList?.Clear();
@@ -275,25 +308,88 @@ namespace CrossDefense.UI
                     var binding = new EquipmentRowBinding(row, item.EquipmentId,
                         id => EquipmentEquipRequested?.Invoke(id));
                     bool equipped = equipment.Equipped(item.Slot)?.EquipmentId == item.EquipmentId;
-                    binding.View.Bind(item.DisplayName, item.Description, equipped ? "장착 중" : "장착");
+                    binding.View.Bind(
+                        item.DisplayName,
+                        item.Description,
+                        equipped ? "장착 중" : "장착",
+                        iconSprite: GameplayIconLibrary.Equipment(item));
                     binding.View.SetAffordable(!equipped);
                     _equipmentRows.Add(binding);
                     _equipmentList.Add(row);
                 }
             }
 
-            var relicNames = new List<string>();
-            if (relics?.Owned != null)
-                foreach (RunRelicDefinition relic in relics.Owned)
-                    relicNames.Add($"• {relic.DisplayName} — {relic.Description}");
             if (_runRelicList != null)
-                _runRelicList.text = relicNames.Count == 0
-                    ? "보유한 유물이 없습니다."
-                    : string.Join("\n", relicNames);
+            {
+                _runRelicList.Clear();
+                if (trophies?.Owned == null || trophies.Owned.Count == 0)
+                {
+                    _runRelicList.Add(new Label("획득한 전리품이 없습니다.")
+                    {
+                        name = "run-relic-empty",
+                    });
+                }
+                else
+                {
+                    foreach (RunRelicDefinition trophy in trophies.Owned)
+                        AddCatalogInfoRow(
+                            _runRelicList,
+                            GameplayIconLibrary.Loot(trophy.Id),
+                            trophy.DisplayName,
+                            trophy.Description);
+                }
+            }
+            if (_trophyTraitList != null)
+                _trophyTraitList.text = string.IsNullOrWhiteSpace(runTraitText)
+                    ? "획득한 특성이 없습니다."
+                    : runTraitText;
         }
 
-        static string SlotText(string slotName, EquipmentData item) =>
-            item == null ? $"{slotName}\n비어 있음" : $"{slotName}\n{item.DisplayName}";
+        public void SetRelicData(RelicProgression relics)
+        {
+            RelicDefinition equipped = relics?.EquippedDefinition;
+            int equippedRank = relics?.EquippedRank ?? 0;
+            RelicRankDefinition equippedRankData = equipped?.Rank(equippedRank);
+            if (_relicEquippedName != null)
+                _relicEquippedName.text = equippedRankData == null
+                    ? "장착한 신물 없음"
+                    : $"{equippedRankData.DisplayName} ★{equippedRank}";
+            if (_relicEquippedDescription != null)
+                _relicEquippedDescription.text = equippedRankData == null
+                    ? "행상인에게서 획득한 신물을 장착할 수 있습니다."
+                    : $"{equippedRankData.SkillName} · {equippedRankData.Description}";
+
+            foreach (RelicSkillRowBinding binding in _relicSkillRows.Values)
+                binding.Dispose();
+            _relicSkillRows.Clear();
+            _relicSkillList?.Clear();
+            if (relics?.Catalog?.Relics == null ||
+                _relicSkillList == null || _upgradeRowTemplate == null)
+                return;
+            foreach (RelicDefinition definition in relics.Catalog.Relics)
+            {
+                if (definition == null)
+                    continue;
+                int rank = relics.Rank(definition.Family);
+                if (rank <= 0)
+                    continue;
+                RelicRankDefinition rankData = definition.Rank(rank);
+                bool isEquipped = definition.Family == relics.EquippedFamily;
+                VisualElement root = _upgradeRowTemplate.Instantiate();
+                var binding = new RelicSkillRowBinding(
+                    root,
+                    definition.Family,
+                    family => RelicSkillEquipRequested?.Invoke(family));
+                binding.View.Bind(
+                    $"{rankData.DisplayName} ★{rank}",
+                    $"{rankData.SkillName} · {rankData.Description}",
+                    isEquipped ? "장착 중" : "장착",
+                    iconSprite: GameplayIconLibrary.Relic(definition.Family, rank));
+                binding.View.SetAffordable(!isEquipped);
+                _relicSkillRows.Add(definition.Family, binding);
+                _relicSkillList.Add(root);
+            }
+        }
 
         static bool IsBuffEquipped(
             IReadOnlyList<SummonerBuffId> equipped,
@@ -316,6 +412,31 @@ namespace CrossDefense.UI
             SummonerBuffId.TimeAcceleration => "row__icon--crit",
             _ => "row__icon--skill-aegis",
         };
+
+        static void AddCatalogInfoRow(
+            VisualElement container,
+            Sprite icon,
+            string title,
+            string description)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("catalog-info-row");
+            var iconElement = new VisualElement();
+            iconElement.AddToClassList("catalog-info-row__icon");
+            if (icon != null)
+                iconElement.style.backgroundImage = new StyleBackground(icon);
+            var copy = new VisualElement();
+            copy.AddToClassList("catalog-info-row__copy");
+            var titleLabel = new Label(title);
+            titleLabel.AddToClassList("catalog-info-row__title");
+            var descriptionLabel = new Label(description);
+            descriptionLabel.AddToClassList("catalog-info-row__description");
+            copy.Add(titleLabel);
+            copy.Add(descriptionLabel);
+            row.Add(iconElement);
+            row.Add(copy);
+            container.Add(row);
+        }
 
         public void SetSummonerInfo(SummonerInfoModel model)
         {
@@ -553,6 +674,26 @@ namespace CrossDefense.UI
             public void Dispose() => _button.clicked -= _handler;
         }
 
+        sealed class RelicSkillRowBinding
+        {
+            public UpgradeRowView View { get; }
+            readonly Button _button;
+            readonly Action _handler;
+
+            public RelicSkillRowBinding(
+                VisualElement root,
+                RelicFamily family,
+                Action<RelicFamily> onClicked)
+            {
+                View = new UpgradeRowView(root);
+                _button = View.ActionButton;
+                _handler = () => onClicked?.Invoke(family);
+                _button.clicked += _handler;
+            }
+
+            public void Dispose() => _button.clicked -= _handler;
+        }
+
         void BuildSkillRows()
         {
             if (_skillList == null || _upgradeRowTemplate == null)
@@ -568,6 +709,12 @@ namespace CrossDefense.UI
                 _skillList.Add(root);
             }
         }
+
+        static string RelicSkillIconClass(RelicFamily family) => family switch
+        {
+            RelicFamily.Ice => "row__icon--skill-ice-wall",
+            _ => "row__icon--skill-meteor",
+        };
 
         void UpdateSummonButtonState()
         {

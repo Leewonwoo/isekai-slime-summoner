@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace CrossDefense.UI
@@ -20,7 +21,12 @@ namespace CrossDefense.UI
             _icon = row.Q<VisualElement>("row-icon");
         }
 
-        public void Bind(string name, string values, string actionText, string iconClass = null)
+        public void Bind(
+            string name,
+            string values,
+            string actionText,
+            string iconClass = null,
+            Sprite iconSprite = null)
         {
             _name.text = name;
             _values.text = values;
@@ -31,6 +37,9 @@ namespace CrossDefense.UI
             _iconClass = iconClass;
             if (!string.IsNullOrEmpty(_iconClass))
                 _icon.AddToClassList(_iconClass);
+            _icon.style.backgroundImage = iconSprite != null
+                ? new StyleBackground(iconSprite)
+                : StyleKeyword.Null;
         }
 
         /// <summary>재화 부족 시 회색 비활성 — 버튼을 숨기지 않는다 (SPEC §4.5)</summary>

@@ -13,6 +13,10 @@ namespace CrossDefense.Core
     [DisallowMultipleComponent]
     public sealed class GameManager : MonoBehaviour
     {
+        const string GameplaySpeedPrefsKey = "CrossDefense.GameplaySpeed.v1";
+        const float NormalGameplaySpeed = 1f;
+        const float FastGameplaySpeed = 1.5f;
+
         [Header("Stage")]
         [SerializeField] StageTimeline stageTimeline;
         [SerializeField] bool autoStart = true;
@@ -46,6 +50,7 @@ namespace CrossDefense.Core
         [Header("Persistent Collections")]
         [SerializeField] MonsterCatalog monsterCatalog;
         [SerializeField] EquipmentCatalog equipmentCatalog;
+        [SerializeField] RelicCatalog relicCatalog;
         [SerializeField] MerchantCatalog merchantCatalog;
 
         [Header("Dopamine")]
@@ -122,14 +127,17 @@ namespace CrossDefense.Core
         RunRewardCatalog _runtimeRunRewardCatalog;
         MonsterCatalog _runtimeMonsterCatalog;
         EquipmentCatalog _runtimeEquipmentCatalog;
+        RelicCatalog _runtimeRelicCatalog;
         MerchantCatalog _runtimeMerchantCatalog;
         WorldHealthBar _summonerHealthBar;
         SpriteRenderer _summonerRenderer;
         DamageFloatingTextService _damageFloatingText;
         CombatEffectService _monsterDeathEffects;
+        MonsterProjectileService _monsterProjectiles;
         SummonerProgression _summonerProgression;
         PermanentTraitProgression _permanentTraits;
         RunTraitProgression _runTraits;
+        SummonerCombatBuildProgression _combatBuild;
         GrowthManager _growthManager;
         SummonerSkillLoadout _summonerSkillLoadout;
         SummonerSkillController _summonerSkillController;
@@ -138,8 +146,11 @@ namespace CrossDefense.Core
         DopamineController _dopamineController;
         MonsterCodexProgression _monsterCodex;
         EquipmentProgression _equipment;
+        RelicProgression _relics;
         RunRelicInventory _runRelics;
         MerchantManager _merchant;
+        RunSessionProgression _runSession;
+        WalletProgression _wallet;
         Coroutine _defeatRestartRoutine;
         float _coreHp;
         float _effectiveMaxCoreHp;
@@ -147,11 +158,15 @@ namespace CrossDefense.Core
         float _coreShieldUntil;
         int _gold;
         int _summonContracts;
+        int _resumeWaveIndex;
+        bool _runSessionActive = true;
+        bool _suppressRunSessionSave;
         RunPhase _phase;
         StageWave _currentWaveData;
         readonly HashSet<int> _grantedRushGoldWaves = new();
         GameplayPauseReason _gameplayPauseReasons;
         float _timeScaleBeforeGameplayPause = 1f;
+        float _gameplaySpeed = NormalGameplaySpeed;
 
         public StageTimeline StageTimeline => stageTimeline;
         public Transform Summoner => summoner;
@@ -165,6 +180,7 @@ namespace CrossDefense.Core
         public SummonerProgression SummonerProgression => _summonerProgression;
         public PermanentTraitProgression PermanentTraits => _permanentTraits;
         public RunTraitProgression RunTraits => _runTraits;
+        public SummonerCombatBuildProgression CombatBuild => _combatBuild;
         public GrowthManager Growth => _growthManager;
         public SummonerSkillLoadout SummonerSkillLoadout => _summonerSkillLoadout;
         public SummonerSkillController SummonerSkills => _summonerSkillController;
@@ -174,6 +190,7 @@ namespace CrossDefense.Core
         public MonsterCatalog MonsterCatalog => monsterCatalog;
         public MonsterCodexProgression MonsterCodex => _monsterCodex;
         public EquipmentProgression Equipment => _equipment;
+        public RelicProgression Relics => _relics;
         public RunRelicInventory RunRelics => _runRelics;
         public MerchantManager Merchant => _merchant;
         public StageWave CurrentWaveData => _currentWaveData;
@@ -192,6 +209,7 @@ namespace CrossDefense.Core
         public DamageFloatingTextService DamageFloatingText => _damageFloatingText;
         public bool IsGameplayPaused => _gameplayPauseReasons != GameplayPauseReason.None;
         public GameplayPauseReason GameplayPauseReasons => _gameplayPauseReasons;
+        public float GameplaySpeed => _gameplaySpeed;
         public float DirectRankOneChance => Mathf.Min(0.25f,
             directRankOneChance +
             (_summonerProgression?.Snapshot.JackpotChanceBonus ?? 0f) +
@@ -203,15 +221,19 @@ namespace CrossDefense.Core
             RunAttackSpeedMultiplier *
             (_permanentTraits?.Snapshot.SummonerAttackSpeedMultiplier ?? 1f) *
             (_equipment?.AttackSpeedMultiplier ?? 1f) *
-            (_runRelics?.AttackSpeedMultiplier ?? 1f);
+            (_runRelics?.AttackSpeedMultiplier ?? 1f) *
+            (_combatBuild?.BuildProfile().AttackSpeedMultiplier ?? 1f) *
+            (_dopamineController?.SummonerAttackSpeedMultiplier ?? 1f);
         public float SlimeAttackSpeedMultiplier =>
             RunAttackSpeedMultiplier *
             (_permanentTraits?.Snapshot.SlimeAttackSpeedMultiplier ?? 1f) *
             (_runRelics?.AttackSpeedMultiplier ?? 1f) *
             (_summonerBuffController?.SlimeAttackSpeedMultiplier ?? 1f);
         public bool IsRunTraitChoicePending => _runTraits?.IsChoicePending ?? false;
+        public bool IsCombatBuildChoicePending => _combatBuild?.IsChoicePending ?? false;
         public bool IsMerchantOpen => _merchant?.IsOpen ?? false;
         public CombatProjectileService Projectiles => _summonedUnitManager?.Projectiles;
+        public MonsterProjectileService MonsterProjectiles => _monsterProjectiles;
         public bool IsRunOver => _phase == RunPhase.Victory || _phase == RunPhase.Defeat;
         public int CurrentWave => _waveManager == null ? 0 : _waveManager.CurrentWaveIndex + 1;
         public int TotalWaves => _waveManager == null ? 0 : _waveManager.TotalWaves;
@@ -230,6 +252,7 @@ namespace CrossDefense.Core
         public event Action<MonsterController, StageWave, int> MonsterSpawned;
         public event Action<MonsterController> MonsterResolved;
         public event Action<bool> GameplayPauseChanged;
+        public event Action<float> GameplaySpeedChanged;
 
         void OnValidate()
         {
@@ -287,6 +310,12 @@ namespace CrossDefense.Core
 
         void Awake()
         {
+            _gameplaySpeed = PlayerPrefs.GetInt(GameplaySpeedPrefsKey, 0) == 1
+                ? FastGameplaySpeed
+                : NormalGameplaySpeed;
+            _timeScaleBeforeGameplayPause = _gameplaySpeed;
+            Time.timeScale = _gameplaySpeed;
+
             if (PersistentProgressReset.ConsumePendingReset())
                 Debug.Log("[CrossDefense] 예약된 영구 진행 초기화를 적용했습니다. Lv.1부터 시작합니다.", this);
 
@@ -318,10 +347,6 @@ namespace CrossDefense.Core
             }
             _summonerProgression = SummonerProgression.CreatePersistent(growthBalance);
             _summonerProgression.Changed += OnSummonerProgressionChanged;
-            _permanentTraits = PermanentTraitProgression.CreatePersistent(
-                growthBalance,
-                () => _summonerProgression.Snapshot.Level);
-            _permanentTraits.Changed += OnPermanentTraitsChanged;
             _summonerSkillLoadout = SummonerSkillLoadout.CreatePersistent(
                 () => _summonerProgression.Snapshot.Level);
             _summonerBuffLoadout = SummonerBuffLoadout.CreatePersistent(
@@ -339,8 +364,18 @@ namespace CrossDefense.Core
             }
             _equipment = EquipmentProgression.CreatePersistent(equipmentCatalog);
             _equipment.Changed += OnEquipmentChanged;
+            if (relicCatalog == null)
+            {
+                _runtimeRelicCatalog = RelicCatalog.CreateRuntimeDefault();
+                relicCatalog = _runtimeRelicCatalog;
+            }
+            _relics = RelicProgression.CreatePersistent(relicCatalog);
+            _permanentTraits = PermanentTraitProgression.CreatePersistent(
+                growthBalance,
+                () => _summonerProgression.Snapshot.Level,
+                availabilityProvider: IsPermanentLevelRewardAvailable);
+            _permanentTraits.Changed += OnPermanentTraitsChanged;
             _runRelics = new RunRelicInventory();
-            _runRelics.Changed += OnRunRelicsChanged;
             if (merchantCatalog == null)
             {
                 _runtimeMerchantCatalog = MerchantCatalog.CreateRuntimeDefault(equipmentCatalog);
@@ -356,13 +391,34 @@ namespace CrossDefense.Core
                     this);
             }
             _runTraits = new RunTraitProgression(runRewardCatalog, stageTimeline?.RandomSeed ?? 0);
+            _combatBuild = new SummonerCombatBuildProgression(
+                runRewardCatalog,
+                unchecked((stageTimeline?.RandomSeed ?? 0) ^ 0x45D9F3B),
+                _summonerProgression.Snapshot.Level);
+
+            _runSession = RunSessionProgression.CreatePersistent();
+            _resumeWaveIndex = 0;
+            if (_runSession.TryLoad(stageTimeline?.StageId, out RunSessionSaveData checkpoint))
+            {
+                _resumeWaveIndex = Mathf.Max(0, checkpoint.waveIndex);
+                Debug.Log(
+                    $"[CrossDefense] DAY checkpoint restored: DAY {_resumeWaveIndex + 1}.",
+                    this);
+            }
+            _runTraits.Restore(checkpoint?.runTraits);
+            _runRelics.Restore(checkpoint?.runRelicIds, merchantCatalog.FindRelic);
+            _runRelics.Changed += OnRunRelicsChanged;
+            _runTraits.Changed += OnRunTraitsChanged;
 
             maxCoreHp = Mathf.Max(1f, maxCoreHp);
             _effectiveMaxCoreHp = maxCoreHp *
                                   _summonerProgression.Snapshot.MaxHpMultiplier *
-                                  _permanentTraits.Snapshot.CoreMaxHpMultiplier;
+                                  _permanentTraits.Snapshot.CoreMaxHpMultiplier *
+                                  (_equipment?.MaxHpMultiplier ?? 1f) *
+                                  (_runRelics?.MaxHpMultiplier ?? 1f);
             _coreHp = _effectiveMaxCoreHp;
-            _gold = Mathf.Max(0, startingGold);
+            _wallet = WalletProgression.CreatePersistent(Mathf.Max(0, startingGold));
+            _gold = _wallet.Gold;
             _summonContracts = Mathf.Max(0, startingSummonContracts);
             _phase = RunPhase.Prepare;
 
@@ -378,6 +434,7 @@ namespace CrossDefense.Core
             _monsterDeathEffects = new CombatEffectService(
                 transform,
                 rootName: "MonsterDeathEffects");
+            _monsterProjectiles = new MonsterProjectileService(this, transform);
 
             _summonManager = new SummonManager(
                 this,
@@ -390,7 +447,8 @@ namespace CrossDefense.Core
                 capacityProvider: () => SummonSlotCapacity,
                 summonerLevelProvider: () => _summonerProgression?.Snapshot.Level ?? 1);
             _growthManager = GrowthManager.CreatePersistent(this, _summonManager, growthBalance);
-            _merchant = new MerchantManager(this, merchantCatalog, _equipment, _runRelics);
+            _merchant = new MerchantManager(
+                this, merchantCatalog, _equipment, _relics, _runRelics);
 
             _summonedUnitManager = GetComponent<SummonedUnitManager>();
             if (_summonedUnitManager == null)
@@ -404,6 +462,9 @@ namespace CrossDefense.Core
                 summonedUnitTargetSearchRange,
                 combatPbd,
                 summonFormation);
+            _summonManager.BenchChanged += OnBenchRosterChanged;
+            _summonedUnitManager.UnitsChanged += OnFieldRosterChanged;
+            RestoreSummonedUnits(checkpoint?.summonedUnits);
 
             _summonerSkillController = GetComponent<SummonerSkillController>();
             if (_summonerSkillController == null)
@@ -411,7 +472,7 @@ namespace CrossDefense.Core
             _summonerSkillController.Initialize(
                 this,
                 summoner != null ? summoner.GetComponent<SummonerAttackController>() : null,
-                _summonerSkillLoadout,
+                _relics,
                 runtimeMeteorProjectileSprite,
                 runtimeMeteorEffectFrames,
                 runtimeIceWallEffectFrames,
@@ -436,7 +497,8 @@ namespace CrossDefense.Core
                 this,
                 _summonerSkillController,
                 dopamineBalance,
-                stageTimeline?.RandomSeed ?? 0);
+                stageTimeline?.RandomSeed ?? 0,
+                stageTimeline?.StartingOverdriveGauge ?? 0);
 
             var input = GetComponent<CombatInputController>();
             if (input == null)
@@ -463,6 +525,7 @@ namespace CrossDefense.Core
             CoreHpChanged?.Invoke(_coreHp, _effectiveMaxCoreHp);
             GoldChanged?.Invoke(_gold);
             SummonContractsChanged?.Invoke(_summonContracts);
+            SaveRunSession(true);
         }
 
         IEnumerable<SummonUnitData> BuildSummonPool()
@@ -626,7 +689,7 @@ namespace CrossDefense.Core
         public void StartRun()
         {
             if (_waveManager == null) return;
-            _waveManager.RunFrom(this);
+            _waveManager.RunFrom(this, _resumeWaveIndex);
         }
 
         public void ApplyCoreDamage(int amount)
@@ -668,6 +731,8 @@ namespace CrossDefense.Core
 
         public void RestartCurrentStage()
         {
+            _wallet?.Flush();
+            SaveSameStageRestartSession();
             _summonerProgression?.Flush();
             _permanentTraits?.Flush();
             _summonerSkillLoadout?.Flush();
@@ -675,6 +740,7 @@ namespace CrossDefense.Core
             _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
+            _relics?.Flush();
             Scene scene = SceneManager.GetActiveScene();
             if (scene.buildIndex >= 0)
                 SceneManager.LoadScene(scene.buildIndex);
@@ -696,14 +762,18 @@ namespace CrossDefense.Core
         public void AddGold(int amount)
         {
             _gold = Mathf.Max(0, _gold + amount);
+            _wallet?.SetGold(_gold);
             GoldChanged?.Invoke(_gold);
+            SaveRunSession(false);
         }
 
         public bool TrySpendGold(int amount)
         {
             if (amount <= 0 || _gold < amount) return false;
             _gold -= amount;
+            _wallet?.SetGold(_gold);
             GoldChanged?.Invoke(_gold);
+            SaveRunSession(false);
             return true;
         }
 
@@ -754,14 +824,26 @@ namespace CrossDefense.Core
 
         public float ModifySummonerDamage(float baseDamage)
         {
+            return ModifySummonerDamage(baseDamage, out _);
+        }
+
+        public float ModifySummonerDamage(float baseDamage, out bool critical)
+        {
             float permanentDamage = Mathf.Max(0f, baseDamage) *
                                     (_summonerProgression?.Snapshot.DamageMultiplier ?? 1f) *
                                     (_permanentTraits?.Snapshot.SummonerDamageMultiplier ?? 1f) *
                                     (_equipment?.DamageMultiplier ?? 1f) *
-                                    (_runRelics?.DamageMultiplier ?? 1f);
-            return _growthManager?.ModifyPlayerDamage(
+                                    (_runRelics?.DamageMultiplier ?? 1f) *
+                                    (_dopamineController?.SummonerDamageMultiplier ?? 1f);
+            if (_growthManager == null)
+            {
+                critical = false;
+                return permanentDamage;
+            }
+            return _growthManager.ModifyPlayerDamage(
                 permanentDamage,
-                _equipment?.CriticalChanceBonus ?? 0f) ?? permanentDamage;
+                _equipment?.CriticalChanceBonus ?? 0f,
+                out critical);
         }
 
         public void RegisterGoldScreenPositionProvider(Func<Vector2> provider)
@@ -774,6 +856,7 @@ namespace CrossDefense.Core
             if (amount <= 0) return;
             _summonContracts += amount;
             SummonContractsChanged?.Invoke(_summonContracts);
+            SaveRunSession(false);
         }
 
         public bool TrySpendSummonContract()
@@ -781,6 +864,7 @@ namespace CrossDefense.Core
             if (_summonContracts <= 0) return false;
             _summonContracts--;
             SummonContractsChanged?.Invoke(_summonContracts);
+            SaveRunSession(false);
             return true;
         }
 
@@ -813,6 +897,105 @@ namespace CrossDefense.Core
         {
             _merchant?.Close();
             SetGameplayPause(GameplayPauseReason.Merchant, false);
+        }
+
+        public bool TryChoosePermanentTrait(PermanentTraitType type)
+        {
+            if (_permanentTraits == null)
+                return false;
+
+            EquipmentData equipmentReward = type == PermanentTraitType.EquipmentSupply
+                ? PickPermanentEquipmentReward()
+                : null;
+            RelicDefinition relicReward = type == PermanentTraitType.RelicDiscovery
+                ? PickPermanentRelicReward()
+                : null;
+            if (type == PermanentTraitType.EquipmentSupply && equipmentReward == null)
+                return false;
+            if (type == PermanentTraitType.RelicDiscovery && relicReward == null)
+                return false;
+            if (!_permanentTraits.TryChoose(type))
+                return false;
+
+            if (equipmentReward != null)
+            {
+                bool acquired = _equipment.Acquire(equipmentReward);
+                if (acquired)
+                    Debug.Log($"[CrossDefense] 레벨업 장비 획득: {equipmentReward.DisplayName}", this);
+                return acquired;
+            }
+            if (relicReward != null)
+            {
+                bool acquired = _relics.TryAcquire(relicReward.Family);
+                if (acquired)
+                {
+                    int rank = _relics.Rank(relicReward.Family);
+                    Debug.Log(
+                        $"[CrossDefense] 레벨업 신물 획득: {relicReward.Rank(rank)?.DisplayName} ★{rank}",
+                        this);
+                }
+                return acquired;
+            }
+            return true;
+        }
+
+        bool IsPermanentLevelRewardAvailable(PermanentTraitType type) =>
+            type switch
+            {
+                PermanentTraitType.EquipmentSupply => HasPermanentEquipmentReward(),
+                PermanentTraitType.RelicDiscovery => HasPermanentRelicReward(),
+                _ => true,
+            };
+
+        bool HasPermanentEquipmentReward()
+        {
+            if (_equipment?.Catalog?.Equipment == null)
+                return false;
+            foreach (EquipmentData item in _equipment.Catalog.Equipment)
+                if (item != null && !_equipment.IsOwned(item.EquipmentId))
+                    return true;
+            return false;
+        }
+
+        bool HasPermanentRelicReward()
+        {
+            if (_relics?.Catalog?.Relics == null)
+                return false;
+            foreach (RelicDefinition relic in _relics.Catalog.Relics)
+                if (relic != null && _relics.CanAcquire(relic.Family))
+                    return true;
+            return false;
+        }
+
+        EquipmentData PickPermanentEquipmentReward()
+        {
+            var candidates = new List<EquipmentData>();
+            if (_equipment?.Catalog?.Equipment != null)
+                foreach (EquipmentData item in _equipment.Catalog.Equipment)
+                    if (item != null && !_equipment.IsOwned(item.EquipmentId))
+                        candidates.Add(item);
+            return PickPermanentReward(candidates);
+        }
+
+        RelicDefinition PickPermanentRelicReward()
+        {
+            var candidates = new List<RelicDefinition>();
+            if (_relics?.Catalog?.Relics != null)
+                foreach (RelicDefinition relic in _relics.Catalog.Relics)
+                    if (relic != null && _relics.CanAcquire(relic.Family))
+                        candidates.Add(relic);
+            return PickPermanentReward(candidates);
+        }
+
+        T PickPermanentReward<T>(List<T> candidates) where T : class
+        {
+            if (candidates == null || candidates.Count == 0)
+                return null;
+            int seed = unchecked(
+                (stageTimeline?.RandomSeed ?? 0) * 397 ^
+                (_summonerProgression?.Snapshot.Level ?? 1) * 7919 ^
+                (_permanentTraits?.TotalChoiceCount ?? 0) * 104729);
+            return candidates[new System.Random(seed).Next(candidates.Count)];
         }
 
         public bool BeginRunTraitChoice(int clearedWave)
@@ -857,6 +1040,9 @@ namespace CrossDefense.Core
             return true;
         }
 
+        public bool TryChooseCombatBuild(string rewardId) =>
+            _combatBuild?.TryChoose(rewardId) ?? false;
+
         void GrantRandomRunRewardUnits(int amount, int rank, List<SummonResult> results)
         {
             for (int i = 0; i < Mathf.Max(0, amount); i++)
@@ -871,11 +1057,21 @@ namespace CrossDefense.Core
         {
             if (_phase == phase) return;
             _phase = phase;
-            if (phase == RunPhase.Victory || phase == RunPhase.Defeat)
+            if (phase == RunPhase.Defeat)
             {
+                _resumeWaveIndex = 0;
+                _wallet?.Flush();
                 _merchant?.Close();
-                _runRelics?.Clear();
+                SaveSameStageRestartSession();
             }
+            else if (phase == RunPhase.Victory)
+            {
+                _wallet?.Flush();
+                _merchant?.Close();
+                SaveRunSession(true);
+            }
+            else
+                SaveRunSession(false);
             PhaseChanged?.Invoke(phase);
             Debug.Log($"[CrossDefense] Phase: {phase}", this);
         }
@@ -907,6 +1103,31 @@ namespace CrossDefense.Core
             GameplayPauseChanged?.Invoke(false);
         }
 
+        public void ToggleGameplaySpeed()
+        {
+            SetGameplaySpeed(
+                Mathf.Approximately(_gameplaySpeed, FastGameplaySpeed)
+                    ? NormalGameplaySpeed
+                    : FastGameplaySpeed);
+        }
+
+        public void SetGameplaySpeed(float speed)
+        {
+            float next = speed >= 1.25f ? FastGameplaySpeed : NormalGameplaySpeed;
+            if (Mathf.Approximately(_gameplaySpeed, next))
+                return;
+
+            _gameplaySpeed = next;
+            _timeScaleBeforeGameplayPause = next;
+            if (!IsGameplayPaused)
+                Time.timeScale = next;
+            PlayerPrefs.SetInt(
+                GameplaySpeedPrefsKey,
+                Mathf.Approximately(next, FastGameplaySpeed) ? 1 : 0);
+            PlayerPrefs.Save();
+            GameplaySpeedChanged?.Invoke(next);
+        }
+
         void RestoreGameplayTimeScale()
         {
             if (_gameplayPauseReasons == GameplayPauseReason.None)
@@ -920,7 +1141,9 @@ namespace CrossDefense.Core
         public void SetWave(int current, int total, StageWave wave)
         {
             _currentWaveData = wave;
+            _resumeWaveIndex = Mathf.Max(0, current - 1);
             WaveChanged?.Invoke(current, total);
+            SaveRunSession(true);
             Debug.Log($"[CrossDefense] Wave {current}/{total}: {wave.Label} prep={wave.PreparationTime:0.##} monsters={wave.TotalMonsterCount}", this);
         }
 
@@ -944,7 +1167,13 @@ namespace CrossDefense.Core
                 Color.white,
                 deathEffectScale,
                 18f);
-            _summonerProgression?.AddExperience(growthBalance.SummonerExperienceReward(rewardGold));
+            int experienceReward = growthBalance.SummonerExperienceReward(rewardGold);
+            int previousSummonerLevel = _summonerProgression?.Snapshot.Level ?? 1;
+            _summonerProgression?.AddExperience(experienceReward);
+            int currentSummonerLevel = _summonerProgression?.Snapshot.Level ?? previousSummonerLevel;
+            _combatBuild?.NotifySummonerLevelChanged(
+                previousSummonerLevel,
+                currentSummonerLevel);
             _monsterCodex?.RecordKill(monster?.Data);
             _waveManager.NotifyMonsterDefeated(monster);
             _dopamineController?.NotifyMonsterDefeated();
@@ -970,7 +1199,131 @@ namespace CrossDefense.Core
         }
 
         void OnEquipmentChanged() => RecalculateEffectiveCoreHp(true);
-        void OnRunRelicsChanged() => RecalculateEffectiveCoreHp(true);
+
+        void OnRunRelicsChanged()
+        {
+            RecalculateEffectiveCoreHp(true);
+            SaveRunSession(true);
+        }
+
+        void OnRunTraitsChanged(RunTraitSnapshot snapshot) => SaveRunSession(true);
+
+        void OnBenchRosterChanged(IReadOnlyList<SummonUnitInstance> _) =>
+            SaveRunSession(true);
+
+        void OnFieldRosterChanged(IReadOnlyList<SummonedUnitController> _) =>
+            SaveRunSession(true);
+
+        void SaveRunSession(bool flush)
+        {
+            if (!_runSessionActive || _suppressRunSessionSave || _runSession == null)
+                return;
+
+            _runSession.Save(new RunSessionSaveData
+            {
+                stageId = stageTimeline?.StageId ?? string.Empty,
+                waveIndex = Mathf.Max(0, _resumeWaveIndex),
+                gold = Mathf.Max(0, _gold),
+                summonContracts = Mathf.Max(0, _summonContracts),
+                coreHp = Mathf.Max(0f, _coreHp),
+                runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
+                runTraits = _runTraits?.CaptureSaveData() ?? new RunTraitProgressionSaveData(),
+                summonedUnits = CaptureSummonedUnits(),
+            }, flush);
+        }
+
+        void SaveSameStageRestartSession()
+        {
+            if (_runSession == null || _suppressRunSessionSave)
+                return;
+
+            _resumeWaveIndex = 0;
+            _runSession.Save(new RunSessionSaveData
+            {
+                stageId = stageTimeline?.StageId ?? string.Empty,
+                waveIndex = 0,
+                gold = Mathf.Max(0, _gold),
+                summonContracts = Mathf.Max(0, startingSummonContracts),
+                coreHp = Mathf.Max(0f, _effectiveMaxCoreHp),
+                runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
+                runTraits = _runTraits?.CaptureSaveData() ?? new RunTraitProgressionSaveData(),
+                summonedUnits = new List<RunSessionSummonSaveData>(),
+            }, true);
+
+            // Scene destruction must not overwrite the death checkpoint with the defeated roster.
+            _suppressRunSessionSave = true;
+        }
+
+        void ClearRunSession()
+        {
+            _runSessionActive = false;
+            _suppressRunSessionSave = true;
+            _runRelics?.Clear();
+            _suppressRunSessionSave = false;
+            _runSession?.Save(new RunSessionSaveData
+            {
+                stageId = stageTimeline?.StageId ?? string.Empty,
+                waveIndex = Mathf.Max(0, _resumeWaveIndex),
+            }, true);
+        }
+
+        List<RunSessionSummonSaveData> CaptureSummonedUnits()
+        {
+            var saved = new List<RunSessionSummonSaveData>();
+            var seen = new HashSet<int>();
+
+            void Add(SummonUnitInstance instance)
+            {
+                if (instance?.Unit == null || !seen.Add(instance.InstanceId))
+                    return;
+                saved.Add(new RunSessionSummonSaveData
+                {
+                    unitId = instance.Unit.UnitId,
+                    rank = SummonRank.Clamp(instance.Rank),
+                });
+            }
+
+            if (_summonManager?.Bench != null)
+                foreach (SummonUnitInstance instance in _summonManager.Bench)
+                    Add(instance);
+            if (_summonedUnitManager?.Units != null)
+                foreach (SummonedUnitController unit in _summonedUnitManager.Units)
+                    Add(unit?.Instance);
+            return saved;
+        }
+
+        void RestoreSummonedUnits(IReadOnlyList<RunSessionSummonSaveData> saved)
+        {
+            if (saved == null || saved.Count == 0 || _summonManager?.Pool == null)
+                return;
+
+            _suppressRunSessionSave = true;
+            int restored = 0;
+            for (int i = 0; i < saved.Count; i++)
+            {
+                RunSessionSummonSaveData entry = saved[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.unitId))
+                    continue;
+                SummonUnitData data = null;
+                foreach (SummonUnitData candidate in _summonManager.Pool)
+                {
+                    if (candidate != null && candidate.UnitId == entry.unitId)
+                    {
+                        data = candidate;
+                        break;
+                    }
+                }
+                if (data != null &&
+                    _summonManager.TryGrantRewardUnit(
+                        data,
+                        SummonRank.Clamp(entry.rank),
+                        out _))
+                    restored++;
+            }
+            _suppressRunSessionSave = false;
+            if (restored > 0)
+                Debug.Log($"[CrossDefense] 슬라임 체크포인트 복구: {restored}마리", this);
+        }
 
         void RecalculateEffectiveCoreHp(bool healAddedMaximum)
         {
@@ -994,6 +1347,9 @@ namespace CrossDefense.Core
         void OnDestroy()
         {
             RestoreGameplayTimeScale();
+            Time.timeScale = NormalGameplaySpeed;
+            SaveRunSession(true);
+            _wallet?.Flush();
             if (_summonerProgression != null)
             {
                 _summonerProgression.Flush();
@@ -1009,8 +1365,14 @@ namespace CrossDefense.Core
             _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
+            _relics?.Flush();
             if (_equipment != null) _equipment.Changed -= OnEquipmentChanged;
+            if (_summonManager != null)
+                _summonManager.BenchChanged -= OnBenchRosterChanged;
+            if (_summonedUnitManager != null)
+                _summonedUnitManager.UnitsChanged -= OnFieldRosterChanged;
             if (_runRelics != null) _runRelics.Changed -= OnRunRelicsChanged;
+            if (_runTraits != null) _runTraits.Changed -= OnRunTraitsChanged;
             if (_runtimeGrowthBalance != null)
                 Destroy(_runtimeGrowthBalance);
             if (_runtimeDopamineBalance != null)
@@ -1021,6 +1383,8 @@ namespace CrossDefense.Core
                 Destroy(_runtimeMonsterCatalog);
             if (_runtimeEquipmentCatalog != null)
                 Destroy(_runtimeEquipmentCatalog);
+            if (_runtimeRelicCatalog != null)
+                Destroy(_runtimeRelicCatalog);
             if (_runtimeMerchantCatalog != null)
                 Destroy(_runtimeMerchantCatalog);
         }
@@ -1035,6 +1399,8 @@ namespace CrossDefense.Core
         {
             if (paused)
             {
+                SaveRunSession(true);
+                _wallet?.Flush();
                 _summonerProgression?.Flush();
                 _permanentTraits?.Flush();
                 _summonerSkillLoadout?.Flush();
@@ -1042,11 +1408,14 @@ namespace CrossDefense.Core
                 _growthManager?.Flush();
                 _monsterCodex?.Flush();
                 _equipment?.Flush();
+                _relics?.Flush();
             }
         }
 
         void OnApplicationQuit()
         {
+            SaveRunSession(true);
+            _wallet?.Flush();
             _summonerProgression?.Flush();
             _permanentTraits?.Flush();
             _summonerSkillLoadout?.Flush();
@@ -1054,6 +1423,7 @@ namespace CrossDefense.Core
             _growthManager?.Flush();
             _monsterCodex?.Flush();
             _equipment?.Flush();
+            _relics?.Flush();
         }
 
     }

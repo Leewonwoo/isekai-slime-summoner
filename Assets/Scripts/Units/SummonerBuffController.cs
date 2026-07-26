@@ -26,6 +26,7 @@ namespace CrossDefense.Units
         GameManager _gameManager;
         SummonerBuffLoadout _loadout;
         CombatEffectService _effects;
+        SkillParticleEffectService _particleEffects;
         Sprite _aegisSprite;
         float _lifeHealAccumulator;
 
@@ -54,6 +55,12 @@ namespace CrossDefense.Units
             _effects ??= new CombatEffectService(
                 transform,
                 rootName: "SummonerBuffEffects");
+            _particleEffects ??= new SkillParticleEffectService(
+                transform,
+                () => _gameManager != null &&
+                      !_gameManager.IsGameplayPaused &&
+                      _gameManager.Phase == RunPhase.InWave,
+                "SummonerBuffParticleEffects");
             StateChanged?.Invoke();
         }
 
@@ -120,16 +127,25 @@ namespace CrossDefense.Units
                         _aegisSprite,
                         new Color(1f, 0.82f, 0.32f),
                         1.45f);
+                    PlayPartyBuff(SummonerBuffId.Aegis, includeSlimes: false);
                     Activate(selected.Value, definition.Duration);
                     break;
                 case SummonerBuffId.LifeBlessing:
                     Activate(selected.Value, definition.Duration);
                     _lifeHealAccumulator = 0f;
+                    PlayPartyBuff(SummonerBuffId.LifeBlessing);
                     break;
                 case SummonerBuffId.LegionCommand:
+                    Activate(selected.Value, definition.Duration);
+                    PlayPartyBuff(SummonerBuffId.LegionCommand);
+                    break;
                 case SummonerBuffId.ElementalResonance:
+                    Activate(selected.Value, definition.Duration);
+                    PlayPartyBuff(SummonerBuffId.ElementalResonance, includeSlimes: false);
+                    break;
                 case SummonerBuffId.TimeAcceleration:
                     Activate(selected.Value, definition.Duration);
+                    PlayPartyBuff(SummonerBuffId.TimeAcceleration);
                     break;
                 default:
                     return false;
@@ -225,6 +241,7 @@ namespace CrossDefense.Units
                     ? _gameManager.Summoner.position
                     : transform.position;
                 _gameManager.PresentDamageNumber(position, coreHealed, DamageTextKind.Healing);
+                _particleEffects?.PlayBuff(SummonerBuffId.LifeBlessing, position, 0.85f);
             }
 
             IReadOnlyList<SummonedUnitController> units =
@@ -238,10 +255,38 @@ namespace CrossDefense.Units
                     continue;
                 float healed = unit.Heal(unit.MaxHp * SlimeHealFractionPerTick);
                 if (healed > 0f)
+                {
                     _gameManager.PresentDamageNumber(
                         unit.GetFloatingTextAnchor(),
                         healed,
                         DamageTextKind.Healing);
+                    _particleEffects?.PlayBuff(
+                        SummonerBuffId.LifeBlessing,
+                        unit.GetFloatingTextAnchor(),
+                        0.7f);
+                }
+            }
+        }
+
+        void PlayPartyBuff(SummonerBuffId id, bool includeSlimes = true)
+        {
+            Vector3 summonerPosition = _gameManager.Summoner != null
+                ? _gameManager.Summoner.position
+                : transform.position;
+            _particleEffects?.PlayBuff(id, summonerPosition, 1f);
+            if (!includeSlimes)
+                return;
+
+            IReadOnlyList<SummonedUnitController> units =
+                _gameManager.SummonedUnitManager?.Units;
+            if (units == null)
+                return;
+            for (int i = 0; i < units.Count; i++)
+            {
+                SummonedUnitController unit = units[i];
+                if (unit == null || unit.IsDefeated)
+                    continue;
+                _particleEffects?.PlayBuff(id, unit.GetFloatingTextAnchor(), 0.75f);
             }
         }
 

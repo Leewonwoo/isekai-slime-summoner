@@ -38,9 +38,11 @@ namespace CrossDefense.Core
         public static EquipmentProgression CreatePersistent(EquipmentCatalog catalog, string key = DefaultPlayerPrefsKey)
         {
             string safeKey = string.IsNullOrWhiteSpace(key) ? DefaultPlayerPrefsKey : key;
-            return new EquipmentProgression(catalog,
+            var progression = new EquipmentProgression(catalog,
                 () => PlayerPrefs.GetString(safeKey, string.Empty),
                 json => PlayerPrefs.SetString(safeKey, json), PlayerPrefs.Save);
+            progression.Persist(true);
+            return progression;
         }
 
         public bool IsOwned(string id) => !string.IsNullOrWhiteSpace(id) && _owned.Contains(id);

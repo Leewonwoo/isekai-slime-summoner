@@ -2,14 +2,12 @@
     <Style src="/Assets/UI/USS/variables.uss" />
     <Style src="/Assets/UI/USS/common.uss" />
     <Style src="/Assets/UI/USS/RootLayout.uss" />
-    <Template name="TopHUD" src="/Assets/UI/UXML/TopHUD.uxml" />
     <Template name="FieldOverlay" src="/Assets/UI/UXML/FieldOverlay.uxml" />
     <Template name="BottomPanel" src="/Assets/UI/UXML/BottomPanel.uxml" />
     <Template name="SlimeCodexModal" src="/Assets/UI/UXML/SlimeCodexModal.uxml" />
     <Template name="MonsterCodexModal" src="/Assets/UI/UXML/MonsterCodexModal.uxml" />
     <Template name="MerchantModal" src="/Assets/UI/UXML/MerchantModal.uxml" />
     <VisualElement name="root" class="root" picking-mode="Ignore">
-        <Instance template="TopHUD" name="zone-top" />
         <VisualElement name="zone-field" class="zone-field" picking-mode="Ignore">
             <Instance template="FieldOverlay" name="field-overlay" picking-mode="Ignore" />
         </VisualElement>

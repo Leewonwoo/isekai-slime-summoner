@@ -10,6 +10,13 @@ namespace CrossDefense.Data
         SummonerEvolution,
         SlimeArmy,
         Summon,
+        ProjectileBuild,
+    }
+
+    public enum RunRewardTrigger
+    {
+        Milestone,
+        SummonerLevel,
     }
 
     public enum RunRewardEffect
@@ -30,6 +37,15 @@ namespace CrossDefense.Data
         TripleSummon,
         MergeSupport,
         JackpotEgg,
+        RapidCast,
+        ManaSpread,
+        PierceEngraving,
+        ManaSplit,
+        Ricochet,
+        Afterimage,
+        CriticalBurst,
+        SlimeResonance,
+        ManaOverdrive,
     }
 
     public enum SummonerAttackArchetype
@@ -50,6 +66,7 @@ namespace CrossDefense.Data
         [SerializeField] RunRewardCategory category;
         [SerializeField] RunRewardEffect effect;
         [SerializeField] SummonerAttackArchetype requiredAttack;
+        [SerializeField] RunRewardTrigger trigger;
         [SerializeField] Sprite icon;
         [Min(1)] [SerializeField] int maxLevel = 1;
         [Min(1)] [SerializeField] int weight = 100;
@@ -66,6 +83,7 @@ namespace CrossDefense.Data
         public RunRewardCategory Category => category;
         public RunRewardEffect Effect => effect;
         public SummonerAttackArchetype RequiredAttack => requiredAttack;
+        public RunRewardTrigger Trigger => trigger;
         public Sprite Icon => icon;
         public int MaxLevel => Mathf.Max(1, maxLevel);
         public int Weight => Mathf.Max(1, weight);
@@ -87,6 +105,7 @@ namespace CrossDefense.Data
             RunRewardCategory category,
             RunRewardEffect effect,
             SummonerAttackArchetype requiredAttack = SummonerAttackArchetype.None,
+            RunRewardTrigger trigger = RunRewardTrigger.Milestone,
             int maxLevel = 1,
             int weight = 100,
             int minimumSelection = 0,
@@ -104,6 +123,7 @@ namespace CrossDefense.Data
                 category = category,
                 effect = effect,
                 requiredAttack = requiredAttack,
+                trigger = trigger,
                 maxLevel = maxLevel,
                 weight = weight,
                 minimumSelection = minimumSelection,
@@ -146,6 +166,30 @@ namespace CrossDefense.Data
                     return reward;
             }
             return null;
+        }
+
+        public IReadOnlyList<RunRewardDefinition> GetRewards(RunRewardTrigger trigger)
+        {
+            var filtered = new List<RunRewardDefinition>();
+            if (rewards != null)
+            {
+                for (int i = 0; i < rewards.Count; i++)
+                {
+                    RunRewardDefinition reward = rewards[i];
+                    if (reward != null && reward.Trigger == trigger)
+                        filtered.Add(reward);
+                }
+            }
+
+            // 기존 ScriptableObject 에셋도 코드 추가 즉시 작동하도록 전투 빌드만 런타임 기본값으로 보완한다.
+            if (trigger == RunRewardTrigger.SummonerLevel && filtered.Count == 0)
+            {
+                List<RunRewardDefinition> defaults = CreateDefaultRewards();
+                for (int i = 0; i < defaults.Count; i++)
+                    if (defaults[i].Trigger == RunRewardTrigger.SummonerLevel)
+                        filtered.Add(defaults[i]);
+            }
+            return filtered;
         }
 
         public IEnumerable<string> Validate()
@@ -206,10 +250,65 @@ namespace CrossDefense.Data
                     RunRewardCategory.Awakening, RunRewardEffect.AwakenThunderSlash,
                     primaryValue: 0.65f, count: 2),
                 RunRewardDefinition.Create(
-                    "summoner-multicast", "마력 분열",
+                    "summoner-multicast", "매직러시",
                     "공격할 때 투사체를 짧은 간격으로 연속 발사합니다. 주변 적을 우선 추적하고 대상이 부족하면 같은 적을 공격합니다.",
-                    RunRewardCategory.SummonerEvolution, RunRewardEffect.Multicast,
-                    maxLevel: 2, primaryValue: 0.65f, count: 1),
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.Multicast,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 3, primaryValue: 0.65f, count: 1),
+                RunRewardDefinition.Create(
+                    "combat-rapid-cast", "퀵캐스트",
+                    "소환사의 기본 공격 간격이 10% 감소합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.RapidCast,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 4, primaryValue: 0.1f),
+                RunRewardDefinition.Create(
+                    "combat-mana-spread", "하나비탄",
+                    "주 공격 좌우에 피해 45%의 부채꼴 보조탄을 2발 발사합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.ManaSpread,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 2, primaryValue: 0.45f, count: 2),
+                RunRewardDefinition.Create(
+                    "combat-pierce", "일점관통",
+                    "투사체가 적을 1기 더 관통하고 후속 피해가 15% 감소합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.PierceEngraving,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 3, primaryValue: 0.85f, count: 1),
+                RunRewardDefinition.Create(
+                    "combat-mana-split", "일탄만발",
+                    "적 처치 시 가까운 다른 적 최대 2기에게 피해 45%의 자식탄을 발사합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.ManaSplit,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 1, primaryValue: 0.45f, count: 2),
+                RunRewardDefinition.Create(
+                    "combat-ricochet", "바운스샷",
+                    "명중 후 가까운 다른 적에게 피해가 20% 감소한 반사탄을 발사합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.Ricochet,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 3, primaryValue: 0.8f, count: 1),
+                RunRewardDefinition.Create(
+                    "combat-afterimage", "우츠시탄",
+                    "일정 확률로 0.18초 뒤 피해 60%의 같은 공격을 복제합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.Afterimage,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 3, primaryValue: 0.15f, secondaryValue: 0.1f, tertiaryValue: 0.6f),
+                RunRewardDefinition.Create(
+                    "combat-critical-burst", "회심폭렬",
+                    "치명타 적중 시 주변 적에게 치명타 피해 일부의 범위 피해를 줍니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.CriticalBurst,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 2, primaryValue: 0.8f, secondaryValue: 0.4f),
+                RunRewardDefinition.Create(
+                    "combat-slime-resonance", "모찌링크",
+                    "최근 슬라임에게 피격된 적을 맞히면 일정 확률로 피해 50%의 추가탄을 발사합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.SlimeResonance,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 3, primaryValue: 0.2f, secondaryValue: 0.1f, tertiaryValue: 0.5f),
+                RunRewardDefinition.Create(
+                    "combat-mana-overdrive", "마력폭주",
+                    "기본 공격 20회마다 5초간 공격속도와 연속 발사 수가 증가합니다.",
+                    RunRewardCategory.ProjectileBuild, RunRewardEffect.ManaOverdrive,
+                    trigger: RunRewardTrigger.SummonerLevel,
+                    maxLevel: 2, primaryValue: 0.3f, secondaryValue: 5f, count: 20),
                 RunRewardDefinition.Create(
                     "fire-burning-core", "타오르는 핵",
                     "화염구의 연소 피해와 지속시간이 증가합니다.",

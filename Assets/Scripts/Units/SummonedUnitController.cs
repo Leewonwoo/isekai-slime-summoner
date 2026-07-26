@@ -247,6 +247,13 @@ namespace CrossDefense.Units
             }
         }
 
+        public void ApplyDamage(DamagePacket packet)
+        {
+            MonsterAttribute defense =
+                _data != null ? _data.Attribute : MonsterAttribute.None;
+            TakeDamage(packet.ResolveDamage(defense));
+        }
+
         public void PrepareForWave(float shieldFraction)
         {
             _revivesUsedThisWave = 0;
@@ -347,6 +354,12 @@ namespace CrossDefense.Units
         {
             Sprite projectileSprite = _data.ProjectileSpriteAtRank(_instance.Rank);
             float projectileScale = _data.ProjectileScaleAtRank(_instance.Rank);
+            string unitId = _data.UnitId;
+            MonsterAttribute attribute = _data.Attribute;
+            SummonAttackStyle attackStyle = _data.AttackStyle;
+            int rank = _instance.Rank;
+            Vector3 origin = GetHeadEffectAnchor();
+            SlimeAttackEffectService attackEffects = _manager.AttackEffects;
             var packet = new DamagePacket(
                 this,
                 _manager.ModifySlimeDamage(
@@ -361,36 +374,76 @@ namespace CrossDefense.Units
             {
                 case SummonAttackStyle.Melee:
                     target.ApplyDamage(packet);
+                    attackEffects?.PlayMelee(
+                        unitId,
+                        attribute,
+                        rank,
+                        origin,
+                        target.transform.position);
                     break;
                 case SummonAttackStyle.Area:
                     if (projectileSprite != null)
                     {
-                        _manager.Projectiles.Fire(
-                            transform.position,
+                        bool fired = _manager.Projectiles.Fire(
+                            origin,
                             target,
                             projectileSprite,
                             packet,
                             _data.ProjectileSpeed,
                             0.42f * projectileScale,
-                            Mathf.Max(0.6f, _data.AreaRadius));
+                            Mathf.Max(0.6f, _data.AreaRadius),
+                            onImpact: context => attackEffects?.PlayImpact(
+                                unitId,
+                                attribute,
+                                attackStyle,
+                                rank,
+                                context.Position));
+                        if (fired)
+                            attackEffects?.PlayLaunch(
+                                unitId,
+                                attribute,
+                                attackStyle,
+                                rank,
+                                origin,
+                                target.transform.position);
                     }
                     else
                     {
                         _manager.ApplyAreaDamage(target.transform.position,
                             Mathf.Max(0.6f, _data.AreaRadius), packet);
+                        attackEffects?.PlayImpact(
+                            unitId,
+                            attribute,
+                            attackStyle,
+                            rank,
+                            target.transform.position);
                     }
                     break;
                 case SummonAttackStyle.Piercing:
                 case SummonAttackStyle.Projectile:
-                    _manager.Projectiles.Fire(
-                        transform.position,
+                    bool launched = _manager.Projectiles.Fire(
+                        origin,
                         target,
                         projectileSprite != null ? projectileSprite : _data.WorldSprite,
                         packet,
                         _data.ProjectileSpeed,
                         0.35f * projectileScale,
                         _data.AreaRadius,
-                        _data.AttackStyle == SummonAttackStyle.Piercing ? _data.PierceCount : 1);
+                        _data.AttackStyle == SummonAttackStyle.Piercing ? _data.PierceCount : 1,
+                        onImpact: context => attackEffects?.PlayImpact(
+                            unitId,
+                            attribute,
+                            attackStyle,
+                            rank,
+                            context.Position));
+                    if (launched)
+                        attackEffects?.PlayLaunch(
+                            unitId,
+                            attribute,
+                            attackStyle,
+                            rank,
+                            origin,
+                            target.transform.position);
                     break;
             }
         }

@@ -12,6 +12,8 @@ namespace CrossDefense.Core
 
         public bool Contains(string id) => !string.IsNullOrWhiteSpace(id) && _owned.ContainsKey(id);
 
+        public List<string> CaptureOwnedIds() => new(_owned.Keys);
+
         public bool TryAdd(RunRelicDefinition relic)
         {
             if (relic == null || string.IsNullOrWhiteSpace(relic.Id) || _owned.ContainsKey(relic.Id)) return false;
@@ -24,6 +26,25 @@ namespace CrossDefense.Core
         {
             if (_owned.Count == 0) return;
             _owned.Clear();
+            Changed?.Invoke();
+        }
+
+        public void Restore(
+            IEnumerable<string> relicIds,
+            Func<string, RunRelicDefinition> resolver)
+        {
+            _owned.Clear();
+            if (relicIds != null && resolver != null)
+            {
+                foreach (string id in relicIds)
+                {
+                    if (string.IsNullOrWhiteSpace(id) || _owned.ContainsKey(id))
+                        continue;
+                    RunRelicDefinition relic = resolver(id);
+                    if (relic != null)
+                        _owned.Add(id, relic);
+                }
+            }
             Changed?.Invoke();
         }
 

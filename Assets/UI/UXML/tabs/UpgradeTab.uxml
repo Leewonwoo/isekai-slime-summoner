@@ -1,7 +1,15 @@
 <UXML xmlns="UnityEngine.UIElements">
     <VisualElement class="upgrade-tab">
-        <Label class="upgrade-tab__title" text="전체 강화" />
-        <Label class="upgrade-tab__description" text="소환사와 모든 슬라임에 공통 적용" />
+        <VisualElement class="upgrade-tab__header">
+            <VisualElement class="upgrade-tab__heading" picking-mode="Ignore">
+                <Label class="upgrade-tab__title" text="전체 강화" />
+                <Label class="upgrade-tab__description" text="소환사와 모든 슬라임에 공통 적용" />
+            </VisualElement>
+            <VisualElement name="gold-capsule" class="capsule upgrade-tab__currency">
+                <VisualElement class="capsule__icon capsule__icon--gold" picking-mode="Ignore" />
+                <Label name="gold-value" class="capsule__value" text="0" picking-mode="Ignore" />
+            </VisualElement>
+        </VisualElement>
         <ScrollView name="upgrade-list" class="row-list panel-scroll" mode="Vertical" />
     </VisualElement>
 </UXML>

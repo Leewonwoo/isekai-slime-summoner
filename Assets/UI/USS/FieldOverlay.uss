@@ -6,18 +6,51 @@
     bottom: 0;
 }
 
-/* HUD 아래 필드 상단 중앙의 웨이브 상태 */
+/* Stage stays in the upper-left while wave status remains centered above combat. */
+.field-overlay__stage-wave {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-transparent);
+}
+
+.field-overlay__stage {
+    position: absolute;
+    left: var(--gap-lg);
+    top: var(--gap-lg);
+    width: var(--stage-overlay-width);
+    align-items: flex-start;
+    justify-content: center;
+    background-color: var(--color-transparent);
+}
+
+.field-overlay__stage-caption {
+    width: 100%;
+    color: var(--color-text-dim);
+    font-size: var(--font-small);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.field-overlay__stage-name {
+    width: 100%;
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
 .field-overlay__wave-status {
     position: absolute;
-    top: var(--gap-md);
     left: 50%;
+    top: var(--gap-md);
     translate: -50% 0;
     width: var(--wave-status-width);
     align-items: center;
     justify-content: center;
     background-color: var(--color-transparent);
-    padding-top: var(--gap-sm);
-    padding-bottom: var(--gap-sm);
 }
 
 .field-overlay__wave {
@@ -129,31 +162,89 @@
     color: var(--color-text);
 }
 
-.codex-button-stack {
+.field-menu-stack {
     position: absolute;
     right: var(--gap-lg);
     top: var(--gap-lg);
     width: var(--codex-button-width);
+    flex-direction: column;
+    align-items: center;
 }
 
-.codex-button {
+.field-settings-button {
+    width: var(--field-settings-size);
+    height: var(--field-settings-size);
+    margin-bottom: var(--gap-sm);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIIcons/icon_settings.png?fileID=21300000&guid=39c989c3992a75b48b8c672fc77e1e56&type=3");
+    background-size: var(--field-settings-icon-size) var(--field-settings-icon-size);
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.field-settings-button:active {
+    translate: 0 2px;
+    background-color: var(--color-transparent);
+}
+
+.speed-toggle-button {
     width: var(--codex-button-width);
-    height: var(--codex-button-size);
-    color: var(--color-ink);
-    background-color: var(--color-surface);
+    height: var(--touch-min);
+    margin-bottom: var(--gap-sm);
+    color: var(--color-text);
+    background-color: var(--color-panel-deep);
     border-width: var(--gap-xs);
-    border-color: var(--color-border);
+    border-color: var(--color-gold-deep);
     border-radius: var(--radius-lg);
-    font-size: var(--font-caption);
+    font-size: var(--font-body);
     -unity-font-style: bold;
 }
 
+.speed-toggle-button--fast {
+    color: var(--color-ink);
+    background-color: var(--color-gold);
+    border-color: var(--color-gold);
+}
+
+.speed-toggle-button:active {
+    translate: 0 2px;
+}
+
+.codex-button {
+    width: var(--codex-button-size);
+    height: var(--codex-button-size);
+    background-color: var(--color-transparent);
+    background-size: 60px 60px;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    border-width: 0;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .slime-codex-button {
-    margin-bottom: var(--gap-md);
+    margin-bottom: var(--gap-sm);
+    background-image: url("project://database/Assets/Art/UIIcons/icon_codex_slime.png?fileID=21300000&guid=86a9f153891edeb41917e45e99f56499&type=3");
+}
+
+.monster-codex-button {
+    background-image: url("project://database/Assets/Art/UIIcons/icon_codex_monster.png?fileID=21300000&guid=300a16d5c9dba7f41b8218131afe5a34&type=3");
 }
 
 .codex-button:active {
-    background-color: var(--color-surface-deep);
+    translate: 0 2px;
+    background-color: var(--color-transparent);
+    opacity: 0.82;
 }
 
 .unlock-toast {

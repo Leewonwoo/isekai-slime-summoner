@@ -27,6 +27,7 @@ namespace CrossDefense.Units
         float _dotDamagePerSecond;
         float _dotUntil;
         float _nextDotTick;
+        float _slimeResonanceUntil;
         SpriteRenderer _renderer;
         CircleCollider2D _collider;
         WorldHealthBar _healthBar;
@@ -39,6 +40,7 @@ namespace CrossDefense.Units
         public float CurrentHp => _hp;
         public float MaxHp { get; private set; }
         public bool IsResolved => _resolved;
+        public bool HasSlimeResonance => Time.time < _slimeResonanceUntil;
         public SummonedUnitController UnitTarget => _unitTarget;
         public bool IsTargetingCore => _unitTarget == null;
         public bool IsAttackAnimating => _isAttackAnimating;
@@ -76,6 +78,7 @@ namespace CrossDefense.Units
             _dotDamagePerSecond = 0f;
             _dotUntil = 0f;
             _nextDotTick = 0f;
+            _slimeResonanceUntil = 0f;
             _moveAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
             _isAttackAnimating = false;
@@ -137,8 +140,10 @@ namespace CrossDefense.Units
         public void ApplyDamage(DamagePacket packet)
         {
             if (_resolved) return;
+            if (packet.Source is SummonedUnitController)
+                _slimeResonanceUntil = Mathf.Max(_slimeResonanceUntil, Time.time + 2f);
             TakeDamage(packet.ResolveDamage(_data.Attribute));
-            if (_resolved) return;
+            if (_resolved || _data == null || !gameObject.activeInHierarchy) return;
 
             if (packet.SlowPercent > 0f && packet.SlowDuration > 0f)
             {
@@ -148,7 +153,9 @@ namespace CrossDefense.Units
 
             if (packet.DamageOverTime > 0f && packet.DamageOverTimeDuration > 0f)
             {
-                _dotDamagePerSecond = Mathf.Max(_dotDamagePerSecond, packet.DamageOverTime);
+                _dotDamagePerSecond = Mathf.Max(
+                    _dotDamagePerSecond,
+                    packet.ResolveDamageOverTime(_data.Attribute));
                 _dotUntil = Mathf.Max(_dotUntil, Time.time + packet.DamageOverTimeDuration);
                 _nextDotTick = Mathf.Min(_nextDotTick <= 0f ? Time.time + 0.25f : _nextDotTick,
                     Time.time + 0.25f);
@@ -173,6 +180,7 @@ namespace CrossDefense.Units
             _dotDamagePerSecond = 0f;
             _dotUntil = 0f;
             _nextDotTick = 0f;
+            _slimeResonanceUntil = 0f;
             _moveAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
             _isAttackAnimating = false;
@@ -243,7 +251,18 @@ namespace CrossDefense.Units
 
             _nextAttackTime = Time.time + 1f / _attacksPerSecond;
             PlayAttackAnimation();
-            _unitTarget.TakeDamage(_contactDamage);
+            bool fired = _data.AttackStyle == MonsterAttackStyle.Projectile &&
+                         _gameManager.MonsterProjectiles != null &&
+                         _gameManager.MonsterProjectiles.FireAtUnit(
+                             ProjectileOrigin(_unitTarget.transform.position),
+                             _unitTarget,
+                             _data,
+                             _contactDamage);
+            if (!fired)
+                _unitTarget.ApplyDamage(new DamagePacket(
+                    this,
+                    _contactDamage,
+                    _data.Attribute));
             if (!IsValidUnitTarget(_unitTarget))
             {
                 _unitTarget = null;
@@ -258,7 +277,25 @@ namespace CrossDefense.Units
 
             _nextAttackTime = Time.time + 1f / _attacksPerSecond;
             PlayAttackAnimation();
-            _gameManager.ApplyCoreDamage(_contactDamage);
+            bool fired = _data.AttackStyle == MonsterAttackStyle.Projectile &&
+                         _gameManager.MonsterProjectiles != null &&
+                         _gameManager.MonsterProjectiles.FireAtCore(
+                             ProjectileOrigin(_coreTarget.position),
+                             _coreTarget,
+                             _data,
+                             _contactDamage);
+            if (!fired)
+                _gameManager.ApplyCoreDamage(_contactDamage);
+        }
+
+        Vector3 ProjectileOrigin(Vector3 targetPosition)
+        {
+            Vector3 origin = _renderer != null ? _renderer.bounds.center : transform.position;
+            Vector3 direction = targetPosition - origin;
+            if (direction.sqrMagnitude > 0.001f)
+                origin += direction.normalized * Mathf.Max(0.12f, CombatRadius * 0.35f);
+            origin.z = transform.position.z;
+            return origin;
         }
 
         static bool IsValidUnitTarget(SummonedUnitController unit) =>

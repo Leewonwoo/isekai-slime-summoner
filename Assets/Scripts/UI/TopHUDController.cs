@@ -4,31 +4,21 @@ using UnityEngine.UIElements;
 
 namespace CrossDefense.UI
 {
-    /// <summary>상단 HUD — 소환사 프로필/스테이지/재화 표시 전용 (데이터 바인딩만)</summary>
+    /// <summary>필드 스테이지와 강화 섹션 골드 표시 데이터 바인딩.</summary>
     public class TopHUDController
     {
-        readonly Label _summonerNickname;
-        readonly Label _summonerLevel;
         readonly Label _stageName;
         readonly Label _goldValue;
-        readonly Label _gemValue;
+        readonly VisualElement _upgradeTabButton;
         Tweener _goldTween;
         int _displayedGold;
         bool _goldInitialized;
 
         public TopHUDController(VisualElement root)
         {
-            _summonerNickname = root.Q<Label>("summoner-nickname");
-            _summonerLevel = root.Q<Label>("summoner-level");
             _stageName = root.Q<Label>("stage-name");
             _goldValue = root.Q<Label>("gold-value");
-            _gemValue = root.Q<Label>("gem-value");
-        }
-
-        public void SetSummonerProfile(string nickname, int level)
-        {
-            _summonerNickname.text = nickname;
-            _summonerLevel.text = $"Lv.{level}";
+            _upgradeTabButton = root.Q<VisualElement>("tab-upgrade");
         }
 
         public void SetStageName(string stageName) => _stageName.text = stageName;
@@ -60,8 +50,9 @@ namespace CrossDefense.UI
 
         public Vector2 GetGoldScreenPosition()
         {
-            Vector2 panelPosition = _goldValue.worldBound.center;
-            float panelWidth = _goldValue.panel?.visualTree.resolvedStyle.width ?? Screen.width;
+            VisualElement target = IsDisplayed(_goldValue) ? _goldValue : _upgradeTabButton;
+            Vector2 panelPosition = target.worldBound.center;
+            float panelWidth = target.panel?.visualTree.resolvedStyle.width ?? Screen.width;
             float pixelsPerPoint = panelWidth > 0f && !float.IsNaN(panelWidth)
                 ? Screen.width / panelWidth
                 : 1f;
@@ -76,6 +67,12 @@ namespace CrossDefense.UI
             _goldTween = null;
         }
 
-        public void SetGems(int value) => _gemValue.text = UIFormat.Gems(value);
+        static bool IsDisplayed(VisualElement element)
+        {
+            for (VisualElement current = element; current != null; current = current.parent)
+                if (current.resolvedStyle.display == DisplayStyle.None)
+                    return false;
+            return true;
+        }
     }
 }

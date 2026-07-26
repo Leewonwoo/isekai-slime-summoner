@@ -191,6 +191,7 @@ namespace CrossDefense.Data
 
         [Header("Timeline")]
         [Min(1)] [SerializeField] int runTraitInterval = 5;
+        [Min(0)] [SerializeField] int startingOverdriveGauge;
         [SerializeField] RunRewardCatalog runRewardCatalog;
         [SerializeField] List<StageWave> waves = new();
 
@@ -201,6 +202,7 @@ namespace CrossDefense.Data
         public bool RandomizeDirectionWeights => randomizeDirectionWeights;
         public float DirectionWeightJitter => directionWeightJitter;
         public int RunTraitInterval => Mathf.Max(1, runTraitInterval);
+        public int StartingOverdriveGauge => Mathf.Max(0, startingOverdriveGauge);
         public RunRewardCatalog RunRewardCatalog => runRewardCatalog;
         public IReadOnlyList<StageWave> Waves => waves;
         public int WaveCount => waves.Count;

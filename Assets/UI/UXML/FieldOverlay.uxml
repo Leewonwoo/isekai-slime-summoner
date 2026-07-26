@@ -1,10 +1,16 @@
 <UXML xmlns="UnityEngine.UIElements">
     <Style src="/Assets/UI/USS/FieldOverlay.uss" />
     <VisualElement name="field-overlay-root" class="field-overlay" picking-mode="Ignore">
-        <VisualElement name="wave-status" class="field-overlay__wave-status" picking-mode="Ignore">
-            <Label name="wave-label" class="field-overlay__wave" text="WAVE 1" picking-mode="Ignore" />
-            <Label name="remaining-monsters-label" class="field-overlay__remaining" text="잔여 몬스터 24" picking-mode="Ignore" />
-            <Label name="combo-label" class="field-overlay__combo hidden" text="" picking-mode="Ignore" />
+        <VisualElement name="stage-wave-status" class="field-overlay__stage-wave" picking-mode="Ignore">
+            <VisualElement name="stage-info" class="field-overlay__stage" picking-mode="Ignore">
+                <Label class="field-overlay__stage-caption" text="STAGE" picking-mode="Ignore" />
+                <Label name="stage-name" class="field-overlay__stage-name" text="고블린 숲" picking-mode="Ignore" />
+            </VisualElement>
+            <VisualElement name="wave-status" class="field-overlay__wave-status" picking-mode="Ignore">
+                <Label name="wave-label" class="field-overlay__wave" text="DAY 1" picking-mode="Ignore" />
+                <Label name="remaining-monsters-label" class="field-overlay__remaining" text="잔여 몬스터 24" picking-mode="Ignore" />
+                <Label name="combo-label" class="field-overlay__combo hidden" text="" picking-mode="Ignore" />
+            </VisualElement>
         </VisualElement>
         <VisualElement name="overdrive-cluster" class="overdrive-cluster overdrive--charging" picking-mode="Ignore">
             <Label name="overdrive-gauge-label" class="overdrive-gauge__label" text="" picking-mode="Ignore" />
@@ -15,9 +21,11 @@
                 <VisualElement class="overdrive-gauge__tick overdrive-gauge__tick--three-quarter" picking-mode="Ignore" />
             </VisualElement>
         </VisualElement>
-        <VisualElement name="codex-button-stack" class="codex-button-stack" picking-mode="Ignore">
-            <Button name="slime-codex-button" class="codex-button slime-codex-button" text="슬라임 도감" tooltip="슬라임 도감" />
-            <Button name="monster-codex-button" class="codex-button" text="몬스터 도감" tooltip="몬스터 도감" />
+        <VisualElement name="field-menu-stack" class="field-menu-stack" picking-mode="Ignore">
+            <Button name="settings-button" class="field-settings-button" text="" tooltip="설정" />
+            <Button name="speed-toggle-button" class="speed-toggle-button" text="×1.0" tooltip="게임 배속" />
+            <Button name="slime-codex-button" class="codex-button slime-codex-button" text="" tooltip="슬라임 도감" />
+            <Button name="monster-codex-button" class="codex-button monster-codex-button" text="" tooltip="몬스터 도감" />
         </VisualElement>
         <Label name="unlock-toast" class="unlock-toast hidden" text="새 슬라임 해금" picking-mode="Ignore" />
         <VisualElement name="buff-skill-cluster" class="buff-skill-cluster" picking-mode="Ignore">

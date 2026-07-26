@@ -9,26 +9,56 @@ namespace CrossDefense.Tests.EditMode
     {
         [TestCase(MonsterAttribute.Fire, MonsterAttribute.Nature)]
         [TestCase(MonsterAttribute.Nature, MonsterAttribute.Ice)]
+        [TestCase(MonsterAttribute.Nature, MonsterAttribute.Water)]
         [TestCase(MonsterAttribute.Ice, MonsterAttribute.Fire)]
+        [TestCase(MonsterAttribute.Ice, MonsterAttribute.Wind)]
+        [TestCase(MonsterAttribute.Water, MonsterAttribute.Fire)]
+        [TestCase(MonsterAttribute.Lightning, MonsterAttribute.Water)]
+        [TestCase(MonsterAttribute.Lightning, MonsterAttribute.Ice)]
+        [TestCase(MonsterAttribute.Wind, MonsterAttribute.Lightning)]
+        [TestCase(MonsterAttribute.Wind, MonsterAttribute.Nature)]
         public void Advantage_ReturnsOnePointFive(MonsterAttribute attack, MonsterAttribute defense)
         {
-            Assert.That(ElementalMatchup.GetDamageMultiplier(attack, defense), Is.EqualTo(1.5f));
+            Assert.That(
+                ElementalMatchup.GetDamageMultiplier(attack, defense),
+                Is.EqualTo(ElementalMatchup.WeaknessMultiplier));
+            Assert.That(
+                ElementalMatchup.GetRelation(attack, defense),
+                Is.EqualTo(ElementalDamageRelation.Weakness));
         }
 
-        [TestCase(MonsterAttribute.Nature, MonsterAttribute.Fire)]
-        [TestCase(MonsterAttribute.Ice, MonsterAttribute.Nature)]
-        [TestCase(MonsterAttribute.Fire, MonsterAttribute.Ice)]
-        public void Disadvantage_ReturnsZeroPointSevenFive(MonsterAttribute attack, MonsterAttribute defense)
+        [Test]
+        public void ReverseOfEveryStrongRule_IsResisted()
         {
-            Assert.That(ElementalMatchup.GetDamageMultiplier(attack, defense), Is.EqualTo(0.75f));
+            foreach (ElementalMatchupRule rule in ElementalMatchup.Rules)
+            {
+                Assert.That(
+                    ElementalMatchup.GetDamageMultiplier(rule.Defense, rule.Attack),
+                    Is.EqualTo(ElementalMatchup.ResistanceMultiplier));
+                Assert.That(
+                    ElementalMatchup.GetRelation(rule.Defense, rule.Attack),
+                    Is.EqualTo(ElementalDamageRelation.Resisted));
+            }
         }
 
         [TestCase(MonsterAttribute.None, MonsterAttribute.Fire)]
         [TestCase(MonsterAttribute.Fire, MonsterAttribute.None)]
-        [TestCase(MonsterAttribute.Ice, MonsterAttribute.Ice)]
         public void NeutralMatchup_ReturnsOne(MonsterAttribute attack, MonsterAttribute defense)
         {
             Assert.That(ElementalMatchup.GetDamageMultiplier(attack, defense), Is.EqualTo(1f));
+        }
+
+        [TestCase(MonsterAttribute.Fire)]
+        [TestCase(MonsterAttribute.Ice)]
+        [TestCase(MonsterAttribute.Nature)]
+        [TestCase(MonsterAttribute.Lightning)]
+        [TestCase(MonsterAttribute.Water)]
+        [TestCase(MonsterAttribute.Wind)]
+        public void SameAttribute_IsResisted(MonsterAttribute attribute)
+        {
+            Assert.That(
+                ElementalMatchup.GetDamageMultiplier(attribute, attribute),
+                Is.EqualTo(ElementalMatchup.SameAttributeMultiplier));
         }
     }
 }

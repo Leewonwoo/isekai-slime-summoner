@@ -47,7 +47,7 @@ MonoBehaviour:
   criticalDamageMultiplier: 2
   coreRecoveryBaseAmount: 15
   coreRecoveryPerLevel: 5
-  baseSummonCapacity: 8
+  baseSummonCapacity: 9
   maxSummonCapacity: 12
   runSummonCapacityMaxLevel: 4
   runSummonCapacityBaseCost: 80

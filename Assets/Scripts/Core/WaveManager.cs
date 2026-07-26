@@ -32,10 +32,12 @@ namespace CrossDefense.Core
             _random = new System.Random(timeline.RandomSeed);
         }
 
-        public void RunFrom(MonoBehaviour coroutineHost)
+        public void RunFrom(MonoBehaviour coroutineHost, int startWaveIndex = 0)
         {
             if (_routine != null) coroutineHost.StopCoroutine(_routine);
-            _routine = coroutineHost.StartCoroutine(Run(coroutineHost));
+            _routine = coroutineHost.StartCoroutine(Run(
+                coroutineHost,
+                Mathf.Clamp(startWaveIndex, 0, Mathf.Max(0, TotalWaves - 1))));
         }
 
         public void Stop(MonoBehaviour coroutineHost)
@@ -50,7 +52,7 @@ namespace CrossDefense.Core
             _livingMonsters.Remove(monster);
         }
 
-        IEnumerator Run(MonoBehaviour coroutineHost)
+        IEnumerator Run(MonoBehaviour coroutineHost, int startWaveIndex)
         {
             if (_timeline == null || _timeline.WaveCount == 0)
             {
@@ -58,7 +60,7 @@ namespace CrossDefense.Core
                 yield break;
             }
 
-            for (_waveIndex = 0; _waveIndex < _timeline.WaveCount; _waveIndex++)
+            for (_waveIndex = startWaveIndex; _waveIndex < _timeline.WaveCount; _waveIndex++)
             {
                 if (_gameManager.IsRunOver) yield break;
                 if (!_timeline.TryGetWave(_waveIndex, out var wave)) continue;

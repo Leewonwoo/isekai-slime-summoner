@@ -17,7 +17,16 @@ MonoBehaviour:
   shape: 1
   attribute: 3
   sprite: {fileID: 21300000, guid: 7029270f972e2e14da6f015772c476a3, type: 3}
-  moveFrames: []
+  moveFrames:
+  - {fileID: -5823499688908985717, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 1928631454198675781, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 2738279030932402050, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 2434613669847580516, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 3752798709079459853, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: -450212232150594899, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 1275984425147894077, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 7053925015075341967, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
+  - {fileID: 6713239951256168546, guid: d4c1d3da2b9dbf64fb48dfa314521e3b, type: 3}
   moveAnimationFps: 9
   attackFrames: []
   attackAnimationFps: 18
@@ -26,5 +35,9 @@ MonoBehaviour:
   contactDamage: 6
   attacksPerSecond: 0.9
   attackRange: 2.2
+  attackStyle: 1
+  projectileSprite: {fileID: 21300000, guid: 8e71775273ae8054ebb8bdc0a0f269d5, type: 3}
+  projectileSpeed: 5.2
+  projectileScale: 0.4
   rewardGold: 4
   sizeMultiplier: 0.95

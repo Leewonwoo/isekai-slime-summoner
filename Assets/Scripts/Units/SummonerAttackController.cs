@@ -50,8 +50,11 @@ namespace CrossDefense.Units
         float _nextClickAttackTime;
         float _idleAnimationElapsed;
         float _attackAnimationElapsed;
+        float _manaOverdriveUntil;
         int _attackSequence;
+        int _basicAttackCount;
         bool _isAttackAnimating;
+        readonly System.Random _combatRandom = new();
 
         public float AttackDamage => attackDamage;
         public float AttacksPerSecond => attacksPerSecond;
@@ -82,6 +85,8 @@ namespace CrossDefense.Units
             _idleAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
             _attackSequence = 0;
+            _basicAttackCount = 0;
+            _manaOverdriveUntil = 0f;
             _isAttackAnimating = false;
             ApplyAnimationFrame(GetFrame(idleFrames, 0));
 
@@ -117,9 +122,15 @@ namespace CrossDefense.Units
             if (target == null)
                 return;
 
-            FireAt(target, GetAttackProfile());
+            SummonerCombatBuildProfile combatProfile = GetCombatBuildProfile();
+            FireAt(target, GetAttackProfile(), combatProfile);
+            RegisterBasicAttack(combatProfile);
             _nextAttackTime = Time.time + 1f /
-                Mathf.Max(0.1f, attacksPerSecond * _gameManager.SummonerAttackSpeedMultiplier);
+                Mathf.Max(
+                    0.1f,
+                    attacksPerSecond *
+                    _gameManager.SummonerAttackSpeedMultiplier *
+                    OverdriveAttackSpeedMultiplier(combatProfile));
         }
 
         public bool TryClickAttack(Vector3 worldPoint, MonsterController preferredTarget = null)
@@ -130,6 +141,7 @@ namespace CrossDefense.Units
                 return false;
 
             SummonerRunAttackProfile profile = GetAttackProfile();
+            SummonerCombatBuildProfile combatProfile = GetCombatBuildProfile();
             Sprite sprite = GetProjectileSprite(profile.Archetype);
             if (sprite == null) return false;
             Vector3 origin = firePosition != null ? firePosition.position : transform.position;
@@ -145,6 +157,7 @@ namespace CrossDefense.Units
                     preferredTarget,
                     sprite,
                     profile,
+                    combatProfile,
                     clickAttackDamage,
                     empowered);
             }
@@ -166,13 +179,19 @@ namespace CrossDefense.Units
                     direction.normalized,
                     sprite,
                     profile,
+                    combatProfile,
                     clickAttackDamage,
                     empowered,
                     radius));
             }
 
+            RegisterBasicAttack(combatProfile);
             _nextClickAttackTime = Time.time + 1f /
-                Mathf.Max(0.1f, clickAttacksPerSecond * _gameManager.SummonerAttackSpeedMultiplier);
+                Mathf.Max(
+                    0.1f,
+                    clickAttacksPerSecond *
+                    _gameManager.SummonerAttackSpeedMultiplier *
+                    OverdriveAttackSpeedMultiplier(combatProfile));
             return true;
         }
 
@@ -216,7 +235,10 @@ namespace CrossDefense.Units
             return monster == null || !monster.gameObject.activeInHierarchy || monster.CurrentHp <= 0f;
         }
 
-        bool FireAt(MonsterController target, SummonerRunAttackProfile profile)
+        bool FireAt(
+            MonsterController target,
+            SummonerRunAttackProfile profile,
+            SummonerCombatBuildProfile combatProfile)
         {
             Sprite sprite = GetProjectileSprite(profile.Archetype);
             if (sprite == null)
@@ -230,7 +252,14 @@ namespace CrossDefense.Units
             if (firePosition == null)
                 origin += direction * spawnOffset;
             if (_gameManager.Projectiles == null) return false;
-            FireVolley(origin, target, sprite, profile, attackDamage, IsEmpoweredAttack(profile));
+            FireVolley(
+                origin,
+                target,
+                sprite,
+                profile,
+                combatProfile,
+                attackDamage,
+                IsEmpoweredAttack(profile));
             return true;
         }
 
@@ -239,10 +268,15 @@ namespace CrossDefense.Units
             MonsterController primaryTarget,
             Sprite sprite,
             SummonerRunAttackProfile profile,
+            SummonerCombatBuildProfile combatProfile,
             float baseDamage,
             bool empowered)
         {
-            BuildVolleyTargets(primaryTarget, profile.ProjectileCount);
+            int projectileCount =
+                profile.ProjectileCount +
+                combatProfile.AdditionalProjectileCount +
+                (IsManaOverdriveActive ? combatProfile.OverdriveProjectileBonus : 0);
+            BuildVolleyTargets(primaryTarget, projectileCount);
             var volleyTargets = new List<MonsterController>(_volleyTargets);
             float areaRadius = empowered
                 ? Mathf.Max(profile.AreaRadius, profile.EmpoweredAreaRadius)
@@ -252,9 +286,17 @@ namespace CrossDefense.Units
                 volleyTargets,
                 sprite,
                 profile,
+                combatProfile,
                 baseDamage,
                 empowered,
                 areaRadius));
+            FireSpreadProjectiles(
+                origin,
+                primaryTarget,
+                sprite,
+                profile,
+                combatProfile,
+                baseDamage);
         }
 
         IEnumerator FireTargetVolleyRoutine(
@@ -262,6 +304,7 @@ namespace CrossDefense.Units
             IReadOnlyList<MonsterController> volleyTargets,
             Sprite sprite,
             SummonerRunAttackProfile profile,
+            SummonerCombatBuildProfile combatProfile,
             float baseDamage,
             bool empowered,
             float areaRadius)
@@ -278,16 +321,30 @@ namespace CrossDefense.Units
 
                 float damageScale = (i == 0 ? 1f : profile.AdditionalProjectileDamageMultiplier) *
                                     (empowered ? profile.EmpoweredDamageMultiplier : 1f);
+                DamagePacket packet = BuildDamagePacket(baseDamage * damageScale, profile);
                 _gameManager.Projectiles.Fire(
                     origin,
                     target,
                     sprite,
-                    BuildDamagePacket(baseDamage * damageScale, profile),
+                    packet,
                     projectileSpeed,
                     ProjectileScale(profile),
                     areaRadius,
-                    profile.PierceCount,
-                    profile.ChainDamageMultiplier);
+                    profile.PierceCount + combatProfile.AdditionalPierceCount,
+                    combatProfile.AdditionalPierceCount > 0
+                        ? Mathf.Min(profile.ChainDamageMultiplier, combatProfile.PierceRetainedDamageMultiplier)
+                        : profile.ChainDamageMultiplier,
+                    onImpact: BuildImpactCallback(sprite, combatProfile));
+                if (combatProfile.AfterimageChance > 0f &&
+                    _combatRandom.NextDouble() < combatProfile.AfterimageChance)
+                {
+                    StartCoroutine(FireAfterimageRoutine(
+                        origin,
+                        target,
+                        sprite,
+                        packet.Scaled(combatProfile.AfterimageDamageMultiplier),
+                        profile));
+                }
                 PlayAttackAnimation();
                 if (i + 1 < volleyTargets.Count)
                     yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
@@ -299,11 +356,17 @@ namespace CrossDefense.Units
             Vector3 centerDirection,
             Sprite sprite,
             SummonerRunAttackProfile profile,
+            SummonerCombatBuildProfile combatProfile,
             float baseDamage,
             bool empowered,
             float hitRadius)
         {
-            for (int i = 0; i < profile.ProjectileCount; i++)
+            int mainProjectileCount =
+                profile.ProjectileCount +
+                combatProfile.AdditionalProjectileCount +
+                (IsManaOverdriveActive ? combatProfile.OverdriveProjectileBonus : 0);
+            int totalProjectileCount = mainProjectileCount + combatProfile.SpreadProjectileCount;
+            for (int i = 0; i < totalProjectileCount; i++)
             {
                 if (!CanContinueVolley())
                     yield break;
@@ -311,7 +374,12 @@ namespace CrossDefense.Units
                     ? 0f
                     : (i % 2 == 0 ? -1f : 1f) * (4f + 3f * ((i - 1) / 2));
                 Vector3 destination = origin + Rotate(centerDirection, angle) * attackRange;
-                float damageScale = (i == 0 ? 1f : profile.AdditionalProjectileDamageMultiplier) *
+                bool spreadProjectile = i >= mainProjectileCount;
+                float damageScale = (i == 0
+                                        ? 1f
+                                        : spreadProjectile
+                                            ? combatProfile.SpreadDamageMultiplier
+                                            : profile.AdditionalProjectileDamageMultiplier) *
                                     (empowered ? profile.EmpoweredDamageMultiplier : 1f);
                 _gameManager.Projectiles.FireToPoint(
                     origin,
@@ -324,7 +392,7 @@ namespace CrossDefense.Units
                     profile.Archetype is SummonerAttackArchetype.Fireball or
                         SummonerAttackArchetype.ThunderSlash);
                 PlayAttackAnimation();
-                if (i + 1 < profile.ProjectileCount)
+                if (i + 1 < totalProjectileCount)
                     yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
             }
         }
@@ -337,14 +405,159 @@ namespace CrossDefense.Units
 
         DamagePacket BuildDamagePacket(float baseDamage, SummonerRunAttackProfile profile)
         {
+            float damage = _gameManager.ModifySummonerDamage(baseDamage, out bool critical);
             return new DamagePacket(
                 this,
-                _gameManager.ModifySummonerDamage(baseDamage),
+                damage,
                 profile.Attribute,
                 profile.SlowPercent,
                 profile.SlowDuration,
                 profile.DamageOverTime,
-                profile.DamageOverTimeDuration);
+                profile.DamageOverTimeDuration,
+                critical);
+        }
+
+        Action<ProjectileImpactContext> BuildImpactCallback(
+            Sprite sprite,
+            SummonerCombatBuildProfile combatProfile)
+        {
+            if (combatProfile.SplitProjectileCount <= 0 &&
+                combatProfile.RicochetCount <= 0 &&
+                combatProfile.CriticalBurstRadius <= 0f &&
+                combatProfile.SlimeResonanceChance <= 0f)
+                return null;
+
+            return context =>
+            {
+                if (_gameManager?.Projectiles == null || _gameManager.IsRunOver)
+                    return;
+                if (context.Packet.IsCritical && combatProfile.CriticalBurstRadius > 0f)
+                {
+                    _gameManager.Projectiles.ApplyAreaDamage(
+                        context.Position,
+                        context.Packet.Scaled(combatProfile.CriticalBurstDamageMultiplier),
+                        combatProfile.CriticalBurstRadius);
+                }
+                if (context.PrimaryDefeated && combatProfile.SplitProjectileCount > 0)
+                {
+                    FireSpecialProjectiles(
+                        context.Position,
+                        sprite,
+                        context.Packet,
+                        combatProfile.SplitProjectileCount,
+                        combatProfile.SplitDamageMultiplier);
+                }
+                if (combatProfile.RicochetCount > 0)
+                {
+                    FireSpecialProjectiles(
+                        context.Position,
+                        sprite,
+                        context.Packet,
+                        combatProfile.RicochetCount,
+                        combatProfile.RicochetDamageMultiplier);
+                }
+                if (context.WasSlimeResonating &&
+                    combatProfile.SlimeResonanceChance > 0f &&
+                    _combatRandom.NextDouble() < combatProfile.SlimeResonanceChance)
+                {
+                    FireSpecialProjectiles(
+                        context.Position,
+                        sprite,
+                        context.Packet,
+                        1,
+                        combatProfile.SlimeResonanceDamageMultiplier);
+                }
+            };
+        }
+
+        void FireSpreadProjectiles(
+            Vector3 origin,
+            MonsterController target,
+            Sprite sprite,
+            SummonerRunAttackProfile profile,
+            SummonerCombatBuildProfile combatProfile,
+            float baseDamage)
+        {
+            if (target == null || combatProfile.SpreadProjectileCount <= 0 ||
+                _gameManager?.Projectiles == null)
+                return;
+            Vector3 direction = (target.transform.position - origin).normalized;
+            for (int i = 0; i < combatProfile.SpreadProjectileCount; i++)
+            {
+                float side = i % 2 == 0 ? -1f : 1f;
+                float angle = side * (8f + 6f * (i / 2));
+                _gameManager.Projectiles.FireToPoint(
+                    origin,
+                    origin + Rotate(direction, angle) * attackRange,
+                    sprite,
+                    BuildDamagePacket(baseDamage * combatProfile.SpreadDamageMultiplier, profile),
+                    projectileSpeed,
+                    ProjectileScale(profile) * 0.86f,
+                    0.5f);
+            }
+        }
+
+        IEnumerator FireAfterimageRoutine(
+            Vector3 origin,
+            MonsterController target,
+            Sprite sprite,
+            DamagePacket packet,
+            SummonerRunAttackProfile profile)
+        {
+            yield return new WaitForSeconds(0.18f);
+            if (!CanContinueVolley())
+                yield break;
+            if (IsInvalidTarget(target))
+                target = FindNearestTarget();
+            if (target == null)
+                yield break;
+            _gameManager.Projectiles.Fire(
+                origin,
+                target,
+                sprite,
+                packet,
+                projectileSpeed,
+                ProjectileScale(profile) * 0.9f,
+                profile.AreaRadius,
+                profile.PierceCount,
+                profile.ChainDamageMultiplier);
+        }
+
+        void FireSpecialProjectiles(
+            Vector3 origin,
+            Sprite sprite,
+            DamagePacket packet,
+            int count,
+            float damageMultiplier)
+        {
+            if (_gameManager?.Projectiles == null || count <= 0)
+                return;
+            List<MonsterController> targets = FindNearestTargets(origin, count);
+            for (int i = 0; i < targets.Count; i++)
+            {
+                _gameManager.Projectiles.Fire(
+                    origin,
+                    targets[i],
+                    sprite,
+                    packet.Scaled(Mathf.Pow(damageMultiplier, i + 1)),
+                    projectileSpeed,
+                    projectileScale * 0.82f);
+            }
+        }
+
+        List<MonsterController> FindNearestTargets(Vector3 origin, int count)
+        {
+            var targets = new List<MonsterController>(Mathf.Max(0, count));
+            _volleyCandidates.Clear();
+            foreach (MonsterController candidate in _targets)
+                if (!IsInvalidTarget(candidate))
+                    _volleyCandidates.Add(candidate);
+            _volleyCandidates.Sort((a, b) =>
+                Vector3.SqrMagnitude(a.transform.position - origin)
+                    .CompareTo(Vector3.SqrMagnitude(b.transform.position - origin)));
+            for (int i = 0; i < _volleyCandidates.Count && targets.Count < count; i++)
+                targets.Add(_volleyCandidates[i]);
+            return targets;
         }
 
         void BuildVolleyTargets(MonsterController primary, int count)
@@ -400,6 +613,25 @@ namespace CrossDefense.Units
                 0,
                 0f,
                 1f);
+        }
+
+        SummonerCombatBuildProfile GetCombatBuildProfile() =>
+            _gameManager?.CombatBuild?.BuildProfile() ?? SummonerCombatBuildProfile.Default;
+
+        bool IsManaOverdriveActive => Time.time < _manaOverdriveUntil;
+
+        float OverdriveAttackSpeedMultiplier(SummonerCombatBuildProfile profile) =>
+            IsManaOverdriveActive ? profile.OverdriveAttackSpeedMultiplier : 1f;
+
+        void RegisterBasicAttack(SummonerCombatBuildProfile profile)
+        {
+            if (profile.OverdriveAttackInterval <= 0)
+                return;
+            _basicAttackCount++;
+            if (_basicAttackCount % profile.OverdriveAttackInterval == 0)
+                _manaOverdriveUntil = Mathf.Max(
+                    _manaOverdriveUntil,
+                    Time.time + profile.OverdriveDuration);
         }
 
         float ProjectileScale(SummonerRunAttackProfile profile)

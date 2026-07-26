@@ -17,7 +17,16 @@ MonoBehaviour:
   shape: 2
   attribute: 3
   sprite: {fileID: 21300000, guid: a98d8717a1da16944814bc0dcc7e7eed, type: 3}
-  moveFrames: []
+  moveFrames:
+  - {fileID: -6805420825308314154, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: 122741750509703378, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: 2580271683009045411, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: 8298438139902440770, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: -1956207654176676503, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: -2644683046274261308, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: 8700645579069069879, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: 4286323013951628366, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
+  - {fileID: -1445860723447887803, guid: a56666cbaf1b34c4fb9b9df3a34c0b2a, type: 3}
   moveAnimationFps: 9
   attackFrames: []
   attackAnimationFps: 18

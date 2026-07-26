@@ -16,6 +16,7 @@ namespace CrossDefense.UI
         readonly Outline[] _outlines = new Outline[3];
         readonly Text[] _titles = new Text[3];
         readonly Text[] _descriptions = new Text[3];
+        readonly Image[] _icons = new Image[3];
 
         RectTransform _selectedLabel;
         Button _confirmButton;
@@ -51,17 +52,20 @@ namespace CrossDefense.UI
             var types = new PermanentTraitType[3];
             var names = new string[3];
             var descriptions = new string[3];
+            var icons = new Sprite[3];
             for (int i = 0; i < choices.Count; i++)
             {
                 types[i] = choices[i].Type;
                 names[i] = choices[i].DisplayName;
                 descriptions[i] = choices[i].Description;
+                icons[i] = GameplayIconLibrary.Trait(choices[i].Type);
             }
             ShowCards(
-                "영구 특성 선택",
+                "레벨업 보상 선택",
                 $"레벨업 보상 · 남은 선택 {Mathf.Max(1, pendingChoiceCount):N0}",
                 names,
                 descriptions,
+                icons,
                 index => onConfirmed?.Invoke(types[index]));
         }
 
@@ -79,6 +83,7 @@ namespace CrossDefense.UI
             var rewardIds = new string[3];
             var names = new string[3];
             var descriptions = new string[3];
+            var icons = new Sprite[3];
             bool awakening = true;
             for (int i = 0; i < choices.Count; i++)
             {
@@ -86,15 +91,52 @@ namespace CrossDefense.UI
                 names[i] = choices[i].DisplayName;
                 descriptions[i] =
                     $"{CategoryLabel(choices[i].Category)} · {choices[i].StatusLabel}\n{choices[i].Description}";
+                icons[i] = GameplayIconLibrary.Reward(choices[i].Reward);
                 awakening &= choices[i].Category == RunRewardCategory.Awakening;
             }
             ShowCards(
                 awakening ? "소환사 속성 각성" : "웨이브 보상 선택",
                 awakening
-                    ? $"WAVE {Mathf.Max(1, clearedWave):N0} 클리어 · 이번 런의 주 공격 선택"
-                    : $"WAVE {Mathf.Max(1, clearedWave):N0} 클리어 · 사망 시 소멸",
+                    ? $"DAY {Mathf.Max(1, clearedWave):N0} 클리어 · 이번 런의 주 공격 선택"
+                    : $"DAY {Mathf.Max(1, clearedWave):N0} 클리어 · 사망 시 소멸",
                 names,
                 descriptions,
+                icons,
+                index => onConfirmed?.Invoke(rewardIds[index]));
+        }
+
+        public void ShowSummonerLevelBuild(
+            IReadOnlyList<RunTraitChoice> choices,
+            int summonerLevel,
+            int pendingChoiceCount,
+            Action<string> onConfirmed)
+        {
+            if (choices == null || choices.Count != _cards.Length)
+            {
+                Debug.LogError("[CrossDefense] 소환사 레벨업 빌드 팝업에는 정확히 3개의 선택지가 필요합니다.", this);
+                return;
+            }
+
+            var rewardIds = new string[3];
+            var names = new string[3];
+            var descriptions = new string[3];
+            var icons = new Sprite[3];
+            for (int i = 0; i < choices.Count; i++)
+            {
+                rewardIds[i] = choices[i].RewardId;
+                names[i] = choices[i].DisplayName;
+                descriptions[i] =
+                    $"투사체 빌드 · {choices[i].StatusLabel}\n{choices[i].Description}";
+                icons[i] = GameplayIconLibrary.Reward(choices[i].Reward);
+            }
+            ShowCards(
+                "소환사 레벨업",
+                pendingChoiceCount > 1
+                    ? $"소환사 Lv.{Mathf.Max(1, summonerLevel):N0} · 남은 선택 {pendingChoiceCount:N0}"
+                    : $"소환사 Lv.{Mathf.Max(1, summonerLevel):N0} · 이번 도전 한정",
+                names,
+                descriptions,
+                icons,
                 index => onConfirmed?.Invoke(rewardIds[index]));
         }
 
@@ -106,6 +148,7 @@ namespace CrossDefense.UI
                 RunRewardCategory.SummonerEvolution => "공격 진화",
                 RunRewardCategory.SlimeArmy => "슬라임 군단",
                 RunRewardCategory.Summon => "운명의 소환",
+                RunRewardCategory.ProjectileBuild => "투사체 빌드",
                 _ => "런 보상",
             };
         }
@@ -115,6 +158,7 @@ namespace CrossDefense.UI
             string subtitle,
             IReadOnlyList<string> names,
             IReadOnlyList<string> descriptions,
+            IReadOnlyList<Sprite> icons,
             Action<int> onConfirmed)
         {
             Initialize();
@@ -133,6 +177,12 @@ namespace CrossDefense.UI
                     _titles[i].text = names[i];
                 if (_descriptions[i] != null)
                     _descriptions[i].text = descriptions[i];
+                if (_icons[i] != null)
+                {
+                    _icons[i].sprite = icons != null && i < icons.Count ? icons[i] : null;
+                    _icons[i].preserveAspect = true;
+                    _icons[i].enabled = _icons[i].sprite != null;
+                }
             }
             Select(0);
         }
@@ -162,6 +212,7 @@ namespace CrossDefense.UI
                 _outlines[i] = card.GetComponent<Outline>();
                 _titles[i] = card.Find("CardTitle")?.GetComponent<Text>();
                 _descriptions[i] = card.Find("CardDescription")?.GetComponent<Text>();
+                _icons[i] = card.Find("Icon")?.GetComponent<Image>();
                 if (_cards[i] == null || _fills[i] == null || _outlines[i] == null)
                     return;
 

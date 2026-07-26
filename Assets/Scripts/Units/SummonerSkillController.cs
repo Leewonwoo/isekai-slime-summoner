@@ -26,15 +26,31 @@ namespace CrossDefense.Units
             public readonly HashSet<MonsterController> Hit = new();
         }
 
+        sealed class RelicBarrage
+        {
+            public SummonerSkillId SkillId;
+            public int Rank;
+            public Vector3 Center;
+            public int StrikeCount;
+            public int NextStrikeIndex;
+            public float NextStrikeAt;
+            public float StrikeInterval;
+            public float DamageMultiplier;
+            public float Radius;
+            public float StatusDurationMultiplier;
+        }
+
         readonly Dictionary<SummonerSkillId, float> _cooldowns = new();
         readonly List<IceWallZone> _iceWalls = new();
+        readonly List<RelicBarrage> _relicBarrages = new();
         readonly List<MonsterController> _monsterBuffer = new(64);
         readonly List<SummonerSkillId> _cooldownKeys = new(3);
 
         GameManager _gameManager;
         SummonerAttackController _summonerAttack;
-        SummonerSkillLoadout _loadout;
+        RelicProgression _relics;
         CombatEffectService _skillEffects;
+        SkillParticleEffectService _particleEffects;
         Sprite _meteorProjectileSprite;
         Sprite[] _meteorFrames;
         Sprite[] _iceWallFrames;
@@ -42,13 +58,11 @@ namespace CrossDefense.Units
         SpriteRenderer _targetPreview;
         bool _targeting;
         float _targetingExpiresAt;
-        int _lastOverdriveTargetInstanceId;
 
-        public SummonerSkillLoadout Loadout => _loadout;
+        public RelicProgression Relics => _relics;
         public SummonerSkillId EquippedSkill =>
-            _loadout?.EquippedSkill ?? SummonerSkillId.Meteor;
-        public SummonerSkillDefinition EquippedDefinition =>
-            SummonerSkillCatalog.Get(EquippedSkill);
+            _relics?.EquippedDefinition?.SkillId ?? SummonerSkillId.ArcaneBurst;
+        public SummonerSkillDefinition EquippedDefinition => BuildEquippedDefinition();
         public bool IsTargeting => _targeting;
         public float RemainingCooldown =>
             _cooldowns.TryGetValue(EquippedSkill, out float value) ? Mathf.Max(0f, value) : 0f;
@@ -59,7 +73,7 @@ namespace CrossDefense.Units
         public void Initialize(
             GameManager gameManager,
             SummonerAttackController summonerAttack,
-            SummonerSkillLoadout loadout,
+            RelicProgression relics,
             Sprite meteorProjectileSprite,
             Sprite[] meteorFrames,
             Sprite[] iceWallFrames,
@@ -67,14 +81,20 @@ namespace CrossDefense.Units
         {
             _gameManager = gameManager;
             _summonerAttack = summonerAttack;
-            if (_loadout != null)
-                _loadout.Changed -= OnEquippedSkillChanged;
-            _loadout = loadout;
-            if (_loadout != null)
-                _loadout.Changed += OnEquippedSkillChanged;
+            if (_relics != null)
+                _relics.Changed -= OnRelicChanged;
+            _relics = relics;
+            if (_relics != null)
+                _relics.Changed += OnRelicChanged;
             _skillEffects ??= new CombatEffectService(
                 transform,
                 rootName: "SummonerSkillEffects");
+            _particleEffects ??= new SkillParticleEffectService(
+                transform,
+                () => _gameManager != null &&
+                      !_gameManager.IsGameplayPaused &&
+                      _gameManager.Phase == RunPhase.InWave,
+                "SummonerSkillParticleEffects");
             _meteorProjectileSprite = meteorProjectileSprite;
             _meteorFrames = meteorFrames;
             _iceWallFrames = iceWallFrames;
@@ -87,6 +107,9 @@ namespace CrossDefense.Units
         {
             if (_gameManager == null)
                 return;
+
+            if (_gameManager.IsRunOver || _gameManager.Phase != RunPhase.InWave)
+                _relicBarrages.Clear();
 
             if (!_gameManager.IsGameplayPaused && _gameManager.Phase == RunPhase.InWave)
             {
@@ -106,6 +129,7 @@ namespace CrossDefense.Units
                     changed |= Mathf.CeilToInt(previous) != Mathf.CeilToInt(next);
                 }
                 TickIceWalls();
+                TickRelicBarrages();
                 if (changed)
                     StateChanged?.Invoke();
             }
@@ -116,8 +140,8 @@ namespace CrossDefense.Units
 
         void OnDestroy()
         {
-            if (_loadout != null)
-                _loadout.Changed -= OnEquippedSkillChanged;
+            if (_relics != null)
+                _relics.Changed -= OnRelicChanged;
         }
 
         public bool PressSkillButton()
@@ -158,20 +182,47 @@ namespace CrossDefense.Units
                     out damageMultiplier,
                     out radiusMultiplier,
                     out statusDurationMultiplier);
+            int relicRank = Mathf.Max(1, _relics?.EquippedRank ?? 1);
             bool cast = definition.Id switch
             {
-                SummonerSkillId.Meteor => CastMeteor(
-                    worldPoint,
-                    definition,
-                    damageMultiplier,
-                    radiusMultiplier,
-                    statusDurationMultiplier),
-                SummonerSkillId.IceWall => CastIceWall(
-                    worldPoint,
-                    definition,
-                    damageMultiplier,
-                    radiusMultiplier,
-                    statusDurationMultiplier),
+                SummonerSkillId.Meteor => relicRank >= 2
+                    ? CastRelicBarrage(
+                        worldPoint, definition, relicRank, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier)
+                    : CastMeteor(
+                        worldPoint, definition, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier),
+                SummonerSkillId.IceWall => relicRank >= 2
+                    ? CastRelicBarrage(
+                        worldPoint, definition, relicRank, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier)
+                    : CastIceWall(
+                        worldPoint, definition, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier),
+                SummonerSkillId.ArcaneBurst => CastElementBurst(
+                    worldPoint, definition, MonsterAttribute.None,
+                    damageMultiplier, radiusMultiplier),
+                SummonerSkillId.LightningStrike => relicRank >= 2
+                    ? CastRelicBarrage(
+                        worldPoint, definition, relicRank, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier)
+                    : CastElementBurst(
+                        worldPoint, definition, MonsterAttribute.Lightning,
+                        damageMultiplier, radiusMultiplier),
+                SummonerSkillId.WaterBurst => relicRank >= 2
+                    ? CastRelicBarrage(
+                        worldPoint, definition, relicRank, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier)
+                    : CastElementBurst(
+                        worldPoint, definition, MonsterAttribute.Water,
+                        damageMultiplier, radiusMultiplier),
+                SummonerSkillId.Gale => relicRank >= 2
+                    ? CastRelicBarrage(
+                        worldPoint, definition, relicRank, damageMultiplier,
+                        radiusMultiplier, statusDurationMultiplier)
+                    : CastElementBurst(
+                        worldPoint, definition, MonsterAttribute.Wind,
+                        damageMultiplier, radiusMultiplier),
                 _ => false,
             };
             if (!cast)
@@ -218,6 +269,185 @@ namespace CrossDefense.Units
             StateChanged?.Invoke();
         }
 
+        bool CastRelicBarrage(
+            Vector3 worldPoint,
+            SummonerSkillDefinition definition,
+            int rank,
+            float damageMultiplier,
+            float radiusMultiplier,
+            float statusDurationMultiplier)
+        {
+            bool battlefieldWide = rank >= 3;
+            var barrage = new RelicBarrage
+            {
+                SkillId = definition.Id,
+                Rank = rank,
+                Center = worldPoint,
+                StrikeCount = battlefieldWide ? 12 : 4,
+                NextStrikeAt = Time.time,
+                StrikeInterval = battlefieldWide ? 0.18f : 0.24f,
+                DamageMultiplier = definition.DamageMultiplier *
+                    damageMultiplier * (battlefieldWide ? 0.32f : 0.48f),
+                Radius = definition.Radius * radiusMultiplier *
+                    (battlefieldWide ? 0.82f : 0.72f),
+                StatusDurationMultiplier = statusDurationMultiplier,
+            };
+            _relicBarrages.Add(barrage);
+            FireNextRelicBarrageStrike(barrage);
+            return true;
+        }
+
+        void TickRelicBarrages()
+        {
+            for (int i = _relicBarrages.Count - 1; i >= 0; i--)
+            {
+                RelicBarrage barrage = _relicBarrages[i];
+                if (barrage.NextStrikeIndex >= barrage.StrikeCount)
+                {
+                    _relicBarrages.RemoveAt(i);
+                    continue;
+                }
+                if (Time.time >= barrage.NextStrikeAt)
+                    FireNextRelicBarrageStrike(barrage);
+            }
+        }
+
+        void FireNextRelicBarrageStrike(RelicBarrage barrage)
+        {
+            int strikeIndex = barrage.NextStrikeIndex++;
+            Vector3 strikePoint = ResolveRelicBarragePoint(barrage, strikeIndex);
+            barrage.NextStrikeAt = Time.time + barrage.StrikeInterval;
+
+            switch (barrage.SkillId)
+            {
+                case SummonerSkillId.Meteor:
+                    LaunchMeteor(
+                        strikePoint,
+                        barrage.DamageMultiplier,
+                        barrage.Radius,
+                        barrage.Rank >= 3 ? 0.08f : 0.12f,
+                        1.5f * barrage.StatusDurationMultiplier,
+                        barrage.Rank >= 3 ? 0.86f : 1f,
+                        Mathf.Max(1f, barrage.Radius));
+                    break;
+                case SummonerSkillId.IceWall:
+                    CastIceBarrageStrike(strikePoint, barrage);
+                    break;
+                case SummonerSkillId.LightningStrike:
+                    CastElementBarrageStrike(
+                        strikePoint, barrage, MonsterAttribute.Lightning);
+                    break;
+                case SummonerSkillId.WaterBurst:
+                    CastElementBarrageStrike(
+                        strikePoint, barrage, MonsterAttribute.Water);
+                    break;
+                case SummonerSkillId.Gale:
+                    CastElementBarrageStrike(
+                        strikePoint, barrage, MonsterAttribute.Wind);
+                    break;
+            }
+        }
+
+        Vector3 ResolveRelicBarragePoint(RelicBarrage barrage, int strikeIndex)
+        {
+            if (barrage.Rank < 3)
+            {
+                if (strikeIndex == 0)
+                    return barrage.Center;
+                float angle = (strikeIndex - 1) * Mathf.PI * 2f /
+                    Mathf.Max(1, barrage.StrikeCount - 1);
+                float spread = Mathf.Max(0.55f, barrage.Radius * 0.9f);
+                return barrage.Center + new Vector3(
+                    Mathf.Cos(angle) * spread,
+                    Mathf.Sin(angle) * spread,
+                    0f);
+            }
+
+            SpriteRenderer background = _gameManager?.GameplayBackground;
+            Bounds bounds = background != null && background.sprite != null
+                ? background.bounds
+                : new Bounds(
+                    _gameManager?.Summoner != null
+                        ? _gameManager.Summoner.position
+                        : Vector3.zero,
+                    new Vector3(10f, 7f, 0f));
+
+            // Low-discrepancy placement makes every ★3 cast sweep the whole play field.
+            float x01 = Mathf.Repeat(0.5f + strikeIndex * 0.6180339f, 1f);
+            float y01 = Mathf.Repeat(0.25f + strikeIndex * 0.381966f, 1f);
+            float x = Mathf.Lerp(
+                bounds.min.x,
+                bounds.max.x,
+                Mathf.Lerp(0.08f, 0.92f, x01));
+            float y = Mathf.Lerp(
+                bounds.min.y,
+                bounds.max.y,
+                Mathf.Lerp(0.1f, 0.9f, y01));
+            return new Vector3(x, y, 0f);
+        }
+
+        void CastElementBarrageStrike(
+            Vector3 worldPoint,
+            RelicBarrage barrage,
+            MonsterAttribute attribute)
+        {
+            float baseDamage = _summonerAttack != null ? _summonerAttack.AttackDamage : 12f;
+            var packet = new DamagePacket(
+                this,
+                _gameManager.ModifySummonerDamage(
+                    baseDamage * barrage.DamageMultiplier),
+                attribute);
+
+            void ApplyImpact()
+            {
+                if (CanResolveRelicBarrage())
+                    ApplyArea(worldPoint, barrage.Radius, packet);
+            }
+
+            Vector3 origin = _gameManager.Summoner != null
+                ? _gameManager.Summoner.position + Vector3.up * 0.25f
+                : transform.position;
+            if (_particleEffects == null ||
+                !_particleEffects.PlayRelicSkill(
+                    barrage.SkillId,
+                    origin,
+                    worldPoint,
+                    Mathf.Max(0.65f, barrage.Radius * 0.62f),
+                    ApplyImpact))
+                ApplyImpact();
+        }
+
+        void CastIceBarrageStrike(Vector3 worldPoint, RelicBarrage barrage)
+        {
+            float baseDamage = _summonerAttack != null ? _summonerAttack.AttackDamage : 12f;
+            var packet = new DamagePacket(
+                this,
+                _gameManager.ModifySummonerDamage(
+                    baseDamage * barrage.DamageMultiplier),
+                MonsterAttribute.Ice,
+                barrage.Rank >= 3 ? 0.75f : 0.65f,
+                (barrage.Rank >= 3 ? 1.8f : 1.35f) *
+                    barrage.StatusDurationMultiplier);
+            ApplyArea(worldPoint, barrage.Radius, packet);
+            _skillEffects?.PlayFrames(
+                worldPoint,
+                _iceWallFrames,
+                Color.white,
+                barrage.Rank >= 3 ? 1.15f : 1f,
+                18f);
+            _particleEffects?.PlayIceWall(
+                worldPoint,
+                Vector2.right,
+                Mathf.Max(0.45f, barrage.Radius * 0.45f),
+                barrage.Rank >= 3 ? 0.85f : 0.72f);
+        }
+
+        bool CanResolveRelicBarrage() =>
+            _gameManager != null &&
+            !_gameManager.IsRunOver &&
+            !_gameManager.IsGameplayPaused &&
+            _gameManager.Phase == RunPhase.InWave;
+
         bool CastMeteor(
             Vector3 worldPoint,
             SummonerSkillDefinition definition,
@@ -235,42 +465,25 @@ namespace CrossDefense.Units
                 1.8f * radiusMultiplier);
         }
 
-        public bool TryCastOverdriveMeteor(
-            DopamineBalanceData balance,
-            System.Random random)
+        public bool ResetCooldownAndAutoCastRelic(System.Random random)
         {
-            if (balance == null || _gameManager == null ||
+            if (_gameManager == null ||
                 _gameManager.IsGameplayPaused || _gameManager.Phase != RunPhase.InWave)
                 return false;
+
+            _cooldowns[EquippedSkill] = 0f;
+            SetPreviewVisible(false);
+            StateChanged?.Invoke();
 
             BuildMonsterBuffer();
             if (_monsterBuffer.Count == 0)
                 return false;
 
             int index = random?.Next(_monsterBuffer.Count) ?? 0;
-            if (_monsterBuffer.Count > 1 &&
-                _monsterBuffer[index].GetInstanceID() == _lastOverdriveTargetInstanceId)
-            {
-                int offset = 1 + (random?.Next(_monsterBuffer.Count - 1) ?? 0);
-                index = (index + offset) % _monsterBuffer.Count;
-            }
-
             MonsterController target = _monsterBuffer[index];
-            _lastOverdriveTargetInstanceId = target.GetInstanceID();
-            double angle = (random?.NextDouble() ?? 0d) * Math.PI * 2d;
-            double distance = Math.Sqrt(random?.NextDouble() ?? 0d) * balance.MeteorTargetJitter;
-            Vector3 jitter = new(
-                (float)(Math.Cos(angle) * distance),
-                (float)(Math.Sin(angle) * distance),
-                0f);
-            return LaunchMeteor(
-                target.transform.position + jitter,
-                balance.MeteorDamageMultiplier,
-                balance.MeteorRadius,
-                0f,
-                0f,
-                0.9f,
-                1.35f);
+            _targeting = true;
+            _targetingExpiresAt = Time.unscaledTime + TargetingTimeout;
+            return TryCastAt(target.transform.position);
         }
 
         bool LaunchMeteor(
@@ -319,6 +532,46 @@ namespace CrossDefense.Units
                 scale,
                 18f);
 
+        bool CastElementBurst(
+            Vector3 worldPoint,
+            SummonerSkillDefinition definition,
+            MonsterAttribute attribute,
+            float damageMultiplier,
+            float radiusMultiplier)
+        {
+            float baseDamage = _summonerAttack != null ? _summonerAttack.AttackDamage : 12f;
+            float radius = definition.Radius * radiusMultiplier;
+            var packet = new DamagePacket(
+                this,
+                _gameManager.ModifySummonerDamage(
+                    baseDamage * definition.DamageMultiplier * damageMultiplier),
+                attribute);
+
+            void ApplyImpact()
+            {
+                if (_gameManager == null || _gameManager.IsRunOver ||
+                    _gameManager.IsGameplayPaused ||
+                    _gameManager.Phase != RunPhase.InWave)
+                    return;
+                ApplyArea(worldPoint, radius, packet);
+            }
+
+            Vector3 origin = _gameManager.Summoner != null
+                ? _gameManager.Summoner.position + Vector3.up * 0.25f
+                : transform.position;
+            if (_particleEffects != null &&
+                _particleEffects.PlayRelicSkill(
+                    definition.Id,
+                    origin,
+                    worldPoint,
+                    Mathf.Max(0.8f, radius * 0.65f),
+                    ApplyImpact))
+                return true;
+
+            ApplyImpact();
+            return true;
+        }
+
         bool CastIceWall(
             Vector3 worldPoint,
             SummonerSkillDefinition definition,
@@ -353,6 +606,11 @@ namespace CrossDefense.Units
                     0f,
                     definition.Duration * statusDurationMultiplier - animationDuration),
                 rotation);
+            _particleEffects?.PlayIceWall(
+                worldPoint,
+                wallAxis,
+                IceWallHalfLength,
+                Mathf.Max(0.8f, radiusMultiplier));
             TickIceWalls();
             return true;
         }
@@ -365,6 +623,12 @@ namespace CrossDefense.Units
                 _aegisSprite,
                 new Color(1f, 0.82f, 0.32f),
                 1.45f);
+            _particleEffects?.PlayBuff(
+                SummonerBuffId.Aegis,
+                _gameManager.Summoner != null
+                    ? _gameManager.Summoner.position
+                    : transform.position,
+                1.1f);
             StartCooldown(definition);
             return true;
         }
@@ -436,7 +700,27 @@ namespace CrossDefense.Units
             StateChanged?.Invoke();
         }
 
-        void OnEquippedSkillChanged(SummonerSkillId _)
+        SummonerSkillDefinition BuildEquippedDefinition()
+        {
+            SummonerSkillDefinition baseDefinition = SummonerSkillCatalog.Get(EquippedSkill);
+            RelicDefinition relic = _relics?.EquippedDefinition;
+            int rank = Mathf.Max(1, _relics?.EquippedRank ?? 1);
+            RelicRankDefinition rankDefinition = relic?.Rank(rank);
+            float rankDamage = 1f + (rank - 1) * 0.35f;
+            float rankRadius = 1f + (rank - 1) * 0.15f;
+            return new SummonerSkillDefinition(
+                baseDefinition.Id,
+                rankDefinition?.SkillName ?? baseDefinition.DisplayName,
+                1,
+                baseDefinition.Targeting,
+                baseDefinition.Cooldown,
+                baseDefinition.DamageMultiplier * rankDamage,
+                baseDefinition.Radius * rankRadius,
+                baseDefinition.Duration * rankRadius,
+                rankDefinition?.Description ?? baseDefinition.Description);
+        }
+
+        void OnRelicChanged()
         {
             CancelTargeting();
             StateChanged?.Invoke();

@@ -12,8 +12,7 @@ namespace CrossDefense.Core
             int gauge,
             int maxGauge,
             bool isActive,
-            float activeTimeRemaining,
-            int meteorsRemaining)
+            float activeTimeRemaining)
         {
             Combo = combo;
             ComboTimeRemaining = Mathf.Max(0f, comboTimeRemaining);
@@ -21,7 +20,6 @@ namespace CrossDefense.Core
             MaxGauge = Mathf.Max(1, maxGauge);
             IsActive = isActive;
             ActiveTimeRemaining = Mathf.Max(0f, activeTimeRemaining);
-            MeteorsRemaining = Mathf.Max(0, meteorsRemaining);
         }
 
         public int Combo { get; }
@@ -32,7 +30,6 @@ namespace CrossDefense.Core
         public bool IsReady => !IsActive && Gauge >= MaxGauge;
         public bool IsActive { get; }
         public float ActiveTimeRemaining { get; }
-        public int MeteorsRemaining { get; }
     }
 
     /// <summary>Unity 생명주기와 분리해 검증 가능한 콤보·오버드라이브 상태 머신.</summary>
@@ -44,12 +41,11 @@ namespace CrossDefense.Core
         int _gauge;
         bool _isActive;
         float _activeTimeRemaining;
-        float _meteorTimer;
-        int _meteorsRemaining;
 
-        public DopamineRuntime(DopamineBalanceData balance)
+        public DopamineRuntime(DopamineBalanceData balance, int startingGauge = 0)
         {
             _balance = balance != null ? balance : DopamineBalanceData.CreateRuntimeDefault();
+            _gauge = Mathf.Clamp(startingGauge, 0, _balance.MaxGauge);
         }
 
         public DopamineBalanceData Balance => _balance;
@@ -59,8 +55,7 @@ namespace CrossDefense.Core
             _gauge,
             _balance.MaxGauge,
             _isActive,
-            _activeTimeRemaining,
-            _meteorsRemaining);
+            _activeTimeRemaining);
 
         public event Action<DopamineSnapshot> Changed;
 
@@ -73,7 +68,7 @@ namespace CrossDefense.Core
             NotifyChanged();
         }
 
-        public void Tick(float deltaTime, bool hasLivingEnemy, Func<bool> tryDropMeteor)
+        public void Tick(float deltaTime, bool hasLivingEnemy, Func<bool> tryActivateOverdrive)
         {
             float safeDelta = Mathf.Max(0f, deltaTime);
             bool changed = TickCombo(safeDelta);
@@ -81,11 +76,12 @@ namespace CrossDefense.Core
             if (!_isActive && _gauge >= _balance.MaxGauge && hasLivingEnemy)
             {
                 BeginOverdrive();
+                tryActivateOverdrive?.Invoke();
                 changed = true;
             }
 
             if (_isActive && hasLivingEnemy)
-                changed |= TickOverdrive(safeDelta, tryDropMeteor);
+                changed |= TickOverdrive(safeDelta);
 
             if (changed)
                 NotifyChanged();
@@ -107,8 +103,6 @@ namespace CrossDefense.Core
             _gauge = 0;
             _isActive = false;
             _activeTimeRemaining = 0f;
-            _meteorTimer = 0f;
-            _meteorsRemaining = 0;
             NotifyChanged();
         }
 
@@ -129,39 +123,20 @@ namespace CrossDefense.Core
             _gauge = 0;
             _isActive = true;
             _activeTimeRemaining = _balance.OverdriveDuration;
-            _meteorTimer = 0f;
-            _meteorsRemaining = _balance.MeteorCount;
         }
 
-        bool TickOverdrive(float deltaTime, Func<bool> tryDropMeteor)
+        bool TickOverdrive(float deltaTime)
         {
             bool changed = false;
             float previousTime = _activeTimeRemaining;
             _activeTimeRemaining = Mathf.Max(0f, _activeTimeRemaining - deltaTime);
             changed |= !Mathf.Approximately(previousTime, _activeTimeRemaining);
-            _meteorTimer -= deltaTime;
-
-            int dropsThisTick = 0;
-            while (_meteorsRemaining > 0 && _meteorTimer <= 0f && dropsThisTick < 2)
-            {
-                if (tryDropMeteor == null || !tryDropMeteor())
-                {
-                    _meteorTimer = 0f;
-                    break;
-                }
-                _meteorsRemaining--;
-                _meteorTimer += _balance.MeteorInterval;
-                dropsThisTick++;
-                changed = true;
-            }
 
             if (_activeTimeRemaining > 0f)
                 return changed;
 
             _isActive = false;
             _activeTimeRemaining = 0f;
-            _meteorTimer = 0f;
-            _meteorsRemaining = 0;
             return true;
         }
 

@@ -5,13 +5,38 @@ using UnityEngine;
 
 namespace CrossDefense.Core
 {
+    public readonly struct ProjectileImpactContext
+    {
+        public Vector3 Position { get; }
+        public DamagePacket Packet { get; }
+        public bool PrimaryDefeated { get; }
+        public bool WasSlimeResonating { get; }
+
+        public ProjectileImpactContext(
+            Vector3 position,
+            DamagePacket packet,
+            bool primaryDefeated,
+            bool wasSlimeResonating)
+        {
+            Position = position;
+            Packet = packet;
+            PrimaryDefeated = primaryDefeated;
+            WasSlimeResonating = wasSlimeResonating;
+        }
+    }
+
     /// <summary>소환사와 소환수가 공유하는 PoolBoss 기반 투사체 서비스.</summary>
     public sealed class CombatProjectileService
     {
+        public const int MaxActiveProjectiles = 48;
+
         readonly Transform _root;
         readonly Func<IReadOnlyCollection<MonsterController>> _monsterProvider;
         readonly Func<bool> _canFight;
         readonly Transform _template;
+        int _activeCount;
+
+        public int ActiveCount => Mathf.Max(0, _activeCount);
 
         public CombatProjectileService(
             Transform parent,
@@ -37,7 +62,31 @@ namespace CrossDefense.Core
 
         internal bool CanResolve => _canFight?.Invoke() ?? true;
 
-        public void Fire(
+        internal bool TryFindRetarget(
+            Vector3 projectilePosition,
+            MonsterController previousTarget,
+            out MonsterController target)
+        {
+            target = null;
+            var monsters = _monsterProvider?.Invoke();
+            if (monsters == null)
+                return false;
+
+            float nearestDistanceSq = float.PositiveInfinity;
+            foreach (var monster in monsters)
+            {
+                if (!IsValid(monster) || monster == previousTarget)
+                    continue;
+                float distanceSq = (monster.transform.position - projectilePosition).sqrMagnitude;
+                if (distanceSq >= nearestDistanceSq)
+                    continue;
+                nearestDistanceSq = distanceSq;
+                target = monster;
+            }
+            return target != null;
+        }
+
+        public bool Fire(
             Vector3 origin,
             MonsterController target,
             Sprite sprite,
@@ -47,11 +96,14 @@ namespace CrossDefense.Core
             float areaRadius = 0f,
             int pierceCount = 1,
             float chainedDamageMultiplier = 1f,
-            bool linePierce = false)
+            bool linePierce = false,
+            Action<ProjectileImpactContext> onImpact = null)
         {
-            if (target == null || target.IsResolved) return;
+            if (target == null || target.IsResolved || _activeCount >= MaxActiveProjectiles)
+                return false;
             var spawned = RuntimePoolService.Spawn(_template, origin, Quaternion.identity, _root);
-            if (spawned == null) return;
+            if (spawned == null) return false;
+            _activeCount++;
             spawned.GetComponent<CombatProjectileController>().Launch(
                 this,
                 target,
@@ -62,10 +114,12 @@ namespace CrossDefense.Core
                 areaRadius,
                 pierceCount,
                 chainedDamageMultiplier,
-                linePierce);
+                linePierce,
+                onImpact);
+            return true;
         }
 
-        public void FireToPoint(
+        public bool FireToPoint(
             Vector3 origin,
             Vector3 destination,
             Sprite sprite,
@@ -77,8 +131,11 @@ namespace CrossDefense.Core
             Action<Vector3> onImpact = null,
             Color? tint = null)
         {
+            if (_activeCount >= MaxActiveProjectiles)
+                return false;
             var spawned = RuntimePoolService.Spawn(_template, origin, Quaternion.identity, _root);
-            if (spawned == null) return;
+            if (spawned == null) return false;
+            _activeCount++;
             spawned.GetComponent<CombatProjectileController>().LaunchToPoint(
                 this,
                 destination,
@@ -90,6 +147,7 @@ namespace CrossDefense.Core
                 hitAllInRadius,
                 onImpact,
                 tint);
+            return true;
         }
 
         internal void ResolveImpact(
@@ -108,43 +166,61 @@ namespace CrossDefense.Core
                 return;
             }
 
-            var monsters = _monsterProvider?.Invoke();
-            if (areaRadius > 0f && monsters != null)
+            try
             {
-                float radiusSq = areaRadius * areaRadius;
-                var snapshot = new List<MonsterController>(monsters);
-                foreach (var monster in snapshot)
+                Vector3 impactPosition = primary.transform.position;
+                float hpBefore = primary.CurrentHp;
+                bool wasSlimeResonating = primary.HasSlimeResonance;
+                Action<ProjectileImpactContext> onImpact = projectile.ImpactCallback;
+                var monsters = _monsterProvider?.Invoke();
+                if (areaRadius > 0f && monsters != null)
                 {
-                    if (!IsValid(monster)) continue;
-                    if ((monster.transform.position - primary.transform.position).sqrMagnitude <= radiusSq)
-                        monster.ApplyDamage(packet);
+                    float radiusSq = areaRadius * areaRadius;
+                    var snapshot = new List<MonsterController>(monsters);
+                    foreach (var monster in snapshot)
+                    {
+                        if (!IsValid(monster)) continue;
+                        if ((monster.transform.position - primary.transform.position).sqrMagnitude <= radiusSq)
+                            monster.ApplyDamage(packet);
+                    }
                 }
-            }
-            else
-            {
-                if (linePierce && pierceCount > 1 && monsters != null)
-                    ResolveLinePierce(
-                        launchOrigin,
-                        primary,
-                        packet,
-                        pierceCount,
-                        monsters,
-                        chainedDamageMultiplier);
                 else
                 {
-                    primary.ApplyDamage(packet);
+                    if (linePierce && pierceCount > 1 && monsters != null)
+                        ResolveLinePierce(
+                            launchOrigin,
+                            primary,
+                            packet,
+                            pierceCount,
+                            monsters,
+                            chainedDamageMultiplier);
+                    else
+                    {
+                        primary.ApplyDamage(packet);
+                    }
+                    if (!linePierce && pierceCount > 1 && monsters != null)
+                        ResolvePierce(primary, packet, pierceCount - 1, monsters, chainedDamageMultiplier);
                 }
-                if (!linePierce && pierceCount > 1 && monsters != null)
-                    ResolvePierce(primary, packet, pierceCount - 1, monsters, chainedDamageMultiplier);
-            }
 
-            Release(projectile);
+                bool primaryDefeated = hpBefore > 0f &&
+                                       (!primary.gameObject.activeInHierarchy || primary.CurrentHp <= 0f);
+                onImpact?.Invoke(new ProjectileImpactContext(
+                    impactPosition,
+                    packet,
+                    primaryDefeated,
+                    wasSlimeResonating));
+            }
+            finally
+            {
+                Release(projectile);
+            }
         }
 
         internal void Release(CombatProjectileController projectile)
         {
             if (projectile == null) return;
             projectile.ResetForPool();
+            _activeCount = Mathf.Max(0, _activeCount - 1);
             RuntimePoolService.Despawn(projectile.transform);
         }
 
@@ -187,6 +263,26 @@ namespace CrossDefense.Core
             finally
             {
                 Release(projectile);
+            }
+        }
+
+        public void ApplyAreaDamage(
+            Vector3 point,
+            DamagePacket packet,
+            float radius)
+        {
+            var monsters = _monsterProvider?.Invoke();
+            if (monsters == null || radius <= 0f)
+                return;
+            float radiusSq = radius * radius;
+            var snapshot = new List<MonsterController>(monsters);
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                MonsterController monster = snapshot[i];
+                if (!IsValid(monster) ||
+                    (monster.transform.position - point).sqrMagnitude > radiusSq)
+                    continue;
+                monster.ApplyDamage(packet);
             }
         }
 
@@ -280,8 +376,12 @@ namespace CrossDefense.Core
         bool _hitAllInRadius;
         bool _linePierce;
         Action<Vector3> _pointImpact;
+        Action<ProjectileImpactContext> _impactCallback;
         Vector3 _launchOrigin;
+        Vector3 _lastKnownTargetPosition;
         bool _inFlight;
+
+        internal Action<ProjectileImpactContext> ImpactCallback => _impactCallback;
 
         void Awake() => _renderer = GetComponent<SpriteRenderer>();
 
@@ -295,7 +395,8 @@ namespace CrossDefense.Core
             float areaRadius,
             int pierceCount,
             float chainedDamageMultiplier,
-            bool linePierce)
+            bool linePierce,
+            Action<ProjectileImpactContext> onImpact)
         {
             _service = service;
             _target = target;
@@ -309,7 +410,9 @@ namespace CrossDefense.Core
             _hitAllInRadius = false;
             _linePierce = linePierce;
             _pointImpact = null;
+            _impactCallback = onImpact;
             _launchOrigin = transform.position;
+            _lastKnownTargetPosition = target.transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
             _renderer.sprite = sprite;
@@ -318,6 +421,9 @@ namespace CrossDefense.Core
                 CrossDefense.Data.MonsterAttribute.Fire => new Color(1f, 0.45f, 0.2f),
                 CrossDefense.Data.MonsterAttribute.Ice => new Color(0.4f, 0.8f, 1f),
                 CrossDefense.Data.MonsterAttribute.Nature => new Color(0.45f, 1f, 0.5f),
+                CrossDefense.Data.MonsterAttribute.Lightning => new Color(0.78f, 0.62f, 1f),
+                CrossDefense.Data.MonsterAttribute.Water => new Color(0.25f, 0.68f, 1f),
+                CrossDefense.Data.MonsterAttribute.Wind => new Color(0.7f, 1f, 0.88f),
                 _ => Color.white,
             };
             FaceTarget();
@@ -348,6 +454,7 @@ namespace CrossDefense.Core
             _hitAllInRadius = hitAllInRadius;
             _linePierce = false;
             _pointImpact = onImpact;
+            _impactCallback = null;
             _launchOrigin = transform.position;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
@@ -367,13 +474,32 @@ namespace CrossDefense.Core
                 return;
             }
             _remainingLifetime -= Time.deltaTime;
-            if (_remainingLifetime <= 0f || (!_usesPointTarget && !IsValidTarget()))
+            if (_remainingLifetime <= 0f)
             {
                 _service?.Release(this);
                 return;
             }
 
-            Vector3 destination = _usesPointTarget ? _pointTarget : _target.transform.position;
+            bool hasLiveTarget = _usesPointTarget || IsValidTarget();
+            if (!_usesPointTarget)
+            {
+                if (hasLiveTarget)
+                {
+                    _lastKnownTargetPosition = _target.transform.position;
+                }
+                else if (_service.TryFindRetarget(transform.position, _target, out var retarget))
+                {
+                    _target = retarget;
+                    _lastKnownTargetPosition = retarget.transform.position;
+                    hasLiveTarget = true;
+                }
+            }
+
+            Vector3 destination = _usesPointTarget
+                ? _pointTarget
+                : hasLiveTarget
+                    ? _target.transform.position
+                    : _lastKnownTargetPosition;
             Vector3 offset = destination - transform.position;
             float travel = _speed * Time.deltaTime;
             if (offset.sqrMagnitude <= Mathf.Max(HitDistance * HitDistance, travel * travel))
@@ -387,7 +513,7 @@ namespace CrossDefense.Core
                         _areaRadius,
                         _hitAllInRadius,
                         _pointImpact);
-                else
+                else if (hasLiveTarget)
                     _service.ResolveImpact(
                         this,
                         _target,
@@ -397,6 +523,8 @@ namespace CrossDefense.Core
                         _chainedDamageMultiplier,
                         _linePierce,
                         _launchOrigin);
+                else
+                    _service.Release(this);
                 return;
             }
 
@@ -418,7 +546,9 @@ namespace CrossDefense.Core
             _hitAllInRadius = false;
             _linePierce = false;
             _pointImpact = null;
+            _impactCallback = null;
             _launchOrigin = Vector3.zero;
+            _lastKnownTargetPosition = Vector3.zero;
             if (_renderer != null)
             {
                 _renderer.sprite = null;
@@ -448,6 +578,9 @@ namespace CrossDefense.Core
                 CrossDefense.Data.MonsterAttribute.Fire => new Color(1f, 0.45f, 0.2f),
                 CrossDefense.Data.MonsterAttribute.Ice => new Color(0.4f, 0.8f, 1f),
                 CrossDefense.Data.MonsterAttribute.Nature => new Color(0.45f, 1f, 0.5f),
+                CrossDefense.Data.MonsterAttribute.Lightning => new Color(0.78f, 0.62f, 1f),
+                CrossDefense.Data.MonsterAttribute.Water => new Color(0.25f, 0.68f, 1f),
+                CrossDefense.Data.MonsterAttribute.Wind => new Color(0.7f, 1f, 0.88f),
                 _ => Color.white,
             };
         }
