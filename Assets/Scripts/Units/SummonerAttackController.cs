@@ -431,6 +431,8 @@ namespace CrossDefense.Units
             {
                 if (_gameManager?.Projectiles == null || _gameManager.IsRunOver)
                     return;
+                if (!context.DidHit)
+                    return;
                 if (context.Packet.IsCritical && combatProfile.CriticalBurstRadius > 0f)
                 {
                     _gameManager.Projectiles.ApplyAreaDamage(

@@ -21,6 +21,7 @@ namespace CrossDefense.Units
         float _nextTargetSearchTime;
         int _contactDamage;
         int _rewardGold;
+        int _spawnVersion;
         bool _resolved;
         float _slowMultiplier = 1f;
         float _slowUntil;
@@ -40,6 +41,7 @@ namespace CrossDefense.Units
         public float CurrentHp => _hp;
         public float MaxHp { get; private set; }
         public bool IsResolved => _resolved;
+        public int SpawnVersion => _spawnVersion;
         public bool HasSlimeResonance => Time.time < _slimeResonanceUntil;
         public SummonedUnitController UnitTarget => _unitTarget;
         public bool IsTargetingCore => _unitTarget == null;
@@ -59,6 +61,10 @@ namespace CrossDefense.Units
             float hpMultiplier, float speedMultiplier, float rewardMultiplier,
             float sizeMultiplier = 1f)
         {
+            unchecked
+            {
+                _spawnVersion++;
+            }
             _gameManager = gameManager;
             _coreTarget = target;
             _unitTarget = null;

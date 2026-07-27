@@ -9,17 +9,20 @@ namespace CrossDefense.Core
     {
         public Vector3 Position { get; }
         public DamagePacket Packet { get; }
+        public bool DidHit { get; }
         public bool PrimaryDefeated { get; }
         public bool WasSlimeResonating { get; }
 
         public ProjectileImpactContext(
             Vector3 position,
             DamagePacket packet,
+            bool didHit,
             bool primaryDefeated,
             bool wasSlimeResonating)
         {
             Position = position;
             Packet = packet;
+            DidHit = didHit;
             PrimaryDefeated = primaryDefeated;
             WasSlimeResonating = wasSlimeResonating;
         }
@@ -61,30 +64,6 @@ namespace CrossDefense.Core
         }
 
         internal bool CanResolve => _canFight?.Invoke() ?? true;
-
-        internal bool TryFindRetarget(
-            Vector3 projectilePosition,
-            MonsterController previousTarget,
-            out MonsterController target)
-        {
-            target = null;
-            var monsters = _monsterProvider?.Invoke();
-            if (monsters == null)
-                return false;
-
-            float nearestDistanceSq = float.PositiveInfinity;
-            foreach (var monster in monsters)
-            {
-                if (!IsValid(monster) || monster == previousTarget)
-                    continue;
-                float distanceSq = (monster.transform.position - projectilePosition).sqrMagnitude;
-                if (distanceSq >= nearestDistanceSq)
-                    continue;
-                nearestDistanceSq = distanceSq;
-                target = monster;
-            }
-            return target != null;
-        }
 
         public bool Fire(
             Vector3 origin,
@@ -207,12 +186,36 @@ namespace CrossDefense.Core
                 onImpact?.Invoke(new ProjectileImpactContext(
                     impactPosition,
                     packet,
+                    true,
                     primaryDefeated,
                     wasSlimeResonating));
             }
             finally
             {
                 Release(projectile);
+            }
+        }
+
+        internal void ResolveMissImpact(
+            CombatProjectileController projectile,
+            Vector3 impactPosition,
+            DamagePacket packet)
+        {
+            if (projectile == null)
+                return;
+            Action<ProjectileImpactContext> onImpact = projectile.ImpactCallback;
+            try
+            {
+                onImpact?.Invoke(new ProjectileImpactContext(
+                    impactPosition,
+                    packet,
+                    false,
+                    false,
+                    false));
+            }
+            finally
+            {
+                projectile.BeginMissBurst();
             }
         }
 
@@ -361,6 +364,7 @@ namespace CrossDefense.Core
     {
         const float HitDistance = 0.12f;
         const float MaxLifetime = 5f;
+        const float MissBurstDuration = 0.12f;
 
         SpriteRenderer _renderer;
         CombatProjectileService _service;
@@ -379,7 +383,12 @@ namespace CrossDefense.Core
         Action<ProjectileImpactContext> _impactCallback;
         Vector3 _launchOrigin;
         Vector3 _lastKnownTargetPosition;
+        int _targetSpawnVersion;
         bool _inFlight;
+        bool _missBursting;
+        float _missBurstRemaining;
+        Vector3 _missBurstScale;
+        Color _missBurstColor;
 
         internal Action<ProjectileImpactContext> ImpactCallback => _impactCallback;
 
@@ -413,6 +422,7 @@ namespace CrossDefense.Core
             _impactCallback = onImpact;
             _launchOrigin = transform.position;
             _lastKnownTargetPosition = target.transform.position;
+            _targetSpawnVersion = target.SpawnVersion;
             _inFlight = true;
             transform.localScale = Vector3.one * Mathf.Max(0.01f, scale);
             _renderer.sprite = sprite;
@@ -465,6 +475,11 @@ namespace CrossDefense.Core
 
         void Update()
         {
+            if (_missBursting)
+            {
+                TickMissBurst();
+                return;
+            }
             if (!_inFlight) return;
             if (Time.timeScale <= 0f)
                 return;
@@ -487,11 +502,9 @@ namespace CrossDefense.Core
                 {
                     _lastKnownTargetPosition = _target.transform.position;
                 }
-                else if (_service.TryFindRetarget(transform.position, _target, out var retarget))
+                else
                 {
-                    _target = retarget;
-                    _lastKnownTargetPosition = retarget.transform.position;
-                    hasLiveTarget = true;
+                    _target = null;
                 }
             }
 
@@ -524,7 +537,10 @@ namespace CrossDefense.Core
                         _linePierce,
                         _launchOrigin);
                 else
-                    _service.Release(this);
+                    _service.ResolveMissImpact(
+                        this,
+                        _lastKnownTargetPosition,
+                        _packet);
                 return;
             }
 
@@ -532,9 +548,40 @@ namespace CrossDefense.Core
             FaceDirection(offset);
         }
 
+        internal void BeginMissBurst()
+        {
+            _inFlight = false;
+            _missBursting = true;
+            _missBurstRemaining = MissBurstDuration;
+            _missBurstScale = transform.localScale;
+            _missBurstColor = _renderer != null ? _renderer.color : Color.white;
+        }
+
+        void TickMissBurst()
+        {
+            if (Time.timeScale <= 0f)
+                return;
+            _missBurstRemaining -= Time.deltaTime;
+            float progress = 1f - Mathf.Clamp01(
+                _missBurstRemaining / MissBurstDuration);
+            transform.localScale = _missBurstScale * Mathf.Lerp(1f, 1.8f, progress);
+            if (_renderer != null)
+            {
+                Color color = _missBurstColor;
+                color.a *= 1f - progress;
+                _renderer.color = color;
+            }
+            if (_missBurstRemaining <= 0f)
+                _service?.Release(this);
+        }
+
         public void ResetForPool()
         {
             _inFlight = false;
+            _missBursting = false;
+            _missBurstRemaining = 0f;
+            _missBurstScale = Vector3.one;
+            _missBurstColor = Color.white;
             _service = null;
             _target = null;
             _usesPointTarget = false;
@@ -549,6 +596,7 @@ namespace CrossDefense.Core
             _impactCallback = null;
             _launchOrigin = Vector3.zero;
             _lastKnownTargetPosition = Vector3.zero;
+            _targetSpawnVersion = 0;
             if (_renderer != null)
             {
                 _renderer.sprite = null;
@@ -557,7 +605,11 @@ namespace CrossDefense.Core
         }
 
         bool IsValidTarget() =>
-            _target != null && _target.gameObject.activeInHierarchy && !_target.IsResolved && _target.CurrentHp > 0f;
+            _target != null &&
+            _target.SpawnVersion == _targetSpawnVersion &&
+            _target.gameObject.activeInHierarchy &&
+            !_target.IsResolved &&
+            _target.CurrentHp > 0f;
 
         void FaceTarget()
         {
