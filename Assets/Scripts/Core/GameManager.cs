@@ -167,6 +167,7 @@ namespace CrossDefense.Core
         GameplayPauseReason _gameplayPauseReasons;
         float _timeScaleBeforeGameplayPause = 1f;
         float _gameplaySpeed = NormalGameplaySpeed;
+        float _nextRunHealthCheckpointTime;
 
         public StageTimeline StageTimeline => stageTimeline;
         public Transform Summoner => summoner;
@@ -405,6 +406,10 @@ namespace CrossDefense.Core
                     $"[CrossDefense] DAY checkpoint restored: DAY {_resumeWaveIndex + 1}.",
                     this);
             }
+            bool hasHealthCheckpoint = checkpoint?.healthCheckpointVersion > 0;
+            bool checkpointWasDefeated = hasHealthCheckpoint && checkpoint.coreHpRatio <= 0f;
+            if (checkpointWasDefeated)
+                _resumeWaveIndex = 0;
             _runTraits.Restore(checkpoint?.runTraits);
             _runRelics.Restore(checkpoint?.runRelicIds, merchantCatalog.FindRelic);
             _runRelics.Changed += OnRunRelicsChanged;
@@ -416,7 +421,9 @@ namespace CrossDefense.Core
                                   _permanentTraits.Snapshot.CoreMaxHpMultiplier *
                                   (_equipment?.MaxHpMultiplier ?? 1f) *
                                   (_runRelics?.MaxHpMultiplier ?? 1f);
-            _coreHp = _effectiveMaxCoreHp;
+            _coreHp = hasHealthCheckpoint && !checkpointWasDefeated
+                ? _effectiveMaxCoreHp * Mathf.Clamp01(checkpoint.coreHpRatio)
+                : _effectiveMaxCoreHp;
             _wallet = WalletProgression.CreatePersistent(Mathf.Max(0, startingGold));
             _gold = _wallet.Gold;
             _summonContracts = Mathf.Max(0, startingSummonContracts);
@@ -464,7 +471,9 @@ namespace CrossDefense.Core
                 summonFormation);
             _summonManager.BenchChanged += OnBenchRosterChanged;
             _summonedUnitManager.UnitsChanged += OnFieldRosterChanged;
-            RestoreSummonedUnits(checkpoint?.summonedUnits);
+            RestoreSummonedUnits(
+                checkpointWasDefeated ? null : checkpoint?.summonedUnits,
+                hasHealthCheckpoint);
 
             _summonerSkillController = GetComponent<SummonerSkillController>();
             if (_summonerSkillController == null)
@@ -684,6 +693,14 @@ namespace CrossDefense.Core
         {
             if (autoStart)
                 StartRun();
+        }
+
+        void Update()
+        {
+            if (Time.unscaledTime < _nextRunHealthCheckpointTime)
+                return;
+            _nextRunHealthCheckpointTime = Time.unscaledTime + 1f;
+            SaveRunSession(true);
         }
 
         public void StartRun()
@@ -1221,11 +1238,15 @@ namespace CrossDefense.Core
 
             _runSession.Save(new RunSessionSaveData
             {
+                healthCheckpointVersion = 1,
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = Mathf.Max(0, _resumeWaveIndex),
                 gold = Mathf.Max(0, _gold),
                 summonContracts = Mathf.Max(0, _summonContracts),
                 coreHp = Mathf.Max(0f, _coreHp),
+                coreHpRatio = _effectiveMaxCoreHp > 0f
+                    ? Mathf.Clamp01(_coreHp / _effectiveMaxCoreHp)
+                    : 0f,
                 runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
                 runTraits = _runTraits?.CaptureSaveData() ?? new RunTraitProgressionSaveData(),
                 summonedUnits = CaptureSummonedUnits(),
@@ -1240,11 +1261,13 @@ namespace CrossDefense.Core
             _resumeWaveIndex = 0;
             _runSession.Save(new RunSessionSaveData
             {
+                healthCheckpointVersion = 1,
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = 0,
                 gold = Mathf.Max(0, _gold),
                 summonContracts = Mathf.Max(0, startingSummonContracts),
                 coreHp = Mathf.Max(0f, _effectiveMaxCoreHp),
+                coreHpRatio = 1f,
                 runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
                 runTraits = _runTraits?.CaptureSaveData() ?? new RunTraitProgressionSaveData(),
                 summonedUnits = new List<RunSessionSummonSaveData>(),
@@ -1272,7 +1295,7 @@ namespace CrossDefense.Core
             var saved = new List<RunSessionSummonSaveData>();
             var seen = new HashSet<int>();
 
-            void Add(SummonUnitInstance instance)
+            void Add(SummonUnitInstance instance, bool isDeployed, float hpRatio)
             {
                 if (instance?.Unit == null || !seen.Add(instance.InstanceId))
                     return;
@@ -1280,19 +1303,26 @@ namespace CrossDefense.Core
                 {
                     unitId = instance.Unit.UnitId,
                     rank = SummonRank.Clamp(instance.Rank),
+                    isDeployed = isDeployed,
+                    hpRatio = Mathf.Clamp01(hpRatio),
                 });
             }
 
-            if (_summonManager?.Bench != null)
-                foreach (SummonUnitInstance instance in _summonManager.Bench)
-                    Add(instance);
             if (_summonedUnitManager?.Units != null)
                 foreach (SummonedUnitController unit in _summonedUnitManager.Units)
-                    Add(unit?.Instance);
+                {
+                    if (unit != null && !unit.IsDefeated && unit.MaxHp > 0f)
+                        Add(unit.Instance, true, unit.CurrentHp / unit.MaxHp);
+                }
+            if (_summonManager?.Bench != null)
+                foreach (SummonUnitInstance instance in _summonManager.Bench)
+                    Add(instance, false, 1f);
             return saved;
         }
 
-        void RestoreSummonedUnits(IReadOnlyList<RunSessionSummonSaveData> saved)
+        void RestoreSummonedUnits(
+            IReadOnlyList<RunSessionSummonSaveData> saved,
+            bool restoreHealth)
         {
             if (saved == null || saved.Count == 0 || _summonManager?.Pool == null)
                 return;
@@ -1302,7 +1332,8 @@ namespace CrossDefense.Core
             for (int i = 0; i < saved.Count; i++)
             {
                 RunSessionSummonSaveData entry = saved[i];
-                if (entry == null || string.IsNullOrWhiteSpace(entry.unitId))
+                if (entry == null || string.IsNullOrWhiteSpace(entry.unitId) ||
+                    restoreHealth && entry.hpRatio <= 0f)
                     continue;
                 SummonUnitData data = null;
                 foreach (SummonUnitData candidate in _summonManager.Pool)
@@ -1317,8 +1348,23 @@ namespace CrossDefense.Core
                     _summonManager.TryGrantRewardUnit(
                         data,
                         SummonRank.Clamp(entry.rank),
-                        out _))
+                        out _,
+                        out SummonUnitInstance instance))
+                {
                     restored++;
+                    if (restoreHealth && entry.isDeployed)
+                    {
+                        if (!_summonedUnitManager.TryRestoreUnitHealth(
+                                instance.InstanceId,
+                                entry.hpRatio))
+                        {
+                            _summonedUnitManager.TryAutoDeploy(instance.InstanceId);
+                            _summonedUnitManager.TryRestoreUnitHealth(
+                                instance.InstanceId,
+                                entry.hpRatio);
+                        }
+                    }
+                }
             }
             _suppressRunSessionSave = false;
             if (restored > 0)

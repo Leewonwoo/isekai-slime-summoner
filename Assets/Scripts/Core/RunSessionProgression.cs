@@ -9,17 +9,21 @@ namespace CrossDefense.Core
     {
         public string unitId;
         public int rank;
+        public bool isDeployed;
+        public float hpRatio = 1f;
     }
 
     [Serializable]
     public sealed class RunSessionSaveData
     {
         public int version = 1;
+        public int healthCheckpointVersion;
         public string stageId;
         public int waveIndex;
         public int gold;
         public int summonContracts;
         public float coreHp;
+        public float coreHpRatio = 1f;
         public List<string> runRelicIds = new();
         public RunTraitProgressionSaveData runTraits = new();
         public List<RunSessionSummonSaveData> summonedUnits = new();
@@ -84,9 +88,19 @@ namespace CrossDefense.Core
                 loaded.gold = Mathf.Max(0, loaded.gold);
                 loaded.summonContracts = Mathf.Max(0, loaded.summonContracts);
                 loaded.coreHp = Mathf.Max(0f, loaded.coreHp);
+                if (loaded.healthCheckpointVersion > 0)
+                    loaded.coreHpRatio = Mathf.Clamp01(loaded.coreHpRatio);
                 loaded.runRelicIds ??= new List<string>();
                 loaded.runTraits ??= new RunTraitProgressionSaveData();
                 loaded.summonedUnits ??= new List<RunSessionSummonSaveData>();
+                if (loaded.healthCheckpointVersion > 0)
+                {
+                    foreach (RunSessionSummonSaveData summon in loaded.summonedUnits)
+                    {
+                        if (summon != null)
+                            summon.hpRatio = Mathf.Clamp01(summon.hpRatio);
+                    }
+                }
                 data = loaded;
                 return true;
             }

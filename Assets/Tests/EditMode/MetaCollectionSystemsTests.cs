@@ -216,11 +216,23 @@ namespace CrossDefense.Tests.EditMode
                 () => flushed = true);
             var source = new RunSessionSaveData
             {
+                healthCheckpointVersion = 1,
                 stageId = "stage-01",
                 waveIndex = 7,
                 gold = 321,
                 summonContracts = 9,
                 coreHp = 72f,
+                coreHpRatio = 0.6f,
+                summonedUnits = new List<RunSessionSummonSaveData>
+                {
+                    new()
+                    {
+                        unitId = "slime-punch",
+                        rank = 2,
+                        isDeployed = true,
+                        hpRatio = 0.35f,
+                    },
+                },
                 runRelicIds = new List<string> { "relic-power", "relic-gold" },
                 runTraits = new RunTraitProgressionSaveData
                 {
@@ -241,6 +253,8 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(restored.waveIndex, Is.EqualTo(7));
             Assert.That(restored.gold, Is.EqualTo(321));
             Assert.That(restored.summonContracts, Is.EqualTo(9));
+            Assert.That(restored.coreHpRatio, Is.EqualTo(0.6f).Within(0.001f));
+            Assert.That(restored.summonedUnits[0].hpRatio, Is.EqualTo(0.35f).Within(0.001f));
             Assert.That(restored.runRelicIds, Is.EquivalentTo(source.runRelicIds));
             Assert.That(restored.runTraits.attackArchetype,
                 Is.EqualTo((int)SummonerAttackArchetype.Fireball));

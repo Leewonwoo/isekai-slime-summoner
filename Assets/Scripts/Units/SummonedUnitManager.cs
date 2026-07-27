@@ -865,6 +865,16 @@ namespace CrossDefense.Units
             ReleaseUnit(unit);
         }
 
+        public bool TryRestoreUnitHealth(int instanceId, float hpRatio)
+        {
+            foreach (SummonedUnitController unit in _units)
+            {
+                if (unit?.Instance?.InstanceId == instanceId)
+                    return unit.RestoreHealthRatio(hpRatio);
+            }
+            return false;
+        }
+
         static void ReleasePreview(SummonedUnitController unit)
         {
             if (unit == null) return;

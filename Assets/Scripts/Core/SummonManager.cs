@@ -156,14 +156,24 @@ namespace CrossDefense.Core
 
         public bool TryGrantRewardUnit(SummonUnitData unit, int rank, out SummonResult result)
         {
+            return TryGrantRewardUnit(unit, rank, out result, out _);
+        }
+
+        public bool TryGrantRewardUnit(
+            SummonUnitData unit,
+            int rank,
+            out SummonResult result,
+            out SummonUnitInstance instance)
+        {
             result = default;
+            instance = null;
             int safeRank = SummonRank.Clamp(rank);
             if (unit == null || !CanAddToBench(unit, safeRank))
                 return false;
 
             int id = _nextResultId++;
             result = SummonResult.RankedUnitResult(id, unit, safeRank);
-            var instance = new SummonUnitInstance(
+            instance = new SummonUnitInstance(
                 _nextInstanceId++,
                 unit,
                 safeRank,

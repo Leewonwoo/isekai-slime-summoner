@@ -281,6 +281,15 @@ namespace CrossDefense.Units
             return _hp - previousHp;
         }
 
+        public bool RestoreHealthRatio(float hpRatio)
+        {
+            if (MaxHp <= 0f || hpRatio <= 0f)
+                return false;
+            _hp = MaxHp * Mathf.Clamp01(hpRatio);
+            _healthBar?.SetHealth(_hp, MaxHp);
+            return true;
+        }
+
         public Vector3 GetFloatingTextAnchor() => GetDamageNumberAnchor();
 
         public Vector3 GetHeadEffectAnchor()
