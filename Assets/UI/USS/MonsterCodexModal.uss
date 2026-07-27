@@ -18,13 +18,28 @@
 }
 
 .codex-panel {
-    width: var(--modal-panel-width);
-    height: var(--modal-panel-height);
-    background-color: var(--color-panel);
-    border-width: var(--gap-sm);
-    border-color: var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--gap-xl);
+    width: 92%;
+    max-width: var(--modal-panel-width);
+    height: 90%;
+    max-height: var(--modal-panel-height);
+    min-height: 0;
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/monster_codex_panel_frame.png?fileID=21300000&guid=4dfc7d54c92d3984ab983c82bd0993bd&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 180px;
+    -unity-slice-top: 180px;
+    -unity-slice-right: 180px;
+    -unity-slice-bottom: 180px;
+    -unity-slice-scale: 0.38;
+    border-width: 0;
+    border-radius: 0;
+    padding-left: 72px;
+    padding-right: 72px;
+    padding-top: 72px;
+    padding-bottom: 64px;
 }
 
 .modal-header {
@@ -47,24 +62,38 @@
 
 .codex-grid-scroll {
     flex-grow: 1;
+    min-height: 0;
 }
 
 .codex-grid {
     flex-direction: row;
     flex-wrap: wrap;
     align-content: flex-start;
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-sm);
 }
 
 .codex-slot {
-    width: var(--codex-slot-size);
-    height: var(--codex-slot-size);
+    width: 168px;
+    height: 168px;
     margin: var(--gap-sm);
-    background-color: var(--color-panel-deep);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/codex_entry_slot_frame.png?fileID=21300000&guid=3c95af3f2eef0cb42b39b717d1d0f79f&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 170px;
+    -unity-slice-top: 170px;
+    -unity-slice-right: 170px;
+    -unity-slice-bottom: 170px;
+    -unity-slice-scale: 0.16;
     border-width: var(--gap-xs);
-    border-color: var(--color-border);
-    border-radius: var(--radius-md);
+    border-color: var(--color-transparent);
+    border-radius: 0;
     align-items: center;
     justify-content: center;
+    padding: var(--gap-sm);
 }
 
 .codex-slot--selected {
@@ -91,9 +120,19 @@
 .codex-detail {
     min-height: var(--codex-detail-height);
     flex-direction: row;
-    background-color: var(--color-panel-deep);
-    border-radius: var(--radius-md);
-    padding: var(--gap-md);
+    background-color: var(--color-transparent);
+    background-image: url("project://database/Assets/Art/UIFrames/codex_detail_frame.png?fileID=21300000&guid=b602bc2a258a5954bad1e1eaeae0c0b3&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+    -unity-slice-left: 130px;
+    -unity-slice-top: 100px;
+    -unity-slice-right: 130px;
+    -unity-slice-bottom: 100px;
+    -unity-slice-scale: 0.3;
+    border-radius: 0;
+    padding: 40px;
 }
 
 .codex-detail__image {

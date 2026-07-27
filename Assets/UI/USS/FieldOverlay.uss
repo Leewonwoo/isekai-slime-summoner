@@ -166,15 +166,24 @@
     position: absolute;
     right: var(--gap-lg);
     top: var(--gap-lg);
-    width: var(--codex-button-width);
+    width: 168px;
     flex-direction: column;
+    align-items: flex-end;
+}
+
+.field-menu-top-row {
+    width: 100%;
+    height: var(--field-settings-size);
+    flex-direction: row;
     align-items: center;
+    justify-content: flex-end;
+    margin-bottom: var(--gap-sm);
 }
 
 .field-settings-button {
     width: var(--field-settings-size);
     height: var(--field-settings-size);
-    margin-bottom: var(--gap-sm);
+    margin-left: var(--gap-sm);
     background-color: var(--color-transparent);
     background-image: url("project://database/Assets/Art/UIIcons/icon_settings.png?fileID=21300000&guid=39c989c3992a75b48b8c672fc77e1e56&type=3");
     background-size: var(--field-settings-icon-size) var(--field-settings-icon-size);
@@ -194,15 +203,14 @@
 }
 
 .speed-toggle-button {
-    width: var(--codex-button-width);
-    height: var(--touch-min);
-    margin-bottom: var(--gap-sm);
+    width: var(--touch-min);
+    height: var(--field-settings-size);
     color: var(--color-text);
     background-color: var(--color-panel-deep);
     border-width: var(--gap-xs);
     border-color: var(--color-gold-deep);
-    border-radius: var(--radius-lg);
-    font-size: var(--font-body);
+    border-radius: var(--radius-md);
+    font-size: var(--font-caption);
     -unity-font-style: bold;
 }
 

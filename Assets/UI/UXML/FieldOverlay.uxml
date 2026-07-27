@@ -22,8 +22,10 @@
             </VisualElement>
         </VisualElement>
         <VisualElement name="field-menu-stack" class="field-menu-stack" picking-mode="Ignore">
-            <Button name="settings-button" class="field-settings-button" text="" tooltip="설정" />
-            <Button name="speed-toggle-button" class="speed-toggle-button" text="×1.0" tooltip="게임 배속" />
+            <VisualElement name="field-menu-top-row" class="field-menu-top-row" picking-mode="Ignore">
+                <Button name="speed-toggle-button" class="speed-toggle-button" text="×1.0" tooltip="게임 배속" />
+                <Button name="settings-button" class="field-settings-button" text="" tooltip="설정" />
+            </VisualElement>
             <Button name="slime-codex-button" class="codex-button slime-codex-button" text="" tooltip="슬라임 도감" />
             <Button name="monster-codex-button" class="codex-button monster-codex-button" text="" tooltip="몬스터 도감" />
         </VisualElement>
