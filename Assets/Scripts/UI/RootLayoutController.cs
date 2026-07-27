@@ -101,7 +101,10 @@ namespace CrossDefense.UI
                 if (_gameManager.SummonerBuffs != null)
                     _gameManager.SummonerBuffs.StateChanged -= RefreshSkillUI;
                 if (_gameManager.Dopamine != null)
+                {
                     _gameManager.Dopamine.StateChanged -= OnDopamineStateChanged;
+                    _gameManager.Dopamine.ComboCashedOut -= OnComboCashedOut;
+                }
                 if (_gameManager.Equipment != null)
                     _gameManager.Equipment.Changed -= OnEquipmentChanged;
                 if (_gameManager.RunRelics != null)
@@ -193,7 +196,10 @@ namespace CrossDefense.UI
             if (_gameManager.SummonerBuffs != null)
                 _gameManager.SummonerBuffs.StateChanged += RefreshSkillUI;
             if (_gameManager.Dopamine != null)
+            {
                 _gameManager.Dopamine.StateChanged += OnDopamineStateChanged;
+                _gameManager.Dopamine.ComboCashedOut += OnComboCashedOut;
+            }
             if (_gameManager.Equipment != null)
                 _gameManager.Equipment.Changed += OnEquipmentChanged;
             if (_gameManager.RunRelics != null)
@@ -246,6 +252,9 @@ namespace CrossDefense.UI
         void OnLivingMonsterCountChanged(int count) => FieldOverlay.SetWave(_gameManager.CurrentWave, count);
         void OnSpeedToggleRequested() => _gameManager?.ToggleGameplaySpeed();
         void OnGameplaySpeedChanged(float speed) => FieldOverlay?.SetGameplaySpeed(speed);
+        void OnComboCashedOut(int combo, float damage, int gold) =>
+            FieldOverlay?.ShowUnlockToast(
+                $"{combo:N0} COMBO 정산!\n전체 피해 {damage:N0} · 골드 +{gold:N0}");
         void OnGoldChanged(int amount)
         {
             TopHUD.SetGold(amount);

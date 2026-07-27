@@ -20,6 +20,9 @@ MonoBehaviour:
   firstTierGaugePerKill: 5
   secondTierGaugePerKill: 8
   thirdTierGaugePerKill: 12
+  comboCashoutMinimum: 2
+  comboDamagePerCount: 0.1
+  comboGoldPerCount: 1
   maxGauge: 100
   overdriveDuration: 6
   overdriveDamageMultiplier: 1.3

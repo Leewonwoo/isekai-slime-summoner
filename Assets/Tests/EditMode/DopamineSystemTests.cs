@@ -34,6 +34,9 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_balance.GaugePerKill(10), Is.EqualTo(5));
             Assert.That(_balance.GaugePerKill(20), Is.EqualTo(8));
             Assert.That(_balance.GaugePerKill(30), Is.EqualTo(12));
+            Assert.That(_balance.ComboCashoutMinimum, Is.EqualTo(2));
+            Assert.That(_balance.ComboDamagePerCount, Is.EqualTo(0.1f));
+            Assert.That(_balance.ComboGoldPerCount, Is.EqualTo(1));
             Assert.That(_balance.OverdriveDuration, Is.EqualTo(6f));
             Assert.That(_balance.OverdriveDamageMultiplier, Is.EqualTo(1.3f));
             Assert.That(_balance.OverdriveAttackSpeedMultiplier, Is.EqualTo(1.5f));
@@ -62,12 +65,31 @@ namespace CrossDefense.Tests.EditMode
         public void ComboTimeout_ResetsComboButPreservesGauge()
         {
             var runtime = new DopamineRuntime(_balance);
+            int expiredCombo = 0;
+            runtime.ComboExpired += combo => expiredCombo = combo;
+            runtime.RegisterDefeat();
             runtime.RegisterDefeat();
 
             runtime.Tick(_balance.ComboGraceSeconds + 0.01f, false, null);
 
             Assert.That(runtime.Snapshot.Combo, Is.Zero);
-            Assert.That(runtime.Snapshot.Gauge, Is.EqualTo(3));
+            Assert.That(runtime.Snapshot.Gauge, Is.EqualTo(6));
+            Assert.That(expiredCombo, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ForcedComboReset_DoesNotTriggerCashout()
+        {
+            var runtime = new DopamineRuntime(_balance);
+            int cashoutCount = 0;
+            runtime.ComboExpired += _ => cashoutCount++;
+            runtime.RegisterDefeat();
+            runtime.RegisterDefeat();
+
+            runtime.ResetCombo();
+
+            Assert.That(runtime.Snapshot.Combo, Is.Zero);
+            Assert.That(cashoutCount, Is.Zero);
         }
 
         [Test]

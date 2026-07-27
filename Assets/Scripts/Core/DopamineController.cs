@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CrossDefense.Data;
 using CrossDefense.Units;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace CrossDefense.Core
         SummonerSkillController _skills;
         DopamineRuntime _runtime;
         System.Random _random;
+        SummonerAttackController _summonerAttack;
 
         public DopamineBalanceData Balance => _runtime?.Balance;
         public DopamineSnapshot Snapshot => _runtime?.Snapshot ?? default;
@@ -24,6 +26,7 @@ namespace CrossDefense.Core
                 ? Balance.OverdriveAttackSpeedMultiplier
                 : 1f;
         public event Action<DopamineSnapshot> StateChanged;
+        public event Action<int, float, int> ComboCashedOut;
 
         public void Initialize(
             GameManager gameManager,
@@ -35,13 +38,20 @@ namespace CrossDefense.Core
             if (_gameManager != null)
                 _gameManager.PhaseChanged -= OnPhaseChanged;
             if (_runtime != null)
+            {
                 _runtime.Changed -= OnRuntimeChanged;
+                _runtime.ComboExpired -= OnComboExpired;
+            }
 
             _gameManager = gameManager;
             _skills = skills;
+            _summonerAttack = gameManager?.Summoner != null
+                ? gameManager.Summoner.GetComponent<SummonerAttackController>()
+                : null;
             _runtime = new DopamineRuntime(balance, startingGauge);
             _random = new System.Random(unchecked(randomSeed ^ 0x4F564552));
             _runtime.Changed += OnRuntimeChanged;
+            _runtime.ComboExpired += OnComboExpired;
             if (_gameManager != null)
                 _gameManager.PhaseChanged += OnPhaseChanged;
             StateChanged?.Invoke(_runtime.Snapshot);
@@ -63,7 +73,10 @@ namespace CrossDefense.Core
             if (_gameManager != null)
                 _gameManager.PhaseChanged -= OnPhaseChanged;
             if (_runtime != null)
+            {
                 _runtime.Changed -= OnRuntimeChanged;
+                _runtime.ComboExpired -= OnComboExpired;
+            }
         }
 
         public void NotifyMonsterDefeated()
@@ -79,6 +92,46 @@ namespace CrossDefense.Core
         bool ActivateOverdrive() =>
             _skills != null &&
             _skills.ResetCooldownAndAutoCastRelic(_random);
+
+        void OnComboExpired(int combo)
+        {
+            if (_gameManager == null || _runtime?.Balance == null ||
+                combo < _runtime.Balance.ComboCashoutMinimum)
+                return;
+
+            float baseDamage = _summonerAttack != null
+                ? _summonerAttack.AttackDamage
+                : 12f;
+            float damage = _gameManager.ModifySummonerDamage(
+                baseDamage * combo * _runtime.Balance.ComboDamagePerCount);
+            var packet = new DamagePacket(
+                this,
+                damage,
+                MonsterAttribute.None);
+            IReadOnlyCollection<MonsterController> monsters =
+                _gameManager.SummonedUnitManager?.Monsters;
+            if (monsters != null)
+            {
+                var snapshot = new List<MonsterController>(monsters);
+                for (int i = 0; i < snapshot.Count; i++)
+                {
+                    MonsterController monster = snapshot[i];
+                    if (monster == null || monster.IsResolved ||
+                        !monster.gameObject.activeInHierarchy)
+                        continue;
+                    monster.ApplyDamage(packet);
+                }
+            }
+
+            int gold = combo * _runtime.Balance.ComboGoldPerCount;
+            if (gold > 0)
+                _gameManager.AddGold(gold);
+            ComboCashedOut?.Invoke(combo, damage, gold);
+            Debug.Log(
+                $"[CrossDefense] Combo cashout: {combo} combo, " +
+                $"all enemies {damage:0.#} damage, gold +{gold}",
+                this);
+        }
 
         void OnPhaseChanged(RunPhase phase)
         {

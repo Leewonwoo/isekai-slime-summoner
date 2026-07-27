@@ -19,6 +19,11 @@ namespace CrossDefense.Data
         [Min(0)] [SerializeField] int secondTierGaugePerKill = 8;
         [Min(0)] [SerializeField] int thirdTierGaugePerKill = 12;
 
+        [Header("Combo Cashout")]
+        [Min(2)] [SerializeField] int comboCashoutMinimum = 2;
+        [Min(0f)] [SerializeField] float comboDamagePerCount = 0.1f;
+        [Min(0)] [SerializeField] int comboGoldPerCount = 1;
+
         [Header("Overdrive")]
         [Min(1)] [SerializeField] int maxGauge = 100;
         [Min(0.1f)] [SerializeField] float overdriveDuration = 6f;
@@ -29,6 +34,9 @@ namespace CrossDefense.Data
         public int FirstComboThreshold => Mathf.Max(1, firstComboThreshold);
         public int SecondComboThreshold => Mathf.Max(FirstComboThreshold + 1, secondComboThreshold);
         public int ThirdComboThreshold => Mathf.Max(SecondComboThreshold + 1, thirdComboThreshold);
+        public int ComboCashoutMinimum => Mathf.Max(2, comboCashoutMinimum);
+        public float ComboDamagePerCount => Mathf.Max(0f, comboDamagePerCount);
+        public int ComboGoldPerCount => Mathf.Max(0, comboGoldPerCount);
         public int MaxGauge => Mathf.Max(1, maxGauge);
         public float OverdriveDuration => Mathf.Max(0.1f, overdriveDuration);
         public float OverdriveDamageMultiplier => Mathf.Max(1f, overdriveDamageMultiplier);
@@ -65,6 +73,9 @@ namespace CrossDefense.Data
             firstComboThreshold = Mathf.Max(1, firstComboThreshold);
             secondComboThreshold = Mathf.Max(firstComboThreshold + 1, secondComboThreshold);
             thirdComboThreshold = Mathf.Max(secondComboThreshold + 1, thirdComboThreshold);
+            comboCashoutMinimum = Mathf.Max(2, comboCashoutMinimum);
+            comboDamagePerCount = Mathf.Max(0f, comboDamagePerCount);
+            comboGoldPerCount = Mathf.Max(0, comboGoldPerCount);
             maxGauge = Mathf.Max(1, maxGauge);
             overdriveDuration = Mathf.Max(0.1f, overdriveDuration);
             overdriveDamageMultiplier = Mathf.Max(1f, overdriveDamageMultiplier);

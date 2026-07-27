@@ -58,6 +58,7 @@ namespace CrossDefense.Core
             _activeTimeRemaining);
 
         public event Action<DopamineSnapshot> Changed;
+        public event Action<int> ComboExpired;
 
         public void RegisterDefeat()
         {
@@ -71,14 +72,15 @@ namespace CrossDefense.Core
         public void Tick(float deltaTime, bool hasLivingEnemy, Func<bool> tryActivateOverdrive)
         {
             float safeDelta = Mathf.Max(0f, deltaTime);
-            bool changed = TickCombo(safeDelta);
-
+            bool changed = false;
             if (!_isActive && _gauge >= _balance.MaxGauge && hasLivingEnemy)
             {
                 BeginOverdrive();
                 tryActivateOverdrive?.Invoke();
                 changed = true;
             }
+
+            changed |= TickCombo(safeDelta);
 
             if (_isActive && hasLivingEnemy)
                 changed |= TickOverdrive(safeDelta);
@@ -114,7 +116,9 @@ namespace CrossDefense.Core
             _comboTimeRemaining = Mathf.Max(0f, _comboTimeRemaining - deltaTime);
             if (_comboTimeRemaining > 0f)
                 return !Mathf.Approximately(previous, _comboTimeRemaining);
+            int expiredCombo = _combo;
             _combo = 0;
+            ComboExpired?.Invoke(expiredCombo);
             return true;
         }
 
