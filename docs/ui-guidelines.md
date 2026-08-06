@@ -185,6 +185,11 @@ Assets/Scripts/UI/
     --unit-detail-stat-row-height: 72px;
     --unit-detail-content-inset: 72px;
     --unit-detail-upgrade-button-width: 220px;
+    --tutorial-card-width: 900px;
+    --tutorial-card-min-height: 300px;
+    --tutorial-card-inset: 48px;
+    --tutorial-card-top: 220px;
+    --tutorial-card-bottom: 80px;
     --font-small: 20px;
 }
 ```
@@ -334,6 +339,7 @@ public class TopHUDController
 - **가방 탭**: 내부를 `장비 / 신물 / 전리품`으로 구분한다. 장비는 무기·방어구·장신구 슬롯과 보유 목록, 신물은 장착 신물과 고유 공격 선택, 전리품은 이번 도전의 행상인 전리품과 5웨이브 특성을 표시한다. 내부 `Equipment*`·`RunRelic*` 타입과 저장 키는 호환을 위해 유지할 수 있다.
 - **소환사 영구 성장**: 소환사 EXP는 획득 즉시 자동으로 레벨에 반영한다. 소환사 탭은 저장된 영구 Lv와 현재 EXP/요구 EXP 게이지, 실제 적용 능력치와 특성 텍스트만 표시하며 레벨업 버튼이나 공용 강화 행을 사용하지 않는다.
 - **터치 타깃**: 상호작용 요소는 최소 `--touch-min`(96px) 확보.
+- **첫 런 튜토리얼**: `RootLayout`의 단일 `TutorialOverlay` 인스턴스를 재사용한다. 행동 단계에서는 카드만 입력을 받고 필드·소환 버튼 입력을 통과시키며, 설명 확인 단계에서만 전체 입력을 막는다. 안내 카드는 `--tutorial-card-*` 토큰을 사용하고 소환·재배치·필드 2머지의 실제 게임 이벤트로 다음 단계가 열린다.
 
 ## 10. Do / Don't 요약
 
