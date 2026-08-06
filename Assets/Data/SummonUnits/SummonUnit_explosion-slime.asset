@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 609351f2de76a5549a4ae8ea20138370, type: 3}
+  m_Name: SummonUnit_explosion-slime
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.SummonUnitData
+  unitId: explosion-slime
+  displayName: "\uD3ED\uBC1C \uC2AC\uB77C\uC784"
+  rarity: 1
+  icon: {fileID: 2972943333547804390, guid: 36ba449a61b5a0e4fa345b09a419e5b5, type: 3}
+  worldSprite: {fileID: 2972943333547804390, guid: 36ba449a61b5a0e4fa345b09a419e5b5, type: 3}
+  projectileSprite: {fileID: 21300000, guid: 9b10f9039114ed04887effab2e3c8366, type: 3}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  moveFrames: []
+  moveAnimationFps: 9
+  weight: 32
+  unlockLevel: 20
+  attribute: 1
+  attackStyle: 2
+  targetPriority: 0
+  baseMaxHp: 100
+  baseDamage: 15
+  attacksPerSecond: 0.55
+  attackRange: 1.1
+  moveSpeed: 2.7
+  projectileSpeed: 9
+  areaRadius: 1.45
+  slowPercent: 0
+  slowDuration: 0
+  damageOverTime: 0
+  damageOverTimeDuration: 0
+  pierceCount: 1
+  supportAttackSpeedBonus: 0
+  supportRadius: 2.5
+  supportHealInterval: 2
+  supportHealFractions:
+  - 0.03
+  - 0.04
+  - 0.05
+  rankWorldSprites:
+  - {fileID: 2972943333547804390, guid: 36ba449a61b5a0e4fa345b09a419e5b5, type: 3}
+  - {fileID: -7498299652913170685, guid: e822669d3e304db429e22d6f79691ec1, type: 3}
+  - {fileID: -7498299652913170685, guid: 51154109195b418589014b71b5c0ab9e, type: 3}
+  rankHpMultipliers:
+  - 1
+  - 1.5
+  - 2.25
+  rankDamageMultipliers:
+  - 1
+  - 1.8
+  - 3.25
+  rankAttackSpeedMultipliers:
+  - 1
+  - 1.08
+  - 1.16
+  rankScaleMultipliers:
+  - 1
+  - 1.2
+  - 1.4
+  rankProjectileSprites:
+  - {fileID: 21300000, guid: be0be3f2f8c401f24d6411b536ea50ba, type: 3}
+  - {fileID: 21300000, guid: c43ef934d8db8cc06d66eaee51eed938, type: 3}
+  - {fileID: 21300000, guid: e818c6b4199269fd2e69ef549ef4f7ac, type: 3}
+  rankProjectileScaleMultipliers:
+  - 1
+  - 1.15
+  - 1.3
+  rankNames:
+  - "\u26051"
+  - "\u26052"
+  - "\u26053"
+  star3SkillName: "\uB300\uD3ED\uBC1C"
+  star3SkillMode: 1
+  star3SkillCooldown: 13
+  star3SkillDamageMultiplier: 3.2
+  star3SkillRadius: 1.9
+  star3SkillDuration: 0
+  star3SkillStrength: 1
+  star3SkillPierceCount: 1
+  star3SkillSlowPercent: 0
+  star3SkillSlowDuration: 0
+  star3SkillDotMultiplier: 0
+  star3SkillDotDuration: 0
+  star3SkillVisualScale: 1.75
+  star3SkillEffectSprite: {fileID: 21300000, guid: 005bf71e05b73234aac7628c33170fb7, type: 3}
+  star3SkillEffectFrames:
+  - {fileID: 286354783571157652, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -8372516123535416995, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 4032882372213062139, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -2520915888631964272, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -3042429207339010407, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 4439341176720341408, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: 7069292609803652604, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -8856983450250083333, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
+  - {fileID: -7659473598035362436, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}

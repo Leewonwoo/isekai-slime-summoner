@@ -2,6 +2,7 @@
 using CrossDefense.Core;
 using CrossDefense.Data;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace CrossDefense.Tests.EditMode
@@ -238,10 +239,12 @@ namespace CrossDefense.Tests.EditMode
         {
             int level = 7;
             string saved = null;
+            SkillCatalog catalog = LoadSkillCatalog();
             var loadout = new SummonerSkillLoadout(
                 () => level,
                 () => string.Empty,
-                json => saved = json);
+                json => saved = json,
+                catalog: catalog);
 
             Assert.That(loadout.TryEquip(SummonerSkillId.IceWall), Is.False);
             level = 8;
@@ -249,21 +252,29 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(loadout.EquippedSkill, Is.EqualTo(SummonerSkillId.IceWall));
             Assert.That(saved, Is.Not.Empty);
 
-            var restored = new SummonerSkillLoadout(() => level, () => saved);
+            var restored = new SummonerSkillLoadout(
+                () => level,
+                () => saved,
+                catalog: catalog);
             Assert.That(restored.EquippedSkill, Is.EqualTo(SummonerSkillId.IceWall));
         }
 
         [Test]
-        public void SummonerSkillCatalog_UsesApprovedUnlocksAndCooldowns()
+        public void SkillCatalog_UsesApprovedUnlocksAndCooldowns()
         {
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Meteor).UnlockLevel, Is.EqualTo(1));
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.Meteor).Cooldown, Is.EqualTo(22f));
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).UnlockLevel, Is.EqualTo(8));
-            Assert.That(SummonerSkillCatalog.Get(SummonerSkillId.IceWall).Cooldown, Is.EqualTo(26f));
-            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.Meteor), Is.True);
-            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.IceWall), Is.True);
-            Assert.That(SummonerSkillCatalog.IsRelicSkill(SummonerSkillId.Aegis), Is.False);
+            SkillCatalog catalog = LoadSkillCatalog();
+            Assert.That(catalog.FindActive(SummonerSkillId.Meteor).UnlockLevel, Is.EqualTo(1));
+            Assert.That(catalog.FindActive(SummonerSkillId.Meteor).Cooldown, Is.EqualTo(22f));
+            Assert.That(catalog.FindActive(SummonerSkillId.IceWall).UnlockLevel, Is.EqualTo(8));
+            Assert.That(catalog.FindActive(SummonerSkillId.IceWall).Cooldown, Is.EqualTo(26f));
+            Assert.That(catalog.IsRelicSkill(SummonerSkillId.Meteor), Is.True);
+            Assert.That(catalog.IsRelicSkill(SummonerSkillId.IceWall), Is.True);
+            Assert.That(catalog.IsRelicSkill(SummonerSkillId.Aegis), Is.False);
         }
+
+        static SkillCatalog LoadSkillCatalog() =>
+            AssetDatabase.LoadAssetAtPath<SkillCatalog>(
+                "Assets/Data/Skills/SkillCatalog_Default.asset");
 
         [Test]
         public void SummonerBuffLoadout_EquipsThreeUnlockedBuffsAndPersists()

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3809eed2befde644aafede2212a96b4, type: 3}
+  m_Name: SkillCatalog_Default
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.SkillCatalog
+  skills:
+  - {fileID: 11400000, guid: 730e344118b3b8a4896f9dd127aadc1a, type: 2}
+  - {fileID: 11400000, guid: 037246728d7c32c4697cd97898673c02, type: 2}
+  - {fileID: 11400000, guid: 534aa10fb5d90cc4a9aca0134c774f56, type: 2}
+  - {fileID: 11400000, guid: 16c69d87dfd9f04419368d0ebe27e989, type: 2}
+  - {fileID: 11400000, guid: 0cbee9b992d1bfc48852b4f01db16840, type: 2}
+  - {fileID: 11400000, guid: 648d9604af1fa23468510b482dbc68ab, type: 2}
+  - {fileID: 11400000, guid: aa5a5eb3003e0a8488fdf7b34e6bf7bf, type: 2}
+  - {fileID: 11400000, guid: f4ad173172d6cf54e91b473713ab064a, type: 2}
+  - {fileID: 11400000, guid: 81ac653cdbea4e440ad9be681778f025, type: 2}
+  - {fileID: 11400000, guid: dc3221643efd115448e41e54d746c928, type: 2}
+  - {fileID: 11400000, guid: 2cab2fc30b775324b8fa3c678e1c88f0, type: 2}
+  defaultBasicAttack: {fileID: 11400000, guid: 730e344118b3b8a4896f9dd127aadc1a, type: 2}

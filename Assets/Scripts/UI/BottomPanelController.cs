@@ -102,8 +102,6 @@ namespace CrossDefense.UI
         readonly Dictionary<RelicFamily, RelicSkillRowBinding> _relicSkillRows = new();
         readonly ScrollView _equipmentList;
         readonly ScrollView _relicSkillList;
-        readonly Label _relicEquippedName;
-        readonly Label _relicEquippedDescription;
         readonly VisualElement _runRelicList;
         readonly Label _trophyTraitList;
         readonly Label _skillLoadoutCount;
@@ -166,8 +164,6 @@ namespace CrossDefense.UI
             BuildBenchSlots();
             _equipmentList = root.Q<ScrollView>("equipment-list");
             _relicSkillList = root.Q<ScrollView>("relic-skill-list");
-            _relicEquippedName = root.Q<Label>("relic-equipped-name");
-            _relicEquippedDescription = root.Q<Label>("relic-equipped-description");
             _runRelicList = root.Q<VisualElement>("run-relic-list");
             _trophyTraitList = root.Q<Label>("trophy-trait-list");
             _skillLoadoutCount = root.Q<Label>("skill-loadout-count");
@@ -347,18 +343,6 @@ namespace CrossDefense.UI
 
         public void SetRelicData(RelicProgression relics)
         {
-            RelicDefinition equipped = relics?.EquippedDefinition;
-            int equippedRank = relics?.EquippedRank ?? 0;
-            RelicRankDefinition equippedRankData = equipped?.Rank(equippedRank);
-            if (_relicEquippedName != null)
-                _relicEquippedName.text = equippedRankData == null
-                    ? "장착한 신물 없음"
-                    : $"{equippedRankData.DisplayName} ★{equippedRank}";
-            if (_relicEquippedDescription != null)
-                _relicEquippedDescription.text = equippedRankData == null
-                    ? "행상인에게서 획득한 신물을 장착할 수 있습니다."
-                    : $"{equippedRankData.SkillName} · {equippedRankData.Description}";
-
             foreach (RelicSkillRowBinding binding in _relicSkillRows.Values)
                 binding.Dispose();
             _relicSkillRows.Clear();

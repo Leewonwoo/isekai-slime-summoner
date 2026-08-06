@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 609351f2de76a5549a4ae8ea20138370, type: 3}
+  m_Name: SummonUnit_ice-slime
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.SummonUnitData
+  unitId: ice-slime
+  displayName: "\uC5BC\uC74C \uC2AC\uB77C\uC784"
+  rarity: 1
+  icon: {fileID: -8070034397944155849, guid: 8c5dab60b85281346a2c232e0f27447f, type: 3}
+  worldSprite: {fileID: -8070034397944155849, guid: 8c5dab60b85281346a2c232e0f27447f, type: 3}
+  projectileSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  moveFrames: []
+  moveAnimationFps: 9
+  weight: 52
+  unlockLevel: 8
+  attribute: 2
+  attackStyle: 1
+  targetPriority: 0
+  baseMaxHp: 100
+  baseDamage: 5.5
+  attacksPerSecond: 1
+  attackRange: 4.2
+  moveSpeed: 2.2
+  projectileSpeed: 9
+  areaRadius: 0
+  slowPercent: 0.32
+  slowDuration: 2
+  damageOverTime: 0
+  damageOverTimeDuration: 0
+  pierceCount: 1
+  supportAttackSpeedBonus: 0
+  supportRadius: 2.5
+  supportHealInterval: 2
+  supportHealFractions:
+  - 0.03
+  - 0.04
+  - 0.05
+  rankWorldSprites:
+  - {fileID: -8070034397944155849, guid: 8c5dab60b85281346a2c232e0f27447f, type: 3}
+  - {fileID: 489473718398621151, guid: bcf77db6e0aa3bd47840ff0d48f4f4fa, type: 3}
+  - {fileID: 489473718398621151, guid: 854b09c6699b4f4b9e4c37360d6b707f, type: 3}
+  rankHpMultipliers:
+  - 1
+  - 1.5
+  - 2.25
+  rankDamageMultipliers:
+  - 1
+  - 1.8
+  - 3.25
+  rankAttackSpeedMultipliers:
+  - 1
+  - 1.08
+  - 1.16
+  rankScaleMultipliers:
+  - 1
+  - 1.2
+  - 1.4
+  rankProjectileSprites:
+  - {fileID: 21300000, guid: a2e290196d89a8be4190e015e8a3acad, type: 3}
+  - {fileID: 21300000, guid: 0a76c5efbfd4e5b9705ac05df661abf7, type: 3}
+  - {fileID: 21300000, guid: f2eecc840c1d5bce26248b9350cd8b63, type: 3}
+  rankProjectileScaleMultipliers:
+  - 1
+  - 1.15
+  - 1.3
+  rankNames:
+  - "\u26051"
+  - "\u26052"
+  - "\u26053"
+  star3SkillName: "\uBE59\uD558 \uD30C\uB3D9"
+  star3SkillMode: 2
+  star3SkillCooldown: 11
+  star3SkillDamageMultiplier: 1.6
+  star3SkillRadius: 1.45
+  star3SkillDuration: 0
+  star3SkillStrength: 1
+  star3SkillPierceCount: 1
+  star3SkillSlowPercent: 0.55
+  star3SkillSlowDuration: 3
+  star3SkillDotMultiplier: 0
+  star3SkillDotDuration: 0
+  star3SkillVisualScale: 1.35
+  star3SkillEffectSprite: {fileID: 21300000, guid: 03938096e57292747a2d79a981f20927, type: 3}
+  star3SkillEffectFrames: []

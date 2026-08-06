@@ -18,6 +18,7 @@ namespace CrossDefense.Core
         readonly Func<int> _levelProvider;
         readonly Action<string> _saveJson;
         readonly Action _flush;
+        readonly SkillCatalog _catalog;
 
         public SummonerSkillId EquippedSkill { get; private set; } = SummonerSkillId.Meteor;
         public event Action<SummonerSkillId> Changed;
@@ -26,16 +27,19 @@ namespace CrossDefense.Core
             Func<int> levelProvider,
             Func<string> loadJson = null,
             Action<string> saveJson = null,
-            Action flush = null)
+            Action flush = null,
+            SkillCatalog catalog = null)
         {
             _levelProvider = levelProvider;
             _saveJson = saveJson;
             _flush = flush;
+            _catalog = catalog;
             Load(loadJson?.Invoke());
         }
 
         public static SummonerSkillLoadout CreatePersistent(
             Func<int> levelProvider,
+            SkillCatalog catalog,
             string playerPrefsKey = DefaultPlayerPrefsKey)
         {
             string key = string.IsNullOrWhiteSpace(playerPrefsKey)
@@ -45,14 +49,15 @@ namespace CrossDefense.Core
                 levelProvider,
                 () => PlayerPrefs.GetString(key, string.Empty),
                 json => PlayerPrefs.SetString(key, json),
-                PlayerPrefs.Save);
+                PlayerPrefs.Save,
+                catalog);
         }
 
         public bool TryEquip(SummonerSkillId id)
         {
             if (!Enum.IsDefined(typeof(SummonerSkillId), id) ||
-                !SummonerSkillCatalog.IsRelicSkill(id) ||
-                !SummonerSkillCatalog.IsUnlocked(id, _levelProvider?.Invoke() ?? 1))
+                !IsRelicSkill(id) ||
+                !IsUnlocked(id))
                 return false;
             if (EquippedSkill == id)
                 return true;
@@ -81,8 +86,7 @@ namespace CrossDefense.Core
                     !Enum.IsDefined(typeof(SummonerSkillId), data.equippedSkill))
                     return;
                 SummonerSkillId loaded = (SummonerSkillId)data.equippedSkill;
-                if (SummonerSkillCatalog.IsRelicSkill(loaded) &&
-                    SummonerSkillCatalog.IsUnlocked(loaded, _levelProvider?.Invoke() ?? 1))
+                if (IsRelicSkill(loaded) && IsUnlocked(loaded))
                     EquippedSkill = loaded;
             }
             catch (ArgumentException)
@@ -97,5 +101,11 @@ namespace CrossDefense.Core
             if (flush)
                 _flush?.Invoke();
         }
+
+        bool IsRelicSkill(SummonerSkillId id) =>
+            _catalog != null && _catalog.IsRelicSkill(id);
+
+        bool IsUnlocked(SummonerSkillId id) =>
+            _catalog != null && _catalog.IsUnlocked(id, _levelProvider?.Invoke() ?? 1);
     }
 }

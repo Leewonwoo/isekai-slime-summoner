@@ -15,11 +15,6 @@
         </VisualElement>
 
         <VisualElement name="gear-page-relic" class="gear-tab__page hidden">
-            <VisualElement class="gear-tab__equipped">
-                <Label class="gear-tab__section gear-tab__section--gold" text="장착 신물" />
-                <Label name="relic-equipped-name" class="gear-tab__equipped-name" text="신물 없음" />
-                <Label name="relic-equipped-description" class="gear-tab__equipped-description" text="장착한 신물의 고유 공격이 표시됩니다." />
-            </VisualElement>
             <Label class="gear-tab__section" text="보유 신물" />
             <ScrollView name="relic-skill-list" class="row-list panel-scroll gear-tab__inventory" mode="Vertical" />
         </VisualElement>

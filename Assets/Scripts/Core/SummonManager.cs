@@ -26,6 +26,8 @@ namespace CrossDefense.Core
         int _nextInstanceId = 1;
         bool _hasPendingResult;
         SummonResult _pendingResult;
+        SummonUnitData _forcedNextUnit;
+        int _forcedNextRank;
 
         public IReadOnlyList<SummonUnitInstance> Bench => _bench;
         public IReadOnlyList<SummonUnitData> Pool => _pool;
@@ -85,7 +87,12 @@ namespace CrossDefense.Core
                 return false;
 
             int id = _nextResultId++;
-            if (!HasUnlockedUnit() || _random.NextDouble() < _currencyChance)
+            if (_forcedNextUnit != null)
+            {
+                result = SummonResult.RankedUnitResult(id, _forcedNextUnit, _forcedNextRank);
+                ClearForcedNextUnit();
+            }
+            else if (!HasUnlockedUnit() || _random.NextDouble() < _currencyChance)
             {
                 result = SummonResult.CurrencyResult(id, _currencyReward);
             }
@@ -101,6 +108,21 @@ namespace CrossDefense.Core
             _pendingResult = result;
             _hasPendingResult = true;
             return true;
+        }
+
+        public bool TryForceNextUnit(SummonUnitData unit, int rank)
+        {
+            if (unit == null || _hasPendingResult || !_pool.Contains(unit) || !IsUnlocked(unit))
+                return false;
+            _forcedNextUnit = unit;
+            _forcedNextRank = SummonRank.Clamp(rank);
+            return true;
+        }
+
+        public void ClearForcedNextUnit()
+        {
+            _forcedNextUnit = null;
+            _forcedNextRank = 0;
         }
 
         public bool CommitPending(SummonResult result)

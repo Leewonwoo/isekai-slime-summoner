@@ -85,6 +85,7 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float slowDuration;
         [Min(0f)] [SerializeField] float damageOverTime;
         [Min(0f)] [SerializeField] float damageOverTimeDuration;
+        [Min(0f)] [SerializeField] float stunDuration;
         [Min(1)] [SerializeField] int pierceCount = 1;
         [Range(0f, 1f)] [SerializeField] float supportAttackSpeedBonus;
         [Min(0f)] [SerializeField] float supportRadius = 2.5f;
@@ -114,6 +115,7 @@ namespace CrossDefense.Data
         [Min(0f)] [SerializeField] float star3SkillSlowDuration;
         [Min(0f)] [SerializeField] float star3SkillDotMultiplier;
         [Min(0f)] [SerializeField] float star3SkillDotDuration;
+        [Min(0f)] [SerializeField] float star3SkillStunDuration;
         [Min(0.1f)] [SerializeField] float star3SkillVisualScale = 1f;
         [SerializeField] Sprite star3SkillEffectSprite;
         [SerializeField] Sprite[] star3SkillEffectFrames;
@@ -144,6 +146,7 @@ namespace CrossDefense.Data
         public float SlowDuration => slowDuration;
         public float DamageOverTime => damageOverTime;
         public float DamageOverTimeDuration => damageOverTimeDuration;
+        public float StunDuration => stunDuration;
         public int PierceCount => pierceCount;
         public float SupportAttackSpeedBonus => supportAttackSpeedBonus;
         public float SupportRadius => supportRadius;
@@ -160,6 +163,7 @@ namespace CrossDefense.Data
         public float Star3SkillSlowDuration => star3SkillSlowDuration;
         public float Star3SkillDotMultiplier => star3SkillDotMultiplier;
         public float Star3SkillDotDuration => star3SkillDotDuration;
+        public float Star3SkillStunDuration => star3SkillStunDuration;
         public float Star3SkillVisualScale => star3SkillVisualScale;
         public Sprite Star3SkillEffectSprite => star3SkillEffectSprite;
         public Sprite[] Star3SkillEffectFrames => star3SkillEffectFrames;
@@ -254,7 +258,8 @@ namespace CrossDefense.Data
             float supportBonus = 0f,
             float supportRange = 2.5f,
             float supportHealSeconds = 2f,
-            float[] supportHealByRank = null)
+            float[] supportHealByRank = null,
+            float stunSeconds = 0f)
         {
             projectileSprite = projectile;
             areaRadius = Mathf.Max(0f, area);
@@ -262,6 +267,7 @@ namespace CrossDefense.Data
             slowDuration = Mathf.Max(0f, slowSeconds);
             damageOverTime = Mathf.Max(0f, dot);
             damageOverTimeDuration = Mathf.Max(0f, dotSeconds);
+            stunDuration = Mathf.Max(0f, stunSeconds);
             pierceCount = Mathf.Max(1, pierce);
             supportAttackSpeedBonus = Mathf.Clamp01(supportBonus);
             supportRadius = Mathf.Max(0f, supportRange);
@@ -315,7 +321,8 @@ namespace CrossDefense.Data
             float skillSlowPercent = 0f,
             float skillSlowDuration = 0f,
             float skillDotMultiplier = 0f,
-            float skillDotDuration = 0f)
+            float skillDotDuration = 0f,
+            float skillStunDuration = 0f)
         {
             star3SkillName = skillName ?? string.Empty;
             star3SkillMode = mode;
@@ -331,6 +338,7 @@ namespace CrossDefense.Data
             star3SkillSlowDuration = Mathf.Max(0f, skillSlowDuration);
             star3SkillDotMultiplier = Mathf.Max(0f, skillDotMultiplier);
             star3SkillDotDuration = Mathf.Max(0f, skillDotDuration);
+            star3SkillStunDuration = Mathf.Max(0f, skillStunDuration);
         }
 
         public void ConfigurePrototypeStar3SkillFrames(Sprite[] frames) =>

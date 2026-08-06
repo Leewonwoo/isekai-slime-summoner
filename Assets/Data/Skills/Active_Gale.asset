@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fc7709158a33b04e9c9ddc803ae671e, type: 3}
+  m_Name: Active_Gale
+  m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Data.SkillData
+  skillId: active-gale
+  displayName: Gale
+  description: 
+  category: 1
+  executionMode: 3
+  attackArchetype: 0
+  projectileSprite: {fileID: 0}
+  baseDamage: 12
+  attacksPerSecond: 1.25
+  attackRange: 4.5
+  projectileSpeed: 10
+  projectileScale: 0.65
+  clickDamage: 18
+  clickAttacksPerSecond: 2
+  clickHitRadius: 0.65
+  volleyShotDelay: 0.09
+  projectileCount: 1
+  additionalProjectileDamageMultiplier: 0.65
+  areaRadius: 0
+  pierceCount: 1
+  chainDamageMultiplier: 1
+  slowPercent: 0
+  slowDuration: 0
+  damageOverTime: 0
+  damageOverTimeDuration: 0
+  activeSkillId: 6
+  targeting: 0
+  unlockLevel: 1
+  cooldown: 17
+  activeDamageMultiplier: 1.7
+  activeRadius: 1.9
+  activeDuration: 0
+  attribute: 6
+  rankProfiles:
+  - damageMultiplier: 1
+    radiusMultiplier: 1
+    durationMultiplier: 1
+    strikeCount: 1
+    strikeInterval: 0.24
+    perStrikeDamageMultiplier: 1
+    perStrikeRadiusMultiplier: 1
+    battlefieldWide: 0
+    slowPercent: 0
+    slowDuration: 0
+    damageOverTimeMultiplier: 0
+    damageOverTimeDuration: 0
+    strength: 0
+    visualScale: 1
+  - damageMultiplier: 1.35
+    radiusMultiplier: 1.15
+    durationMultiplier: 1.15
+    strikeCount: 4
+    strikeInterval: 0.24
+    perStrikeDamageMultiplier: 0.48
+    perStrikeRadiusMultiplier: 0.72
+    battlefieldWide: 0
+    slowPercent: 0
+    slowDuration: 0
+    damageOverTimeMultiplier: 0
+    damageOverTimeDuration: 0
+    strength: 0
+    visualScale: 1
+  - damageMultiplier: 1.7
+    radiusMultiplier: 1.3
+    durationMultiplier: 1.3
+    strikeCount: 12
+    strikeInterval: 0.18
+    perStrikeDamageMultiplier: 0.32
+    perStrikeRadiusMultiplier: 0.82
+    battlefieldWide: 1
+    slowPercent: 0
+    slowDuration: 0
+    damageOverTimeMultiplier: 0
+    damageOverTimeDuration: 0
+    strength: 0
+    visualScale: 1

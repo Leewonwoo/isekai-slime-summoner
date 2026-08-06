@@ -11,28 +11,9 @@ namespace CrossDefense.Units
     [DisallowMultipleComponent]
     public sealed class SummonerAttackController : MonoBehaviour
     {
-        [Header("Projectile Visuals")]
-        [SerializeField] Sprite energyBoltSprite;
-        [SerializeField] Sprite fireballSprite;
-        [SerializeField] Sprite iceballSprite;
-        [SerializeField] Sprite lightningOrbSprite;
-
-        [Header("Balance")]
-        [Min(0.1f)] [SerializeField] float attackDamage = 12f;
-        [Min(0.1f)] [SerializeField] float attacksPerSecond = 1.25f;
-        [Min(0.1f)] [SerializeField] float attackRange = 4.5f;
-        [Min(0.1f)] [SerializeField] float projectileSpeed = 10f;
-
-        [Header("Click Attack")]
-        [Min(0.1f)] [SerializeField] float clickAttackDamage = 18f;
-        [Min(0.1f)] [SerializeField] float clickAttacksPerSecond = 2f;
-        [Min(0.1f)] [SerializeField] float clickHitRadius = 0.65f;
-
         [Header("Presentation")]
         [SerializeField] Transform firePosition;
         [Min(0f)] [SerializeField] float spawnOffset = 0.4f;
-        [Min(0.01f)] [SerializeField] float projectileScale = 0.65f;
-        [Min(0.01f)] [SerializeField] float volleyShotDelay = 0.09f;
 
         [Header("Animation")]
         [SerializeField] Sprite[] idleFrames;
@@ -44,6 +25,7 @@ namespace CrossDefense.Units
         readonly List<MonsterController> _volleyTargets = new(4);
         readonly List<MonsterController> _volleyCandidates = new(32);
         GameManager _gameManager;
+        SkillCatalog _skillCatalog;
         SpriteRenderer _renderer;
         WorldHealthBar _healthBar;
         float _nextAttackTime;
@@ -56,13 +38,20 @@ namespace CrossDefense.Units
         bool _isAttackAnimating;
         readonly System.Random _combatRandom = new();
 
-        public float AttackDamage => attackDamage;
-        public float AttacksPerSecond => attacksPerSecond;
-        public float AttackRange => attackRange;
+        public float AttackDamage => CurrentAttackSkill?.BaseDamage ?? 0f;
+        public float AttacksPerSecond => CurrentAttackSkill?.AttacksPerSecond ?? 0f;
+        public float AttackRange => CurrentAttackSkill?.AttackRange ?? 0f;
         public Transform FirePosition => firePosition;
         public int IdleFrameCount => idleFrames?.Length ?? 0;
         public int AttackFrameCount => attackFrames?.Length ?? 0;
         public bool IsAttackAnimating => _isAttackAnimating;
+
+        public void ConfigureSkillCatalog(SkillCatalog catalog)
+        {
+            _skillCatalog = catalog;
+            if (_skillCatalog == null)
+                Debug.LogError("[CrossDefense] Summoner SkillCatalog is missing.", this);
+        }
 
         void Awake()
         {
@@ -128,7 +117,7 @@ namespace CrossDefense.Units
             _nextAttackTime = Time.time + 1f /
                 Mathf.Max(
                     0.1f,
-                    attacksPerSecond *
+                    Mathf.Max(0.1f, CurrentAttackSkill?.AttacksPerSecond ?? 0.1f) *
                     _gameManager.SummonerAttackSpeedMultiplier *
                     OverdriveAttackSpeedMultiplier(combatProfile));
         }
@@ -141,15 +130,19 @@ namespace CrossDefense.Units
                 return false;
 
             SummonerRunAttackProfile profile = GetAttackProfile();
+            SkillData attackSkill = ResolveAttackSkill(profile.Archetype);
+            if (attackSkill == null)
+                return false;
             SummonerCombatBuildProfile combatProfile = GetCombatBuildProfile();
-            Sprite sprite = GetProjectileSprite(profile.Archetype);
+            Sprite sprite = attackSkill.ProjectileSprite;
             if (sprite == null) return false;
             Vector3 origin = firePosition != null ? firePosition.position : transform.position;
             bool empowered = IsEmpoweredAttack(profile);
 
             bool preferredTargetInRange = preferredTarget != null &&
                 !preferredTarget.IsResolved &&
-                (preferredTarget.transform.position - origin).sqrMagnitude <= attackRange * attackRange;
+                (preferredTarget.transform.position - origin).sqrMagnitude <=
+                attackSkill.AttackRange * attackSkill.AttackRange;
             if (preferredTargetInRange)
             {
                 FireVolley(
@@ -158,7 +151,7 @@ namespace CrossDefense.Units
                     sprite,
                     profile,
                     combatProfile,
-                    clickAttackDamage,
+                    attackSkill.ClickDamage,
                     empowered);
             }
             else
@@ -167,9 +160,9 @@ namespace CrossDefense.Units
                 if (direction.sqrMagnitude <= 0.01f) return false;
                 float radius = profile.Archetype switch
                 {
-                    SummonerAttackArchetype.Fireball => Mathf.Max(clickHitRadius, profile.AreaRadius),
-                    SummonerAttackArchetype.ThunderSlash => Mathf.Max(clickHitRadius, 0.9f),
-                    _ => clickHitRadius,
+                    SummonerAttackArchetype.Fireball => Mathf.Max(attackSkill.ClickHitRadius, profile.AreaRadius),
+                    SummonerAttackArchetype.ThunderSlash => Mathf.Max(attackSkill.ClickHitRadius, 0.9f),
+                    _ => attackSkill.ClickHitRadius,
                 };
                 if (empowered)
                     radius = Mathf.Max(radius, profile.EmpoweredAreaRadius);
@@ -180,7 +173,7 @@ namespace CrossDefense.Units
                     sprite,
                     profile,
                     combatProfile,
-                    clickAttackDamage,
+                    attackSkill.ClickDamage,
                     empowered,
                     radius));
             }
@@ -189,7 +182,7 @@ namespace CrossDefense.Units
             _nextClickAttackTime = Time.time + 1f /
                 Mathf.Max(
                     0.1f,
-                    clickAttacksPerSecond *
+                    attackSkill.ClickAttacksPerSecond *
                     _gameManager.SummonerAttackSpeedMultiplier *
                     OverdriveAttackSpeedMultiplier(combatProfile));
             return true;
@@ -198,7 +191,7 @@ namespace CrossDefense.Units
         void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.72f, 0.2f, 0.85f);
-            Gizmos.DrawWireSphere(transform.position, Mathf.Max(0.1f, attackRange));
+            Gizmos.DrawWireSphere(transform.position, Mathf.Max(0.1f, AttackRange));
         }
 
         void OnMonsterSpawned(MonsterController monster, StageWave _, int __)
@@ -216,7 +209,7 @@ namespace CrossDefense.Units
         MonsterController FindNearestTarget()
         {
             MonsterController nearest = null;
-            float nearestDistanceSq = attackRange * attackRange;
+            float nearestDistanceSq = AttackRange * AttackRange;
             _targets.RemoveWhere(IsInvalidTarget);
 
             foreach (var candidate in _targets)
@@ -240,7 +233,8 @@ namespace CrossDefense.Units
             SummonerRunAttackProfile profile,
             SummonerCombatBuildProfile combatProfile)
         {
-            Sprite sprite = GetProjectileSprite(profile.Archetype);
+            SkillData attackSkill = ResolveAttackSkill(profile.Archetype);
+            Sprite sprite = attackSkill?.ProjectileSprite;
             if (sprite == null)
             {
                 Debug.LogWarning($"[CrossDefense] {profile.Archetype} 투사체 스프라이트가 비어 있습니다.", this);
@@ -258,7 +252,7 @@ namespace CrossDefense.Units
                 sprite,
                 profile,
                 combatProfile,
-                attackDamage,
+                attackSkill.BaseDamage,
                 IsEmpoweredAttack(profile));
             return true;
         }
@@ -327,7 +321,7 @@ namespace CrossDefense.Units
                     target,
                     sprite,
                     packet,
-                    projectileSpeed,
+                    ResolveAttackSkill(profile.Archetype).ProjectileSpeed,
                     ProjectileScale(profile),
                     areaRadius,
                     profile.PierceCount + combatProfile.AdditionalPierceCount,
@@ -347,7 +341,8 @@ namespace CrossDefense.Units
                 }
                 PlayAttackAnimation();
                 if (i + 1 < volleyTargets.Count)
-                    yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
+                    yield return new WaitForSeconds(
+                        ResolveAttackSkill(profile.Archetype).VolleyShotDelay);
             }
         }
 
@@ -373,7 +368,8 @@ namespace CrossDefense.Units
                 float angle = i == 0
                     ? 0f
                     : (i % 2 == 0 ? -1f : 1f) * (4f + 3f * ((i - 1) / 2));
-                Vector3 destination = origin + Rotate(centerDirection, angle) * attackRange;
+                SkillData attackSkill = ResolveAttackSkill(profile.Archetype);
+                Vector3 destination = origin + Rotate(centerDirection, angle) * attackSkill.AttackRange;
                 bool spreadProjectile = i >= mainProjectileCount;
                 float damageScale = (i == 0
                                         ? 1f
@@ -386,14 +382,14 @@ namespace CrossDefense.Units
                     destination,
                     sprite,
                     BuildDamagePacket(baseDamage * damageScale, profile),
-                    projectileSpeed,
+                    attackSkill.ProjectileSpeed,
                     ProjectileScale(profile),
                     hitRadius,
                     profile.Archetype is SummonerAttackArchetype.Fireball or
                         SummonerAttackArchetype.ThunderSlash);
                 PlayAttackAnimation();
                 if (i + 1 < totalProjectileCount)
-                    yield return new WaitForSeconds(Mathf.Max(0.01f, volleyShotDelay));
+                    yield return new WaitForSeconds(attackSkill.VolleyShotDelay);
             }
         }
 
@@ -484,16 +480,17 @@ namespace CrossDefense.Units
                 _gameManager?.Projectiles == null)
                 return;
             Vector3 direction = (target.transform.position - origin).normalized;
+            SkillData attackSkill = ResolveAttackSkill(profile.Archetype);
             for (int i = 0; i < combatProfile.SpreadProjectileCount; i++)
             {
                 float side = i % 2 == 0 ? -1f : 1f;
                 float angle = side * (8f + 6f * (i / 2));
                 _gameManager.Projectiles.FireToPoint(
                     origin,
-                    origin + Rotate(direction, angle) * attackRange,
+                    origin + Rotate(direction, angle) * attackSkill.AttackRange,
                     sprite,
                     BuildDamagePacket(baseDamage * combatProfile.SpreadDamageMultiplier, profile),
-                    projectileSpeed,
+                    attackSkill.ProjectileSpeed,
                     ProjectileScale(profile) * 0.86f,
                     0.5f);
             }
@@ -518,7 +515,7 @@ namespace CrossDefense.Units
                 target,
                 sprite,
                 packet,
-                projectileSpeed,
+                ResolveAttackSkill(profile.Archetype).ProjectileSpeed,
                 ProjectileScale(profile) * 0.9f,
                 profile.AreaRadius,
                 profile.PierceCount,
@@ -542,8 +539,8 @@ namespace CrossDefense.Units
                     targets[i],
                     sprite,
                     packet.Scaled(Mathf.Pow(damageMultiplier, i + 1)),
-                    projectileSpeed,
-                    projectileScale * 0.82f);
+                    CurrentAttackSkill.ProjectileSpeed,
+                    CurrentAttackSkill.ProjectileScale * 0.82f);
             }
         }
 
@@ -576,7 +573,8 @@ namespace CrossDefense.Units
             {
                 if (IsInvalidTarget(candidate) || candidate == primary)
                     continue;
-                if ((candidate.transform.position - transform.position).sqrMagnitude > attackRange * attackRange)
+                if ((candidate.transform.position - transform.position).sqrMagnitude >
+                    AttackRange * AttackRange)
                     continue;
                 _volleyCandidates.Add(candidate);
             }
@@ -598,20 +596,21 @@ namespace CrossDefense.Units
 
         SummonerRunAttackProfile GetAttackProfile()
         {
+            SkillData attackSkill = CurrentAttackSkill;
             if (_gameManager?.RunTraits != null)
-                return _gameManager.RunTraits.BuildAttackProfile();
+                return _gameManager.RunTraits.BuildAttackProfile(attackSkill);
             return new SummonerRunAttackProfile(
-                SummonerAttackArchetype.EnergyBolt,
-                MonsterAttribute.None,
-                1,
-                0.65f,
-                0f,
-                1,
-                1f,
-                0f,
-                0f,
-                0f,
-                0f,
+                attackSkill?.AttackArchetype ?? SummonerAttackArchetype.EnergyBolt,
+                attackSkill?.Attribute ?? MonsterAttribute.None,
+                attackSkill?.ProjectileCount ?? 1,
+                attackSkill?.AdditionalProjectileDamageMultiplier ?? 1f,
+                attackSkill?.AreaRadius ?? 0f,
+                attackSkill?.PierceCount ?? 1,
+                attackSkill?.ChainDamageMultiplier ?? 1f,
+                attackSkill?.SlowPercent ?? 0f,
+                attackSkill?.SlowDuration ?? 0f,
+                attackSkill?.DamageOverTime ?? 0f,
+                attackSkill?.DamageOverTimeDuration ?? 0f,
                 0,
                 0f,
                 1f);
@@ -637,16 +636,7 @@ namespace CrossDefense.Units
         }
 
         float ProjectileScale(SummonerRunAttackProfile profile)
-        {
-            float multiplier = profile.Archetype switch
-            {
-                SummonerAttackArchetype.Fireball => 1.2f,
-                SummonerAttackArchetype.IceLance => 0.95f,
-                SummonerAttackArchetype.ThunderSlash => 1.08f,
-                _ => 1f,
-            };
-            return Mathf.Max(0.01f, projectileScale * multiplier);
-        }
+            => ResolveAttackSkill(profile.Archetype)?.ProjectileScale ?? 0.01f;
 
         static Vector3 Rotate(Vector3 direction, float degrees)
         {
@@ -720,17 +710,19 @@ namespace CrossDefense.Units
             return null;
         }
 
-        Sprite GetProjectileSprite(SummonerAttackArchetype archetype)
+        SkillData CurrentAttackSkill
         {
-            return archetype switch
+            get
             {
-                SummonerAttackArchetype.Fireball => fireballSprite != null ? fireballSprite : energyBoltSprite,
-                SummonerAttackArchetype.IceLance => iceballSprite != null ? iceballSprite : energyBoltSprite,
-                SummonerAttackArchetype.ThunderSlash =>
-                    lightningOrbSprite != null ? lightningOrbSprite : energyBoltSprite,
-                _ => energyBoltSprite,
-            };
+                SummonerAttackArchetype archetype =
+                    _gameManager?.RunTraits?.Snapshot.AttackArchetype ??
+                    SummonerAttackArchetype.EnergyBolt;
+                return ResolveAttackSkill(archetype);
+            }
         }
+
+        SkillData ResolveAttackSkill(SummonerAttackArchetype archetype) =>
+            _skillCatalog?.FindAttack(archetype) ?? _skillCatalog?.DefaultBasicAttack;
 
     }
 

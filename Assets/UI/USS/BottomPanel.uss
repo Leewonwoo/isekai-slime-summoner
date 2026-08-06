@@ -525,31 +525,6 @@
     min-height: var(--row-height);
 }
 
-.gear-tab__equipped {
-    flex-shrink: 0;
-    background-color: var(--color-panel-deep);
-    border-width: 2px;
-    border-color: var(--color-gold);
-    border-radius: var(--radius-md);
-    padding-left: var(--gap-md);
-    padding-right: var(--gap-md);
-    padding-top: var(--gap-sm);
-    padding-bottom: var(--gap-md);
-}
-
-.gear-tab__equipped-name {
-    color: var(--color-text);
-    font-size: var(--font-body);
-    -unity-font-style: bold;
-}
-
-.gear-tab__equipped-description {
-    margin-top: var(--gap-xs);
-    color: var(--color-text-dim);
-    font-size: var(--font-caption);
-    white-space: normal;
-}
-
 .gear-tab__trophy-page {
     padding-bottom: var(--gap-md);
 }
