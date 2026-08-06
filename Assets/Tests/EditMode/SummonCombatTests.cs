@@ -104,13 +104,15 @@ namespace CrossDefense.Tests.EditMode
                 dotSeconds: -4f,
                 pierce: 0,
                 supportBonus: 2f,
-                supportRange: -5f);
+                supportRange: -5f,
+                stunSeconds: -3f);
 
             Assert.That(_data.AreaRadius, Is.Zero);
             Assert.That(_data.SlowPercent, Is.EqualTo(0.95f));
             Assert.That(_data.SlowDuration, Is.Zero);
             Assert.That(_data.DamageOverTime, Is.Zero);
             Assert.That(_data.DamageOverTimeDuration, Is.Zero);
+            Assert.That(_data.StunDuration, Is.Zero);
             Assert.That(_data.PierceCount, Is.EqualTo(1));
             Assert.That(_data.SupportAttackSpeedBonus, Is.EqualTo(1f));
             Assert.That(_data.SupportRadius, Is.Zero);
@@ -158,7 +160,8 @@ namespace CrossDefense.Tests.EditMode
                 skillSlowPercent: 2f,
                 skillSlowDuration: -1f,
                 skillDotMultiplier: -2f,
-                skillDotDuration: -3f);
+                skillDotDuration: -3f,
+                skillStunDuration: -4f);
 
             Assert.That(_data.HasStar3Skill, Is.True);
             Assert.That(_data.Star3SkillName, Is.EqualTo("테스트 스킬"));
@@ -174,6 +177,50 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(_data.Star3SkillSlowDuration, Is.Zero);
             Assert.That(_data.Star3SkillDotMultiplier, Is.Zero);
             Assert.That(_data.Star3SkillDotDuration, Is.Zero);
+            Assert.That(_data.Star3SkillStunDuration, Is.Zero);
+        }
+
+        [Test]
+        public void StunPacket_IsAppliedAndClearedByPoolReset()
+        {
+            var monsterObject = new GameObject("Stun Test Monster");
+            var targetObject = new GameObject("Stun Test Target");
+            var monster = monsterObject.AddComponent<MonsterController>();
+            MonsterData monsterData = MonsterData.CreatePrototype(
+                "stun-target",
+                "Stun Target",
+                MonsterShape.Grunt,
+                MonsterAttribute.None,
+                100,
+                1f,
+                1,
+                1);
+            try
+            {
+                monster.Initialize(
+                    null,
+                    targetObject.transform,
+                    monsterData,
+                    1f,
+                    1f,
+                    1f);
+
+                monster.ApplyDamage(new DamagePacket(
+                    null,
+                    0f,
+                    MonsterAttribute.None,
+                    stunDuration: 1.25f));
+
+                Assert.That(monster.IsStunned, Is.True);
+                monster.ResetForPool();
+                Assert.That(monster.IsStunned, Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(monsterData);
+                Object.DestroyImmediate(monsterObject);
+                Object.DestroyImmediate(targetObject);
+            }
         }
     }
 }

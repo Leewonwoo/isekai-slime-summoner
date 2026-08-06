@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using CrossDefense.Data;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace CrossDefense.Tests.EditMode
@@ -145,6 +146,36 @@ namespace CrossDefense.Tests.EditMode
                 Assert.That(timeline.ChooseSpawnZone(wave, firstRandom), Is.EqualTo(timeline.ChooseSpawnZone(wave, secondRandom)));
 
             Object.DestroyImmediate(timeline);
+        }
+
+        [Test]
+        public void Stage01_GoldenGoblin_IsGuaranteedEveryFifteenDays()
+        {
+            StageTimeline timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(
+                "Assets/Data/StageTimelines/Stage_01.asset");
+
+            Assert.That(timeline, Is.Not.Null);
+            Assert.That(timeline.GoldenGoblin, Is.Not.Null);
+            Assert.That(timeline.GoldenGoblin.AppearanceChance, Is.EqualTo(0.05f).Within(0.0001f));
+            Assert.That(timeline.GoldenGoblin.GuaranteedInterval, Is.EqualTo(15));
+            Assert.That(timeline.ShouldSpawnGoldenGoblin(15, 12345), Is.True);
+            Assert.That(timeline.ShouldSpawnGoldenGoblin(30, 12345), Is.True);
+            Assert.That(timeline.ShouldSpawnGoldenGoblin(45, 12345), Is.True);
+        }
+
+        [Test]
+        public void GoldenGoblinRoll_IsStableForSameRunSeedAndDay()
+        {
+            StageTimeline timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(
+                "Assets/Data/StageTimelines/Stage_01.asset");
+
+            bool first = timeline.ShouldSpawnGoldenGoblin(7, 987654);
+            bool second = timeline.ShouldSpawnGoldenGoblin(7, 987654);
+
+            Assert.That(second, Is.EqualTo(first));
+            Assert.That(
+                StageTimeline.GoldenGoblinRollSeed(20260720, 987654, 7),
+                Is.EqualTo(StageTimeline.GoldenGoblinRollSeed(20260720, 987654, 7)));
         }
     }
 }

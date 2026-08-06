@@ -30,6 +30,10 @@
             <Button name="monster-codex-button" class="codex-button monster-codex-button" text="" tooltip="몬스터 도감" />
         </VisualElement>
         <Label name="unlock-toast" class="unlock-toast hidden" text="새 슬라임 해금" picking-mode="Ignore" />
+        <VisualElement name="golden-goblin-banner" class="golden-goblin-banner hidden" picking-mode="Ignore">
+            <Label name="golden-goblin-title" class="golden-goblin-banner__title" text="황금 고블린 출현!" picking-mode="Ignore" />
+            <Label name="golden-goblin-timer" class="golden-goblin-banner__timer" text="10.0초" picking-mode="Ignore" />
+        </VisualElement>
         <VisualElement name="buff-skill-cluster" class="buff-skill-cluster" picking-mode="Ignore">
             <Button name="buff-skill-button-0" class="buff-skill-button">
                 <VisualElement name="buff-skill-icon-0" class="buff-skill-button__icon" picking-mode="Ignore" />

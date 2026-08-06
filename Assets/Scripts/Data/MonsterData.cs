@@ -30,6 +30,13 @@ namespace CrossDefense.Data
         Projectile,
     }
 
+    public enum MonsterBehavior
+    {
+        Normal,
+        GoldenRunner,
+        Splitter,
+    }
+
     [CreateAssetMenu(fileName = "MonsterData", menuName = "Isekai Slime Summoner/Data/Monster Profile", order = 10)]
     public sealed class MonsterData : ScriptableObject
     {
@@ -38,6 +45,7 @@ namespace CrossDefense.Data
         [SerializeField] string displayName = "Goblin Grunt";
         [SerializeField] MonsterShape shape = MonsterShape.Grunt;
         [SerializeField] MonsterAttribute attribute = MonsterAttribute.None;
+        [SerializeField] MonsterBehavior behavior;
         [SerializeField] Sprite sprite;
         [SerializeField] Sprite[] moveFrames;
         [Min(1f)] [SerializeField] float moveAnimationFps = 12f;
@@ -57,10 +65,19 @@ namespace CrossDefense.Data
         [Min(0)] [SerializeField] int rewardGold = 1;
         [Min(0.1f)] [SerializeField] float sizeMultiplier = 1f;
 
+        [Header("Defeat Split")]
+        [SerializeField] MonsterData splitChild;
+        [Range(0, 8)] [SerializeField] int splitChildCount;
+        [Range(0.05f, 1f)] [SerializeField] float splitChildHpMultiplier = 0.45f;
+        [Range(0.1f, 2f)] [SerializeField] float splitChildSpeedMultiplier = 1.15f;
+        [Range(0f, 1f)] [SerializeField] float splitChildRewardMultiplier;
+        [Range(0.1f, 1f)] [SerializeField] float splitChildSizeMultiplier = 0.65f;
+
         public string MonsterId => monsterId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
         public MonsterShape Shape => shape;
         public MonsterAttribute Attribute => attribute;
+        public MonsterBehavior Behavior => behavior;
         public Sprite Sprite => sprite;
         public Sprite[] MoveFrames => moveFrames;
         public float MoveAnimationFps => moveAnimationFps;
@@ -77,6 +94,14 @@ namespace CrossDefense.Data
         public float ProjectileScale => Mathf.Max(0.1f, projectileScale);
         public int RewardGold => rewardGold;
         public float SizeMultiplier => sizeMultiplier;
+        public bool HasDefeatSplit =>
+            behavior == MonsterBehavior.Splitter && splitChildCount > 0;
+        public MonsterData SplitChild => splitChild != null ? splitChild : this;
+        public int SplitChildCount => Mathf.Clamp(splitChildCount, 0, 8);
+        public float SplitChildHpMultiplier => Mathf.Clamp(splitChildHpMultiplier, 0.05f, 1f);
+        public float SplitChildSpeedMultiplier => Mathf.Clamp(splitChildSpeedMultiplier, 0.1f, 2f);
+        public float SplitChildRewardMultiplier => Mathf.Clamp01(splitChildRewardMultiplier);
+        public float SplitChildSizeMultiplier => Mathf.Clamp(splitChildSizeMultiplier, 0.1f, 1f);
 
         public static MonsterData CreatePrototype(string id, string displayName, MonsterShape shape, MonsterAttribute attribute,
             int hp, float speed, int contactDamage, int rewardGold, Sprite sprite = null,

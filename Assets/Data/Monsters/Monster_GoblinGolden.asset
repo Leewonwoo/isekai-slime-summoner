@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\uD669\uAE08 \uACE0\uBE14\uB9B0"
   shape: 1
   attribute: 0
+  behavior: 1
   sprite: {fileID: 21300000, guid: b9eb0cdce2b24e4296d4c9c4002f066a, type: 3}
   moveFrames:
   - {fileID: -7965933094318800854, guid: 9daae6255ac8239468eddf463b336379, type: 3}

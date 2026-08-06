@@ -136,6 +136,7 @@ namespace CrossDefense.Core
         float _speed;
         float _expiresAt;
         int _damage;
+        int _unitInstanceId;
         MonsterAttribute _attribute;
 
         public void ApplyVisual(Sprite sprite, float scale, Color tint)
@@ -158,6 +159,7 @@ namespace CrossDefense.Core
                 return false;
             _service = service;
             _unitTarget = target;
+            _unitInstanceId = target.Instance?.InstanceId ?? 0;
             _coreTarget = null;
             _gameManager = null;
             _attribute = attribute;
@@ -177,6 +179,7 @@ namespace CrossDefense.Core
                 return false;
             _service = service;
             _unitTarget = null;
+            _unitInstanceId = 0;
             _coreTarget = target;
             _gameManager = gameManager;
             _attribute = attribute;
@@ -206,7 +209,9 @@ namespace CrossDefense.Core
             Transform target = _unitTarget != null ? _unitTarget.transform : _coreTarget;
             if (target == null || (_unitTarget != null &&
                 (_unitTarget.IsDefeated || _unitTarget.CurrentHp <= 0f ||
-                 !_unitTarget.gameObject.activeInHierarchy)))
+                 !_unitTarget.gameObject.activeInHierarchy ||
+                 _unitTarget.Instance == null ||
+                 _unitTarget.Instance.InstanceId != _unitInstanceId)))
             {
                 _service.Release(this);
                 return;
@@ -246,6 +251,7 @@ namespace CrossDefense.Core
             _gameManager = null;
             _unitTarget = null;
             _coreTarget = null;
+            _unitInstanceId = 0;
             _speed = 0f;
             _expiresAt = 0f;
             _damage = 0;

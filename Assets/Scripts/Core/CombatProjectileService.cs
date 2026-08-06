@@ -586,6 +586,8 @@ namespace CrossDefense.Core
             _target = null;
             _usesPointTarget = false;
             _pointTarget = default;
+            _packet = default;
+            _speed = 0f;
             _remainingLifetime = 0f;
             _areaRadius = 0f;
             _pierceCount = 1;
@@ -597,6 +599,8 @@ namespace CrossDefense.Core
             _launchOrigin = Vector3.zero;
             _lastKnownTargetPosition = Vector3.zero;
             _targetSpawnVersion = 0;
+            transform.localScale = Vector3.one;
+            transform.rotation = Quaternion.identity;
             if (_renderer != null)
             {
                 _renderer.sprite = null;

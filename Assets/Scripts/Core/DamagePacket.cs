@@ -13,6 +13,7 @@ namespace CrossDefense.Core
         public readonly float DamageOverTime;
         public readonly float DamageOverTimeDuration;
         public readonly bool IsCritical;
+        public readonly float StunDuration;
 
         public DamagePacket(
             Object source,
@@ -22,7 +23,8 @@ namespace CrossDefense.Core
             float slowDuration = 0f,
             float damageOverTime = 0f,
             float damageOverTimeDuration = 0f,
-            bool isCritical = false)
+            bool isCritical = false,
+            float stunDuration = 0f)
         {
             Source = source;
             BaseDamage = Mathf.Max(0f, baseDamage);
@@ -32,6 +34,7 @@ namespace CrossDefense.Core
             DamageOverTime = Mathf.Max(0f, damageOverTime);
             DamageOverTimeDuration = Mathf.Max(0f, damageOverTimeDuration);
             IsCritical = isCritical;
+            StunDuration = Mathf.Max(0f, stunDuration);
         }
 
         public float ResolveDamage(MonsterAttribute defense) =>
@@ -49,6 +52,7 @@ namespace CrossDefense.Core
                 SlowDuration,
                 DamageOverTime * Mathf.Max(0f, multiplier),
                 DamageOverTimeDuration,
-                IsCritical);
+                IsCritical,
+                StunDuration);
     }
 }

@@ -25,6 +25,7 @@ namespace CrossDefense.Units
         bool _resolved;
         float _slowMultiplier = 1f;
         float _slowUntil;
+        float _stunUntil;
         float _dotDamagePerSecond;
         float _dotUntil;
         float _nextDotTick;
@@ -35,6 +36,15 @@ namespace CrossDefense.Units
         float _moveAnimationElapsed;
         float _attackAnimationElapsed;
         bool _isAttackAnimating;
+        Vector3 _goldenExitPosition;
+        float _goldenEscapeAt;
+        float _goldenEscapeDuration;
+        float _spawnHpMultiplier;
+        float _spawnSpeedMultiplier;
+        float _spawnRewardMultiplier;
+        float _spawnSizeMultiplier;
+        bool _allowDefeatSplit;
+        bool _grantsDefeatRewards;
         Vector2 _pbdPreviousPosition;
 
         public MonsterData Data => _data;
@@ -47,6 +57,19 @@ namespace CrossDefense.Units
         public bool IsTargetingCore => _unitTarget == null;
         public bool IsAttackAnimating => _isAttackAnimating;
         public float AttackRange => _attackRange;
+        public bool IsGoldenRunner => _data?.Behavior == MonsterBehavior.GoldenRunner;
+        public bool IsStunned => !_resolved && Time.time < _stunUntil;
+        public bool CanSplitOnDefeat =>
+            _allowDefeatSplit && _data != null && _data.HasDefeatSplit;
+        public float SpawnHpMultiplier => _spawnHpMultiplier;
+        public float SpawnSpeedMultiplier => _spawnSpeedMultiplier;
+        public float SpawnRewardMultiplier => _spawnRewardMultiplier;
+        public float SpawnSizeMultiplier => _spawnSizeMultiplier;
+        public bool GrantsDefeatRewards => _grantsDefeatRewards;
+        public bool ParticipatesInPbd => !IsGoldenRunner;
+        public float GoldenEscapeDuration => _goldenEscapeDuration;
+        public float GoldenEscapeTimeRemaining =>
+            IsGoldenRunner && !_resolved ? Mathf.Max(0f, _goldenEscapeAt - Time.time) : 0f;
         public Vector2 PbdPreviousPosition => _pbdPreviousPosition;
         public float CombatRadius
         {
@@ -59,7 +82,8 @@ namespace CrossDefense.Units
 
         public void Initialize(GameManager gameManager, Transform target, MonsterData data,
             float hpMultiplier, float speedMultiplier, float rewardMultiplier,
-            float sizeMultiplier = 1f)
+            float sizeMultiplier = 1f, bool allowDefeatSplit = true,
+            bool grantsDefeatRewards = true)
         {
             unchecked
             {
@@ -81,6 +105,7 @@ namespace CrossDefense.Units
             _resolved = false;
             _slowMultiplier = 1f;
             _slowUntil = 0f;
+            _stunUntil = 0f;
             _dotDamagePerSecond = 0f;
             _dotUntil = 0f;
             _nextDotTick = 0f;
@@ -88,6 +113,15 @@ namespace CrossDefense.Units
             _moveAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
             _isAttackAnimating = false;
+            _goldenExitPosition = Vector3.zero;
+            _goldenEscapeAt = 0f;
+            _goldenEscapeDuration = 0f;
+            _spawnHpMultiplier = Mathf.Max(0.01f, hpMultiplier);
+            _spawnSpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
+            _spawnRewardMultiplier = Mathf.Max(0f, rewardMultiplier);
+            _spawnSizeMultiplier = Mathf.Max(0.1f, sizeMultiplier);
+            _allowDefeatSplit = allowDefeatSplit;
+            _grantsDefeatRewards = grantsDefeatRewards;
             _pbdPreviousPosition = transform.position;
             if (_collider == null)
                 _collider = GetComponent<CircleCollider2D>();
@@ -102,6 +136,21 @@ namespace CrossDefense.Units
 
             TickStatusEffects();
             if (_resolved) return;
+            if (_renderer != null)
+                _renderer.color = IsStunned
+                    ? new Color(1f, 0.9f, 0.35f, 1f)
+                    : Color.white;
+            if (IsStunned)
+            {
+                TickCombatAnimation(false, Time.deltaTime);
+                return;
+            }
+
+            if (IsGoldenRunner)
+            {
+                TickGoldenRunner();
+                return;
+            }
 
             RefreshUnitTarget();
             Transform target = _unitTarget != null ? _unitTarget.transform : _coreTarget;
@@ -157,6 +206,13 @@ namespace CrossDefense.Units
                 _slowUntil = Mathf.Max(_slowUntil, Time.time + packet.SlowDuration);
             }
 
+            if (packet.StunDuration > 0f)
+            {
+                _stunUntil = Mathf.Max(_stunUntil, Time.time + packet.StunDuration);
+                if (_renderer != null)
+                    _renderer.color = new Color(1f, 0.9f, 0.35f, 1f);
+            }
+
             if (packet.DamageOverTime > 0f && packet.DamageOverTimeDuration > 0f)
             {
                 _dotDamagePerSecond = Mathf.Max(
@@ -183,6 +239,7 @@ namespace CrossDefense.Units
             _resolved = false;
             _slowMultiplier = 1f;
             _slowUntil = 0f;
+            _stunUntil = 0f;
             _dotDamagePerSecond = 0f;
             _dotUntil = 0f;
             _nextDotTick = 0f;
@@ -190,6 +247,15 @@ namespace CrossDefense.Units
             _moveAnimationElapsed = 0f;
             _attackAnimationElapsed = 0f;
             _isAttackAnimating = false;
+            _goldenExitPosition = Vector3.zero;
+            _goldenEscapeAt = 0f;
+            _goldenEscapeDuration = 0f;
+            _spawnHpMultiplier = 0f;
+            _spawnSpeedMultiplier = 0f;
+            _spawnRewardMultiplier = 0f;
+            _spawnSizeMultiplier = 0f;
+            _allowDefeatSplit = false;
+            _grantsDefeatRewards = false;
             _healthBar?.ResetForPool();
             _pbdPreviousPosition = Vector2.zero;
             transform.localScale = Vector3.one;
@@ -197,12 +263,55 @@ namespace CrossDefense.Units
 
         public void SetPbdResolvedPosition(Vector3 position) => _pbdPreviousPosition = position;
 
+        public void ConfigureGoldenRunner(Vector3 exitPosition, float escapeDuration)
+        {
+            _goldenExitPosition = exitPosition;
+            _goldenEscapeDuration = Mathf.Max(0.1f, escapeDuration);
+            _goldenEscapeAt = Time.time + _goldenEscapeDuration;
+            _unitTarget = null;
+            _nextTargetSearchTime = float.MaxValue;
+        }
+
+        void TickGoldenRunner()
+        {
+            if (Time.time >= _goldenEscapeAt)
+            {
+                ResolveEscaped();
+                return;
+            }
+
+            Vector3 offset = _goldenExitPosition - transform.position;
+            if (offset.sqrMagnitude <= 0.12f * 0.12f)
+            {
+                ResolveEscaped();
+                return;
+            }
+
+            float slowMultiplier = Time.time < _slowUntil ? _slowMultiplier : 1f;
+            transform.position += offset.normalized * (_speed * slowMultiplier * Time.deltaTime);
+            _pbdPreviousPosition = transform.position;
+            TickCombatAnimation(true, Time.deltaTime);
+        }
+
         void TickStatusEffects()
         {
+            if (_slowUntil > 0f && Time.time >= _slowUntil)
+            {
+                _slowMultiplier = 1f;
+                _slowUntil = 0f;
+            }
+
+            if (_stunUntil > 0f && Time.time >= _stunUntil)
+                _stunUntil = 0f;
+
             if (_dotDamagePerSecond <= 0f || Time.time >= _dotUntil)
             {
                 if (Time.time >= _dotUntil)
+                {
                     _dotDamagePerSecond = 0f;
+                    _dotUntil = 0f;
+                    _nextDotTick = 0f;
+                }
                 return;
             }
 
@@ -325,6 +434,13 @@ namespace CrossDefense.Units
             if (_resolved) return;
             _resolved = true;
             _gameManager.NotifyMonsterDefeated(this, _rewardGold);
+        }
+
+        void ResolveEscaped()
+        {
+            if (_resolved) return;
+            _resolved = true;
+            _gameManager.NotifyGoldenGoblinEscaped(this);
         }
 
         void ApplyVisual(MonsterData data, float spawnSizeMultiplier)

@@ -377,7 +377,8 @@ namespace CrossDefense.Units
                 _data.SlowPercent,
                 _data.SlowDuration,
                 _data.DamageOverTime,
-                _data.DamageOverTimeDuration);
+                _data.DamageOverTimeDuration,
+                stunDuration: _data.StunDuration);
 
             switch (_data.AttackStyle)
             {

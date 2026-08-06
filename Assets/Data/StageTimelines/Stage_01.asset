@@ -21,6 +21,17 @@ MonoBehaviour:
   runTraitInterval: 5
   startingOverdriveGauge: 0
   runRewardCatalog: {fileID: 11400000, guid: 56ce19d0ae7e41de9f270a539ec79763, type: 2}
+  goldenGoblin:
+    enabled: 1
+    monster: {fileID: 11400000, guid: 22f8bb59572717d4eb0208b895906cb8, type: 2}
+    appearanceChance: 0.05
+    guaranteedInterval: 15
+    warningLeadTime: 1.2
+    escapeDuration: 10
+    totalGoldReward: 50
+    hpMultiplier: 1
+    speedMultiplier: 1
+    sizeMultiplier: 1
   waves:
   - label: Wave 1
     kind: 0

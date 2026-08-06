@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\uC790\uC5F0 \uACE0\uBE14\uB9B0 \uD3EC\uC790 \uC8FC\uC220\uC0AC"
   shape: 3
   attribute: 3
+  behavior: 2
   sprite: {fileID: 21300000, guid: ed6a085a6631c504987e2bbe8cca1186, type: 3}
   moveFrames:
   - {fileID: 4125749995361926217, guid: 0ccc9c833a6f87542a94b86d73774a17, type: 3}
@@ -41,3 +42,9 @@ MonoBehaviour:
   projectileScale: 0.5
   rewardGold: 4
   sizeMultiplier: 1
+  splitChild: {fileID: 11400000, guid: dce05757db944104f9d76a1a2c68955c, type: 2}
+  splitChildCount: 2
+  splitChildHpMultiplier: 0.4
+  splitChildSpeedMultiplier: 1.2
+  splitChildRewardMultiplier: 0
+  splitChildSizeMultiplier: 0.62

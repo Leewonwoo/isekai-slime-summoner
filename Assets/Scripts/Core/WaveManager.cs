@@ -18,6 +18,7 @@ namespace CrossDefense.Core
         Coroutine _routine;
         int _waveIndex;
         int _pendingRushSpawners;
+        bool _pendingGoldenSpawner;
 
         public int CurrentWaveIndex => _waveIndex;
         public int TotalWaves => _timeline == null ? 0 : _timeline.WaveCount;
@@ -47,9 +48,51 @@ namespace CrossDefense.Core
             _routine = null;
         }
 
+        public void NotifyMonsterResolved(MonsterController monster)
+        {
+            _livingMonsters.Remove(monster);
+        }
+
         public void NotifyMonsterDefeated(MonsterController monster)
         {
             _livingMonsters.Remove(monster);
+            if (monster == null || !monster.CanSplitOnDefeat ||
+                monster.Data == null ||
+                !_timeline.TryGetWave(_waveIndex, out StageWave wave))
+                return;
+
+            MonsterData parentData = monster.Data;
+            MonsterData childData = parentData.SplitChild;
+            int availableSlots = Mathf.Max(
+                0,
+                wave.MaxLivingMonsters - _livingMonsters.Count);
+            int childCount = Mathf.Min(parentData.SplitChildCount, availableSlots);
+            if (childData == null || childCount <= 0)
+                return;
+
+            Vector3 origin = monster.transform.position;
+            float spawnRadius = Mathf.Max(0.2f, monster.CombatRadius * 0.65f);
+            for (int i = 0; i < childCount; i++)
+            {
+                float angle = Mathf.PI * 2f * i / childCount;
+                Vector3 offset = new(
+                    Mathf.Cos(angle) * spawnRadius,
+                    Mathf.Sin(angle) * spawnRadius,
+                    0f);
+                MonsterController child = _spawner.SpawnAtPosition(
+                    _gameManager,
+                    _summoner,
+                    childData,
+                    origin + offset,
+                    monster.SpawnHpMultiplier * parentData.SplitChildHpMultiplier,
+                    monster.SpawnSpeedMultiplier * parentData.SplitChildSpeedMultiplier,
+                    monster.SpawnRewardMultiplier * parentData.SplitChildRewardMultiplier,
+                    monster.SpawnSizeMultiplier * parentData.SplitChildSizeMultiplier,
+                    allowDefeatSplit: false);
+                if (child == null) continue;
+                _livingMonsters.Add(child);
+                _gameManager.NotifyMonsterSpawned(child, wave, _livingMonsters.Count);
+            }
         }
 
         IEnumerator Run(MonoBehaviour coroutineHost, int startWaveIndex)
@@ -68,7 +111,7 @@ namespace CrossDefense.Core
                 _gameManager.SetWave(_waveIndex + 1, _timeline.WaveCount, wave);
                 _gameManager.SetPhase(RunPhase.Prepare);
                 yield return new WaitForSeconds(Mathf.Max(0f, wave.PreparationTime));
-                while (_gameManager.IsGameplayPaused)
+                while (_gameManager.IsGameplayPaused || _gameManager.IsWaveProgressionHeld)
                     yield return null;
                 if (_gameManager.IsRunOver) yield break;
 
@@ -115,6 +158,12 @@ namespace CrossDefense.Core
 
         IEnumerator SpawnWave(MonoBehaviour coroutineHost, StageWave wave)
         {
+            _pendingGoldenSpawner = _timeline.ShouldSpawnGoldenGoblin(
+                _waveIndex + 1,
+                _gameManager.RunEventSeed);
+            if (_pendingGoldenSpawner)
+                coroutineHost.StartCoroutine(SpawnGoldenGoblin(wave));
+
             if (wave.IsRush)
             {
                 _pendingRushSpawners = 0;
@@ -126,6 +175,8 @@ namespace CrossDefense.Core
                 }
                 while (_pendingRushSpawners > 0 && !_gameManager.IsRunOver)
                     yield return null;
+                while (_pendingGoldenSpawner && !_gameManager.IsRunOver)
+                    yield return null;
                 yield break;
             }
 
@@ -134,6 +185,48 @@ namespace CrossDefense.Core
                 if (entry == null || entry.Monster == null) continue;
                 yield return SpawnEntry(wave, entry, false);
             }
+            while (_pendingGoldenSpawner && !_gameManager.IsRunOver)
+                yield return null;
+        }
+
+        IEnumerator SpawnGoldenGoblin(StageWave wave)
+        {
+            GoldenGoblinSettings settings = _timeline.GoldenGoblin;
+            _gameManager.NotifyGoldenGoblinWarning(settings.WarningLeadTime);
+            if (settings.WarningLeadTime > 0f)
+                yield return new WaitForSeconds(settings.WarningLeadTime);
+
+            while (!_gameManager.IsRunOver &&
+                   (_gameManager.IsGameplayPaused ||
+                    _livingMonsters.Count >= wave.MaxLivingMonsters))
+                yield return null;
+
+            if (_gameManager.IsRunOver)
+            {
+                _pendingGoldenSpawner = false;
+                yield break;
+            }
+
+            SpawnZone zone = _timeline.ChooseSpawnZone(wave, _random);
+            MonsterController monster = _spawner.SpawnGoldenGoblin(
+                _gameManager,
+                _summoner,
+                settings,
+                zone,
+                _timeline.GetGoldenGoblinHpMultiplier(wave),
+                _timeline.GetGoldenGoblinSpeedMultiplier(wave),
+                _random);
+            if (monster != null)
+            {
+                _livingMonsters.Add(monster);
+                _gameManager.NotifyMonsterSpawned(monster, wave, _livingMonsters.Count);
+                _gameManager.NotifyGoldenGoblinSpawned(monster);
+            }
+            else
+            {
+                _gameManager.NotifyGoldenGoblinSpawnFailed();
+            }
+            _pendingGoldenSpawner = false;
         }
 
         IEnumerator SpawnEntry(StageWave wave, MonsterSpawnEntry entry, bool rush)

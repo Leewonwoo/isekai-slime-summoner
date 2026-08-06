@@ -272,6 +272,96 @@
     white-space: normal;
 }
 
+.golden-goblin-banner {
+    position: absolute;
+    left: 50%;
+    top: 176px;
+    translate: -50% 0;
+    width: 84%;
+    max-width: 760px;
+    min-height: 104px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(255, 205, 58);
+    border-width: var(--gap-xs);
+    border-color: rgb(130, 78, 12);
+    border-radius: var(--radius-lg);
+    padding-left: var(--gap-lg);
+    padding-right: var(--gap-lg);
+    padding-top: var(--gap-sm);
+    padding-bottom: var(--gap-sm);
+    opacity: 0.96;
+    overflow: hidden;
+}
+
+.golden-goblin-banner__title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    color: rgb(54, 31, 5);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    white-space: normal;
+}
+
+.golden-goblin-banner__timer {
+    flex-shrink: 0;
+    width: 132px;
+    min-height: 64px;
+    margin-left: var(--gap-md);
+    color: rgb(255, 239, 178);
+    background-color: rgb(129, 75, 12);
+    border-radius: var(--radius-md);
+    padding-left: var(--gap-sm);
+    padding-right: var(--gap-sm);
+    font-size: 40px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.golden-goblin-banner--warning {
+    background-color: rgb(255, 226, 112);
+}
+
+.golden-goblin-banner--warning .golden-goblin-banner__timer {
+    color: rgb(255, 242, 188);
+    background-color: rgb(112, 68, 16);
+}
+
+.golden-goblin-banner--defeated {
+    background-color: rgb(116, 220, 117);
+    border-color: rgb(36, 100, 43);
+}
+
+.golden-goblin-banner--defeated .golden-goblin-banner__timer {
+    width: 160px;
+    color: rgb(224, 255, 220);
+    background-color: rgb(36, 100, 43);
+    font-size: 32px;
+}
+
+.golden-goblin-banner--escaped {
+    background-color: rgb(110, 105, 96);
+    border-color: rgb(52, 49, 45);
+}
+
+.golden-goblin-banner--escaped .golden-goblin-banner__title,
+.golden-goblin-banner--escaped .golden-goblin-banner__timer {
+    color: rgb(244, 238, 224);
+}
+
+.golden-goblin-banner--message-only .golden-goblin-banner__title {
+    width: 100%;
+    -unity-text-align: middle-center;
+}
+
+.golden-goblin-banner--message-only .golden-goblin-banner__timer {
+    display: none;
+}
+
 .field-overlay__wave--rush {
     color: var(--color-danger);
 }

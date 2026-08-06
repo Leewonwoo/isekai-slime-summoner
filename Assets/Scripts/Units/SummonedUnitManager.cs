@@ -7,6 +7,14 @@ using UnityEngine;
 
 namespace CrossDefense.Units
 {
+    public enum AutoDeployFailureReason
+    {
+        None,
+        InstanceUnavailable,
+        NoValidPosition,
+        SpawnFailed,
+    }
+
     /// <summary>벤치↔필드 배치, 자유 이동 전투, 재배치와 2머지를 한 인스턴스 ID 기준으로 관리한다.</summary>
     [DisallowMultipleComponent]
     public sealed class SummonedUnitManager : MonoBehaviour
@@ -56,6 +64,9 @@ namespace CrossDefense.Units
         public float SlimeReviveFraction => _gameManager?.RunTraits?.SlimeReviveFraction ?? 0f;
 
         public event Action<IReadOnlyList<SummonedUnitController>> UnitsChanged;
+        public event Action<SummonUnitInstance, AutoDeployFailureReason> AutoDeployFailed;
+        public event Action<SummonedUnitController, bool, bool> FieldDragEnded;
+        public event Action<SummonedUnitController, int, int> UnitMerged;
 
         public void Initialize(
             GameManager gameManager,
@@ -241,12 +252,16 @@ namespace CrossDefense.Units
                 SummonTargetPriority.Farthest => float.MinValue,
                 _ => float.MaxValue,
             };
+            bool bestIsGolden = false;
 
             _monsters.RemoveWhere(monster => monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
             foreach (var monster in _monsters)
             {
                 float distanceSq = (monster.transform.position - unit.transform.position).sqrMagnitude;
                 if (distanceSq > searchRangeSq) continue;
+                bool candidateIsGolden = monster.IsGoldenRunner;
+                if (bestIsGolden && !candidateIsGolden)
+                    continue;
                 float value = unit.Data.TargetPriority switch
                 {
                     SummonTargetPriority.LowestHp => monster.CurrentHp,
@@ -259,9 +274,12 @@ namespace CrossDefense.Units
                     SummonTargetPriority.HighestHp or SummonTargetPriority.Farthest => value > bestValue,
                     _ => value < bestValue,
                 };
+                if (candidateIsGolden && !bestIsGolden)
+                    better = true;
                 if (!better) continue;
                 best = monster;
                 bestValue = value;
+                bestIsGolden = candidateIsGolden;
             }
 
             return best;
@@ -279,6 +297,8 @@ namespace CrossDefense.Units
             {
                 float distanceSq = (candidate.transform.position - unit.transform.position).sqrMagnitude;
                 if (distanceSq > searchRangeSq) continue;
+                if (candidate.IsGoldenRunner)
+                    return candidate;
 
                 int neighbors = 0;
                 foreach (var nearby in _monsters)
@@ -322,7 +342,7 @@ namespace CrossDefense.Units
             _monsters.RemoveWhere(monster => monster == null || !monster.gameObject.activeInHierarchy || monster.IsResolved);
             foreach (var monster in _monsters)
             {
-                if (monster.Data == null) continue;
+                if (monster.Data == null || !monster.ParticipatesInPbd) continue;
                 float scale = Mathf.Max(0.1f, monster.Data.SizeMultiplier);
                 _pbdMonsters.Add(monster);
                 _pbdBodies.Add(new CombatPbdBody(
@@ -532,7 +552,8 @@ namespace CrossDefense.Units
                 data.Star3SkillSlowPercent,
                 data.Star3SkillSlowDuration,
                 ModifySlimeDamage(rankDamage * data.Star3SkillDotMultiplier),
-                data.Star3SkillDotDuration);
+                data.Star3SkillDotDuration,
+                stunDuration: data.Star3SkillStunDuration);
         }
 
         void PlayStar3Effect(SummonedUnitController unit, Vector3 position)
@@ -661,16 +682,31 @@ namespace CrossDefense.Units
 
         public bool TryAutoDeploy(int instanceId)
         {
+            return TryAutoDeploy(instanceId, out _);
+        }
+
+        public bool TryAutoDeploy(
+            int instanceId,
+            out AutoDeployFailureReason failureReason)
+        {
+            failureReason = AutoDeployFailureReason.None;
             if (_summonManager == null || !_summonManager.TryTakeFromBench(instanceId, out var instance))
+            {
+                failureReason = AutoDeployFailureReason.InstanceUnavailable;
                 return false;
+            }
             if (!TryFindAutoPlacement(out var position))
             {
                 _summonManager.ReturnToBench(instance);
+                failureReason = AutoDeployFailureReason.NoValidPosition;
+                AutoDeployFailed?.Invoke(instance, failureReason);
                 return false;
             }
             var spawned = SpawnUnit(instance, position, true);
             if (spawned != null) return true;
             _summonManager.ReturnToBench(instance);
+            failureReason = AutoDeployFailureReason.SpawnFailed;
+            AutoDeployFailed?.Invoke(instance, failureReason);
             return false;
         }
 
@@ -759,9 +795,10 @@ namespace CrossDefense.Units
             UpdateFieldDrag(worldPosition);
             var source = _draggedUnit;
             bool merged = _mergeTarget != null && TryMerge(source, _mergeTarget);
+            bool validPlacement = merged || IsPlacementValid(source.transform.position, source);
             if (!merged)
             {
-                if (!IsPlacementValid(source.transform.position, source))
+                if (!validPlacement)
                     source.transform.position = _dragOrigin;
                 source.SetDragging(false);
             }
@@ -770,6 +807,7 @@ namespace CrossDefense.Units
             else
                 SetMergeTarget(null);
             _draggedUnit = null;
+            FieldDragEnded?.Invoke(source, merged, validPlacement);
             return true;
         }
 
@@ -906,15 +944,36 @@ namespace CrossDefense.Units
                 source.Instance.Rank >= SummonRank.MaxInternalRank)
                 return false;
 
+            int previousRank = target.Instance.Rank;
             ReleaseUnit(source);
             if (!target.Instance.TryPromote()) return false;
+            int resultRank = target.Instance.Rank;
             target.RefreshRankVisual();
             target.SetDragging(false);
             target.Outline?.SetState(UnitOutlineState.MergeTarget);
             StartCoroutine(ClearOutlineAfter(target, 0.45f));
             ActivateMergeFrenzy();
             UnitsChanged?.Invoke(_units);
+            UnitMerged?.Invoke(target, previousRank, resultRank);
             return true;
+        }
+
+        public void SetTutorialMergeHint(string unitId, int rank, bool visible)
+        {
+            if (string.IsNullOrWhiteSpace(unitId))
+                visible = false;
+
+            for (int i = 0; i < _units.Count; i++)
+            {
+                SummonedUnitController unit = _units[i];
+                if (unit?.Instance?.Unit == null || unit.IsDragging)
+                    continue;
+                bool matches = visible &&
+                    unit.Instance.Unit.UnitId == unitId &&
+                    unit.Instance.Rank == rank;
+                if (matches || unit.Outline?.State == UnitOutlineState.MergeTarget)
+                    unit.Outline?.SetState(matches ? UnitOutlineState.MergeTarget : UnitOutlineState.None);
+            }
         }
 
         void ActivateMergeFrenzy()

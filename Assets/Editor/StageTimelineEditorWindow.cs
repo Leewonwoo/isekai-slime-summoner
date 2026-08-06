@@ -19,6 +19,7 @@ namespace CrossDefense.Editor
         SerializedProperty _randomSeed;
         SerializedProperty _randomizeDirectionWeights;
         SerializedProperty _directionWeightJitter;
+        SerializedProperty _goldenGoblin;
         SerializedProperty _waves;
         int _selectedWave = -1;
         Vector2 _waveScroll;
@@ -168,6 +169,11 @@ namespace CrossDefense.Editor
                 EditorGUILayout.Slider(_directionWeightJitter, 0f, 1f, new GUIContent("Spawn Zone Jitter"));
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.LabelField($"Wave Count: {_waves.arraySize}", EditorStyles.miniBoldLabel);
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.PropertyField(
+                _goldenGoblin,
+                new GUIContent("Golden Goblin Event"),
+                true);
             EditorGUILayout.EndVertical();
         }
 
@@ -414,6 +420,7 @@ namespace CrossDefense.Editor
             _randomSeed = _serializedTimeline.FindProperty("randomSeed");
             _randomizeDirectionWeights = _serializedTimeline.FindProperty("randomizeDirectionWeights");
             _directionWeightJitter = _serializedTimeline.FindProperty("directionWeightJitter");
+            _goldenGoblin = _serializedTimeline.FindProperty("goldenGoblin");
             _waves = _serializedTimeline.FindProperty("waves");
             _selectedWave = _waves.arraySize == 0 ? -1 : Mathf.Clamp(_selectedWave, 0, _waves.arraySize - 1);
         }

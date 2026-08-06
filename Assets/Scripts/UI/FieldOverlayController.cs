@@ -17,9 +17,13 @@ namespace CrossDefense.UI
         readonly Label _overdriveGaugeLabel;
         readonly Button _skillButton;
         readonly Button _speedToggleButton;
+        readonly Button _settingsButton;
         readonly Button _slimeCodexButton;
         readonly Button _monsterCodexButton;
         readonly Label _unlockToast;
+        readonly VisualElement _goldenGoblinBanner;
+        readonly Label _goldenGoblinTitle;
+        readonly Label _goldenGoblinTimer;
         readonly Label _skillName;
         readonly Label _skillCooldown;
         readonly VisualElement _skillIcon;
@@ -36,10 +40,12 @@ namespace CrossDefense.UI
         int _lastCombo;
         IVisualElementScheduledItem _comboMilestoneReset;
         IVisualElementScheduledItem _unlockToastReset;
+        IVisualElementScheduledItem _goldenGoblinReset;
 
         public event Action SkillRequested;
         public event Action<int> BuffSkillRequested;
         public event Action SpeedToggleRequested;
+        public event Action SettingsRequested;
         public event Action SlimeCodexRequested;
         public event Action MonsterCodexRequested;
 
@@ -53,9 +59,13 @@ namespace CrossDefense.UI
             _overdriveGaugeLabel = root.Q<Label>("overdrive-gauge-label");
             _skillButton = root.Q<Button>("skill-button");
             _speedToggleButton = root.Q<Button>("speed-toggle-button");
+            _settingsButton = root.Q<Button>("settings-button");
             _slimeCodexButton = root.Q<Button>("slime-codex-button");
             _monsterCodexButton = root.Q<Button>("monster-codex-button");
             _unlockToast = root.Q<Label>("unlock-toast");
+            _goldenGoblinBanner = root.Q<VisualElement>("golden-goblin-banner");
+            _goldenGoblinTitle = root.Q<Label>("golden-goblin-title");
+            _goldenGoblinTimer = root.Q<Label>("golden-goblin-timer");
             _skillName = root.Q<Label>("skill-button-name");
             _skillCooldown = root.Q<Label>("skill-button-cooldown");
             _skillIcon = root.Q<VisualElement>("skill-button-icon");
@@ -73,6 +83,7 @@ namespace CrossDefense.UI
                 _buffSkillButtons[i].clicked += _buffSkillClickHandlers[i];
             }
             _speedToggleButton.clicked += OnSpeedToggleClicked;
+            _settingsButton.clicked += OnSettingsClicked;
             _slimeCodexButton.clicked += OnSlimeCodexClicked;
             _monsterCodexButton.clicked += OnMonsterCodexClicked;
         }
@@ -94,7 +105,13 @@ namespace CrossDefense.UI
 
         public void ShowUnlockToast(string message)
         {
+            ShowToast(message);
+        }
+
+        public void ShowToast(string message)
+        {
             _unlockToastReset?.Pause();
+            _goldenGoblinReset?.Pause();
             _unlockToast.text = message;
             _unlockToast.RemoveFromClassList("hidden");
             _unlockToastReset = _unlockToast.schedule.Execute(
@@ -115,6 +132,7 @@ namespace CrossDefense.UI
             for (int i = 0; i < _buffSkillButtons.Length; i++)
                 _buffSkillButtons[i].clicked -= _buffSkillClickHandlers[i];
             _speedToggleButton.clicked -= OnSpeedToggleClicked;
+            _settingsButton.clicked -= OnSettingsClicked;
             _slimeCodexButton.clicked -= OnSlimeCodexClicked;
             _monsterCodexButton.clicked -= OnMonsterCodexClicked;
         }
@@ -148,6 +166,54 @@ namespace CrossDefense.UI
             _overdriveGaugeLabel.text = snapshot.IsActive
                 ? $"OVERDRIVE {snapshot.ActiveTimeRemaining:0.0}s"
                 : snapshot.IsReady ? "READY" : string.Empty;
+        }
+
+        public void SetGoldenGoblinState(GoldenGoblinSnapshot snapshot)
+        {
+            _goldenGoblinReset?.Pause();
+            _goldenGoblinBanner.RemoveFromClassList("golden-goblin-banner--warning");
+            _goldenGoblinBanner.RemoveFromClassList("golden-goblin-banner--defeated");
+            _goldenGoblinBanner.RemoveFromClassList("golden-goblin-banner--escaped");
+            _goldenGoblinBanner.RemoveFromClassList("golden-goblin-banner--message-only");
+
+            if (snapshot.State == GoldenGoblinState.Hidden)
+            {
+                _goldenGoblinBanner.AddToClassList("hidden");
+                return;
+            }
+
+            _goldenGoblinBanner.RemoveFromClassList("hidden");
+            switch (snapshot.State)
+            {
+                case GoldenGoblinState.Warning:
+                    _goldenGoblinBanner.AddToClassList("golden-goblin-banner--warning");
+                    _goldenGoblinTitle.text = "황금 고블린이 나타납니다!";
+                    _goldenGoblinTimer.text = "준비!";
+                    break;
+                case GoldenGoblinState.Active:
+                    _goldenGoblinTitle.text = "황금 고블린 출현!";
+                    _goldenGoblinTimer.text = $"{snapshot.RemainingTime:0.0}초";
+                    break;
+                case GoldenGoblinState.Defeated:
+                    _goldenGoblinBanner.AddToClassList("golden-goblin-banner--defeated");
+                    _goldenGoblinTitle.text = "황금 고블린 처치!";
+                    _goldenGoblinTimer.text = $"+{snapshot.GoldReward:N0}G";
+                    ScheduleGoldenGoblinHide();
+                    break;
+                case GoldenGoblinState.Escaped:
+                    _goldenGoblinBanner.AddToClassList("golden-goblin-banner--escaped");
+                    _goldenGoblinBanner.AddToClassList("golden-goblin-banner--message-only");
+                    _goldenGoblinTitle.text = "황금 고블린이 도망쳤습니다";
+                    _goldenGoblinTimer.text = string.Empty;
+                    ScheduleGoldenGoblinHide();
+                    break;
+            }
+        }
+
+        void ScheduleGoldenGoblinHide()
+        {
+            _goldenGoblinReset = _goldenGoblinBanner.schedule.Execute(
+                () => _goldenGoblinBanner.AddToClassList("hidden")).StartingIn(2600);
         }
 
         public void SetGameplaySpeed(float speed)
@@ -256,5 +322,6 @@ namespace CrossDefense.UI
         void OnSlimeCodexClicked() => SlimeCodexRequested?.Invoke();
         void OnMonsterCodexClicked() => MonsterCodexRequested?.Invoke();
         void OnSpeedToggleClicked() => SpeedToggleRequested?.Invoke();
+        void OnSettingsClicked() => SettingsRequested?.Invoke();
     }
 }

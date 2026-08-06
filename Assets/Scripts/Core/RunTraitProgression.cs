@@ -307,18 +307,19 @@ namespace CrossDefense.Core
             };
         }
 
-        public SummonerRunAttackProfile BuildAttackProfile()
+        public SummonerRunAttackProfile BuildAttackProfile(SkillData baseSkill = null)
         {
-            MonsterAttribute attribute = MonsterAttribute.None;
-            int projectileCount = 1;
-            float additionalDamage = 0.65f;
-            float areaRadius = 0f;
-            int pierceCount = 1;
-            float chainDamage = 1f;
-            float slowPercent = 0f;
-            float slowDuration = 0f;
-            float dotDamage = 0f;
-            float dotDuration = 0f;
+            MonsterAttribute attribute = baseSkill?.Attribute ?? MonsterAttribute.None;
+            int projectileCount = baseSkill?.ProjectileCount ?? 1;
+            float additionalDamage =
+                baseSkill?.AdditionalProjectileDamageMultiplier ?? 0.65f;
+            float areaRadius = baseSkill?.AreaRadius ?? 0f;
+            int pierceCount = baseSkill?.PierceCount ?? 1;
+            float chainDamage = baseSkill?.ChainDamageMultiplier ?? 1f;
+            float slowPercent = baseSkill?.SlowPercent ?? 0f;
+            float slowDuration = baseSkill?.SlowDuration ?? 0f;
+            float dotDamage = baseSkill?.DamageOverTime ?? 0f;
+            float dotDuration = baseSkill?.DamageOverTimeDuration ?? 0f;
             int empoweredInterval = 0;
             float empoweredArea = 0f;
             float empoweredDamage = 1f;
@@ -328,10 +329,10 @@ namespace CrossDefense.Core
             {
                 case SummonerAttackArchetype.Fireball:
                     awakening = _catalog.Find(RunRewardEffect.AwakenFireball);
-                    attribute = MonsterAttribute.Fire;
-                    areaRadius = awakening?.PrimaryValue ?? 0.95f;
-                    dotDamage = awakening?.SecondaryValue ?? 2f;
-                    dotDuration = awakening?.TertiaryValue ?? 3f;
+                    attribute = baseSkill?.Attribute ?? MonsterAttribute.Fire;
+                    areaRadius = awakening?.PrimaryValue ?? areaRadius;
+                    dotDamage = awakening?.SecondaryValue ?? dotDamage;
+                    dotDuration = awakening?.TertiaryValue ?? dotDuration;
                     RunRewardDefinition burn = _catalog.Find(RunRewardEffect.FireBurn);
                     int burnLevel = GetLevel(RunRewardEffect.FireBurn);
                     if (burn != null && burnLevel > 0)
@@ -344,10 +345,10 @@ namespace CrossDefense.Core
                     break;
                 case SummonerAttackArchetype.IceLance:
                     awakening = _catalog.Find(RunRewardEffect.AwakenIceLance);
-                    attribute = MonsterAttribute.Ice;
-                    slowPercent = awakening?.PrimaryValue ?? 0.3f;
-                    slowDuration = awakening?.SecondaryValue ?? 2f;
-                    pierceCount = Mathf.Max(1, awakening?.Count ?? 3);
+                    attribute = baseSkill?.Attribute ?? MonsterAttribute.Ice;
+                    slowPercent = awakening?.PrimaryValue ?? slowPercent;
+                    slowDuration = awakening?.SecondaryValue ?? slowDuration;
+                    pierceCount = Mathf.Max(1, awakening?.Count ?? pierceCount);
                     RunRewardDefinition pierce = _catalog.Find(RunRewardEffect.IcePierce);
                     pierceCount += (pierce?.Count ?? 0) * GetLevel(RunRewardEffect.IcePierce);
                     RunRewardDefinition frost = _catalog.Find(RunRewardEffect.IceFrost);
@@ -360,9 +361,11 @@ namespace CrossDefense.Core
                     break;
                 case SummonerAttackArchetype.ThunderSlash:
                     awakening = _catalog.Find(RunRewardEffect.AwakenThunderSlash);
-                    attribute = MonsterAttribute.Lightning;
-                    pierceCount = 1 + Mathf.Max(0, awakening?.Count ?? 2);
-                    chainDamage = awakening?.PrimaryValue ?? 0.65f;
+                    attribute = baseSkill?.Attribute ?? MonsterAttribute.Lightning;
+                    pierceCount = awakening != null
+                        ? 1 + Mathf.Max(0, awakening.Count)
+                        : pierceCount;
+                    chainDamage = awakening?.PrimaryValue ?? chainDamage;
                     RunRewardDefinition chain = _catalog.Find(RunRewardEffect.ThunderChain);
                     int chainLevel = GetLevel(RunRewardEffect.ThunderChain);
                     if (chain != null && chainLevel > 0)

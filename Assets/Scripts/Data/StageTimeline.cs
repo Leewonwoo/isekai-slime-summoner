@@ -7,6 +7,32 @@ namespace CrossDefense.Data
     public enum StageWaveKind { Normal, Boss, Rush }
     public enum PostWaveEvent { None, Merchant }
 
+    [Serializable]
+    public sealed class GoldenGoblinSettings
+    {
+        [SerializeField] bool enabled;
+        [SerializeField] MonsterData monster;
+        [Range(0f, 1f)] [SerializeField] float appearanceChance = 0.05f;
+        [Min(1)] [SerializeField] int guaranteedInterval = 15;
+        [Min(0f)] [SerializeField] float warningLeadTime = 1.2f;
+        [Min(0.1f)] [SerializeField] float escapeDuration = 10f;
+        [Min(0)] [SerializeField] int totalGoldReward = 50;
+        [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
+        [Min(0.01f)] [SerializeField] float speedMultiplier = 1f;
+        [Min(0.1f)] [SerializeField] float sizeMultiplier = 1f;
+
+        public bool Enabled => enabled;
+        public MonsterData Monster => monster;
+        public float AppearanceChance => Mathf.Clamp01(appearanceChance);
+        public int GuaranteedInterval => Mathf.Max(1, guaranteedInterval);
+        public float WarningLeadTime => Mathf.Max(0f, warningLeadTime);
+        public float EscapeDuration => Mathf.Max(0.1f, escapeDuration);
+        public int TotalGoldReward => Mathf.Max(0, totalGoldReward);
+        public float HpMultiplier => Mathf.Max(0.01f, hpMultiplier);
+        public float SpeedMultiplier => Mathf.Max(0.01f, speedMultiplier);
+        public float SizeMultiplier => Mathf.Max(0.1f, sizeMultiplier);
+    }
+
     /// <summary>Reusable stage-wide balance knobs. Assign one profile to many stages to tune them together.</summary>
     [CreateAssetMenu(fileName = "StageBalanceProfile", menuName = "Isekai Slime Summoner/Data/Stage Balance Profile", order = 11)]
     public sealed class StageBalanceProfile : ScriptableObject
@@ -182,6 +208,7 @@ namespace CrossDefense.Data
         [Header("Stage")]
         [SerializeField] string stageId = "stage-01";
         [SerializeField] string displayName = "Stage 1";
+        [SerializeField] string nextSceneName;
         [SerializeField] StageBalanceProfile balanceProfile;
 
         [Header("Run Variation")]
@@ -193,10 +220,12 @@ namespace CrossDefense.Data
         [Min(1)] [SerializeField] int runTraitInterval = 5;
         [Min(0)] [SerializeField] int startingOverdriveGauge;
         [SerializeField] RunRewardCatalog runRewardCatalog;
+        [SerializeField] GoldenGoblinSettings goldenGoblin = new();
         [SerializeField] List<StageWave> waves = new();
 
         public string StageId => stageId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
+        public string NextSceneName => nextSceneName ?? string.Empty;
         public StageBalanceProfile BalanceProfile => balanceProfile;
         public int RandomSeed => randomSeed;
         public bool RandomizeDirectionWeights => randomizeDirectionWeights;
@@ -204,11 +233,37 @@ namespace CrossDefense.Data
         public int RunTraitInterval => Mathf.Max(1, runTraitInterval);
         public int StartingOverdriveGauge => Mathf.Max(0, startingOverdriveGauge);
         public RunRewardCatalog RunRewardCatalog => runRewardCatalog;
+        public GoldenGoblinSettings GoldenGoblin => goldenGoblin;
         public IReadOnlyList<StageWave> Waves => waves;
         public int WaveCount => waves.Count;
 
         public bool ShouldOfferRunTrait(int clearedWave) =>
             clearedWave > 0 && clearedWave % RunTraitInterval == 0;
+
+        public bool ShouldSpawnGoldenGoblin(int day, int runEventSeed)
+        {
+            if (day <= 0 || goldenGoblin == null || !goldenGoblin.Enabled ||
+                goldenGoblin.Monster == null)
+                return false;
+            if (day % goldenGoblin.GuaranteedInterval == 0)
+                return true;
+
+            int seed = GoldenGoblinRollSeed(randomSeed, runEventSeed, day);
+            return new System.Random(seed).NextDouble() < goldenGoblin.AppearanceChance;
+        }
+
+        public static int GoldenGoblinRollSeed(int stageSeed, int runEventSeed, int day)
+        {
+            unchecked
+            {
+                uint hash = 2166136261u;
+                hash = (hash ^ (uint)stageSeed) * 16777619u;
+                hash = (hash ^ (uint)runEventSeed) * 16777619u;
+                hash = (hash ^ (uint)day) * 16777619u;
+                hash = (hash ^ 0x474F4C44u) * 16777619u;
+                return (int)(hash & 0x7FFFFFFF);
+            }
+        }
 
         public bool TryGetWave(int zeroBasedIndex, out StageWave wave)
         {
@@ -225,6 +280,9 @@ namespace CrossDefense.Data
         public IEnumerable<MonsterData> EnumerateMonsters()
         {
             var seen = new HashSet<string>();
+            if (goldenGoblin?.Monster != null &&
+                seen.Add(goldenGoblin.Monster.MonsterId))
+                yield return goldenGoblin.Monster;
             foreach (StageWave wave in waves)
             {
                 if (wave?.MonsterSpawns == null) continue;
@@ -268,6 +326,12 @@ namespace CrossDefense.Data
             return GetProfileValue(profile => profile.SpeedMultiplier) * wave.SpeedMultiplier * spawn.SpeedMultiplier;
         }
 
+        public float GetGoldenGoblinHpMultiplier(StageWave wave) =>
+            GetProfileValue(profile => profile.HpMultiplier) * wave.HpMultiplier;
+
+        public float GetGoldenGoblinSpeedMultiplier(StageWave wave) =>
+            GetProfileValue(profile => profile.SpeedMultiplier) * wave.SpeedMultiplier;
+
         public float GetSpawnInterval(StageWave wave, MonsterSpawnEntry spawn)
         {
             return spawn.SpawnInterval * GetProfileValue(profile => profile.SpawnIntervalMultiplier);
@@ -304,6 +368,16 @@ namespace CrossDefense.Data
             {
                 foreach (string warning in runRewardCatalog.Validate())
                     yield return $"Run reward catalog: {warning}";
+            }
+
+            if (goldenGoblin != null && goldenGoblin.Enabled)
+            {
+                if (goldenGoblin.Monster == null)
+                    yield return "Golden goblin is enabled but has no Monster Profile.";
+                else if (goldenGoblin.Monster.Behavior != MonsterBehavior.GoldenRunner)
+                    yield return "Golden goblin Monster Profile is not configured as GoldenRunner.";
+                if (goldenGoblin.AppearanceChance < 0f || goldenGoblin.AppearanceChance > 1f)
+                    yield return "Golden goblin appearance chance must be between 0 and 1.";
             }
 
             if (waves == null || waves.Count == 0)
