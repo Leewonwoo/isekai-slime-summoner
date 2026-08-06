@@ -217,6 +217,7 @@ namespace CrossDefense.Tests.EditMode
             var source = new RunSessionSaveData
             {
                 healthCheckpointVersion = 1,
+                runEventSeed = 24680,
                 stageId = "stage-01",
                 waveIndex = 7,
                 gold = 321,
@@ -254,6 +255,7 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(restored.gold, Is.EqualTo(321));
             Assert.That(restored.summonContracts, Is.EqualTo(9));
             Assert.That(restored.coreHpRatio, Is.EqualTo(0.6f).Within(0.001f));
+            Assert.That(restored.runEventSeed, Is.EqualTo(24680));
             Assert.That(restored.summonedUnits[0].hpRatio, Is.EqualTo(0.35f).Within(0.001f));
             Assert.That(restored.runRelicIds, Is.EquivalentTo(source.runRelicIds));
             Assert.That(restored.runTraits.attackArchetype,

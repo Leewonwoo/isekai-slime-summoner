@@ -5,11 +5,15 @@
         <VisualElement name="merchant-modal-backdrop" class="modal-backdrop" picking-mode="Ignore" />
         <VisualElement name="merchant-panel" class="merchant-panel">
             <VisualElement class="modal-header">
-                <VisualElement>
-                    <Label class="modal-title" text="떠돌이 행상인" />
-                    <Label class="merchant-subtitle" text="러쉬 보너스로 필요한 물건을 준비하세요" />
-                </VisualElement>
+                <Label class="modal-title" text="떠돌이 행상인" />
                 <Button name="merchant-close-button" class="btn modal-close" text="상점 닫기" />
+            </VisualElement>
+            <VisualElement class="merchant-intro" picking-mode="Ignore">
+                <VisualElement class="merchant-character" picking-mode="Ignore" />
+                <VisualElement class="merchant-speech">
+                    <VisualElement class="merchant-speech__tail" picking-mode="Ignore" />
+                    <Label class="merchant-speech__text" text="뭣 좀 보실라우?&#10;재밌는게 있다네." />
+                </VisualElement>
             </VisualElement>
             <ScrollView name="merchant-cards" class="merchant-cards" mode="Vertical">
                 <Instance template="MerchantCard" name="merchant-card-0" />

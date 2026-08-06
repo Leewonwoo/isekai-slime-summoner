@@ -1,0 +1,97 @@
+.tutorial-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 140;
+    align-items: center;
+    justify-content: center;
+}
+
+.tutorial-overlay--hidden {
+    display: none;
+}
+
+.tutorial-overlay--blocking {
+    background-color: var(--color-modal-scrim);
+}
+
+.tutorial-card {
+    width: var(--tutorial-card-width);
+    min-height: var(--tutorial-card-min-height);
+    padding-left: var(--tutorial-card-inset);
+    padding-right: var(--tutorial-card-inset);
+    padding-top: var(--gap-xl);
+    padding-bottom: var(--gap-xl);
+    background-color: var(--color-panel);
+    background-image: url("project://database/Assets/Art/UIFrames/summon_roulette_panel_frame.png?fileID=21300000&guid=8f46bfcad52e79f46a985af0fe88b83f&type=3");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    -unity-slice-left: var(--summon-modal-frame-slice);
+    -unity-slice-top: var(--summon-modal-frame-slice);
+    -unity-slice-right: var(--summon-modal-frame-slice);
+    -unity-slice-bottom: var(--summon-modal-frame-slice);
+    -unity-slice-scale: var(--summon-modal-frame-slice-scale);
+}
+
+.tutorial-card--top {
+    position: absolute;
+    top: var(--tutorial-card-top);
+}
+
+.tutorial-card--bottom {
+    position: absolute;
+    bottom: var(--tutorial-card-bottom);
+}
+
+.tutorial-card__header {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorial-card__eyebrow {
+    color: var(--color-gold);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.tutorial-card__progress {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.tutorial-card__title {
+    margin-top: var(--gap-sm);
+    color: var(--color-text);
+    font-size: var(--font-title);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.tutorial-card__body {
+    width: 100%;
+    margin-top: var(--gap-md);
+    color: var(--color-text);
+    font-size: var(--font-caption);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.tutorial-card__actions {
+    width: 100%;
+    min-height: var(--touch-min);
+    margin-top: var(--gap-lg);
+    flex-direction: row;
+    justify-content: center;
+}
+
+.tutorial-card__button {
+    width: 46%;
+    min-height: var(--touch-min);
+    margin-left: var(--gap-sm);
+    margin-right: var(--gap-sm);
+}

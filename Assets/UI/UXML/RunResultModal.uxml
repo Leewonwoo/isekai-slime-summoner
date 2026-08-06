@@ -1,0 +1,17 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/RunResultModal.uss" />
+    <VisualElement name="run-result-overlay" class="run-result hidden">
+        <VisualElement name="run-result-backdrop" class="run-result__backdrop" picking-mode="Ignore" />
+        <VisualElement name="run-result-panel" class="run-result__panel">
+            <Label name="run-result-eyebrow" class="run-result__eyebrow" text="스테이지" />
+            <Label name="run-result-title" class="run-result__title" text="스테이지 클리어" />
+            <VisualElement class="run-result__divider" picking-mode="Ignore" />
+            <Label name="run-result-summary" class="run-result__summary" text="DAY 1까지 방어했습니다" />
+            <Label name="run-result-gold" class="run-result__gold" text="보유 금화  0 G" />
+            <VisualElement class="run-result__actions">
+                <Button name="run-result-restart-button" class="btn run-result__button" text="처음부터 다시" />
+                <Button name="run-result-continue-button" class="btn btn--primary run-result__button" text="다음 진행" />
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

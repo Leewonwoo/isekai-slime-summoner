@@ -18,12 +18,17 @@ namespace CrossDefense.Editor
         {
             EditorApplication.update -= UpdateInputDeviceForFocusedWindow;
             EditorApplication.update += UpdateInputDeviceForFocusedWindow;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
 
         static void UpdateInputDeviceForFocusedWindow()
         {
             if (!EditorApplication.isPlaying)
+            {
+                _lastFocusedWindow = null;
                 return;
+            }
 
             EditorWindow focusedWindow = EditorWindow.focusedWindow;
             if (focusedWindow == null || focusedWindow == _lastFocusedWindow)
@@ -35,6 +40,18 @@ namespace CrossDefense.Editor
                 SetNativeMouseEnabled(true);
             else if (typeName == SimulatorWindowTypeName)
                 SetNativeMouseEnabled(false);
+        }
+
+        static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            _lastFocusedWindow = null;
+            if (state != PlayModeStateChange.EnteredPlayMode)
+                return;
+
+            // Device Simulator can leave the native mouse disabled between play sessions.
+            // Enable it first, then let the focused Simulator window disable it if needed.
+            SetNativeMouseEnabled(true);
+            EditorApplication.delayCall += UpdateInputDeviceForFocusedWindow;
         }
 
         static void SetNativeMouseEnabled(bool enabled)

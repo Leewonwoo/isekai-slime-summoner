@@ -1,0 +1,17 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/TutorialOverlay.uss" />
+    <VisualElement name="tutorial-overlay" class="tutorial-overlay tutorial-overlay--hidden" picking-mode="Ignore">
+        <VisualElement name="tutorial-card" class="tutorial-card">
+            <VisualElement class="tutorial-card__header" picking-mode="Ignore">
+                <Label name="tutorial-eyebrow" class="tutorial-card__eyebrow" text="FIRST RUN" />
+                <Label name="tutorial-progress" class="tutorial-card__progress" text="1/10" />
+            </VisualElement>
+            <Label name="tutorial-title" class="tutorial-card__title" text="소환사를 지켜라" picking-mode="Ignore" />
+            <Label name="tutorial-body" class="tutorial-card__body" text="슬라임을 소환해 고블린을 막아내세요." picking-mode="Ignore" />
+            <VisualElement class="tutorial-card__actions">
+                <Button name="tutorial-skip-button" class="btn tutorial-card__button" text="건너뛰기" />
+                <Button name="tutorial-next-button" class="btn btn--primary tutorial-card__button" text="시작하기" />
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

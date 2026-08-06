@@ -40,10 +40,6 @@ namespace CrossDefense.Core
         [Min(0)] [SerializeField] int startingGold = 0;
         [Min(0)] [SerializeField] int startingSummonContracts = 4;
 
-        [Header("Defeat Restart")]
-        [SerializeField] bool restartStageOnDefeat = true;
-        [Min(0f)] [SerializeField] float defeatRestartDelay = 1.25f;
-
         [Header("Growth")]
         [SerializeField] GrowthBalanceData growthBalance;
 
@@ -52,63 +48,28 @@ namespace CrossDefense.Core
         [SerializeField] EquipmentCatalog equipmentCatalog;
         [SerializeField] RelicCatalog relicCatalog;
         [SerializeField] MerchantCatalog merchantCatalog;
+        [SerializeField] SummonUnitCatalog summonUnitCatalog;
+        [SerializeField] SkillCatalog skillCatalog;
 
         [Header("Dopamine")]
         [SerializeField] DopamineBalanceData dopamineBalance;
 
         [Header("Summon Roulette")]
         [SerializeField] List<SummonUnitData> summonPool = new();
-        [SerializeField] Sprite runtimePrototypeSummonSprite;
-        [SerializeField] Sprite runtimePrototypePunchSprite;
-        [SerializeField] Sprite runtimePrototypeWatergunSprite;
-        [SerializeField] Sprite runtimePrototypeFlameSprite;
-        [SerializeField] Sprite runtimePrototypeIceSprite;
-        [SerializeField] Sprite runtimePrototypeGreenSprite;
-        [SerializeField] Sprite runtimePrototypeBuffSprite;
-        [SerializeField] Sprite runtimePrototypeExplosionSprite;
-        [SerializeField] Sprite runtimePrototypeFreezeSprite;
-        [Header("Summon Rank Sprites")]
-        [SerializeField] Sprite runtimePrototypePunchStar2Sprite;
-        [SerializeField] Sprite runtimePrototypePunchStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeWatergunStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeWatergunStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeFlameStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeFlameStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeIceStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeIceStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeGreenStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeGreenStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeBuffStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeBuffStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeExplosionStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeExplosionStar3Sprite;
-        [SerializeField] Sprite runtimePrototypeFreezeStar2Sprite;
-        [SerializeField] Sprite runtimePrototypeFreezeStar3Sprite;
-        [SerializeField] Sprite[] runtimePrototypePunchMoveFrames;
-        [Min(1f)] [SerializeField] float runtimePrototypePunchMoveFps = 9f;
-        [SerializeField] Sprite runtimePrototypeNeutralProjectileSprite;
-        [SerializeField] Sprite runtimePrototypeFireProjectileSprite;
-        [SerializeField] Sprite runtimePrototypeIceProjectileSprite;
-        [Header("Rank Projectile Visuals")]
-        [SerializeField] Sprite[] runtimePrototypeWatergunProjectiles;
-        [SerializeField] Sprite[] runtimePrototypeFlameProjectiles;
-        [SerializeField] Sprite[] runtimePrototypeIceProjectiles;
-        [SerializeField] Sprite[] runtimePrototypeGreenProjectiles;
-        [SerializeField] Sprite[] runtimePrototypeExplosionProjectiles;
-        [SerializeField] Sprite[] runtimePrototypeFreezeProjectiles;
-        [Header("Star 3 Skill Effects")]
-        [SerializeField] Sprite runtimeStar3NeutralEffectSprite;
-        [SerializeField] Sprite runtimeStar3FireEffectSprite;
-        [SerializeField] Sprite runtimeStar3IceEffectSprite;
-        [SerializeField] Sprite runtimeStar3NatureEffectSprite;
-        [SerializeField] Sprite[] runtimeExplosionStar3EffectFrames;
         [Header("Summoner Active Skill Effects")]
+        [SerializeField] Sprite runtimeStar3NeutralEffectSprite;
         [SerializeField] Sprite runtimeMeteorProjectileSprite;
         [SerializeField] Sprite[] runtimeMeteorEffectFrames;
         [SerializeField] Sprite[] runtimeIceWallEffectFrames;
         [SerializeField] Sprite runtimeAegisEffectSprite;
         [Header("Monster Death Effect")]
         [SerializeField] Sprite[] runtimeGoblinDeathEffectFrames;
+        [Header("Audio")]
+        [SerializeField] AudioClip waveStartSfx;
+        [Range(0f, 1f)] [SerializeField] float waveStartSfxVolume = 0.8f;
+        [SerializeField] AudioClip goblinDeathSfx;
+        [SerializeField] AudioClip goblinDeathKiekSfx;
+        [Range(0f, 1f)] [SerializeField] float goblinDeathSfxVolume = 0.72f;
         [SerializeField] bool autoDeploySummonedUnits = true;
         [Range(0f, 1f)] [SerializeField] float currencyResultChance = 0.18f;
         [Range(0f, 1f)] [SerializeField] float directRankOneChance = 0.05f;
@@ -133,6 +94,7 @@ namespace CrossDefense.Core
         SpriteRenderer _summonerRenderer;
         DamageFloatingTextService _damageFloatingText;
         CombatEffectService _monsterDeathEffects;
+        AudioSource _sfxSource;
         MonsterProjectileService _monsterProjectiles;
         SummonerProgression _summonerProgression;
         PermanentTraitProgression _permanentTraits;
@@ -151,7 +113,6 @@ namespace CrossDefense.Core
         MerchantManager _merchant;
         RunSessionProgression _runSession;
         WalletProgression _wallet;
-        Coroutine _defeatRestartRoutine;
         float _coreHp;
         float _effectiveMaxCoreHp;
         float _coreShieldHp;
@@ -159,15 +120,19 @@ namespace CrossDefense.Core
         int _gold;
         int _summonContracts;
         int _resumeWaveIndex;
+        int _runEventSeed;
         bool _runSessionActive = true;
         bool _suppressRunSessionSave;
         RunPhase _phase;
         StageWave _currentWaveData;
         readonly HashSet<int> _grantedRushGoldWaves = new();
         GameplayPauseReason _gameplayPauseReasons;
+        bool _tutorialWaveHold;
         float _timeScaleBeforeGameplayPause = 1f;
         float _gameplaySpeed = NormalGameplaySpeed;
         float _nextRunHealthCheckpointTime;
+        float _nextGoldenGoblinUiTime;
+        MonsterController _activeGoldenGoblin;
 
         public StageTimeline StageTimeline => stageTimeline;
         public Transform Summoner => summoner;
@@ -209,6 +174,7 @@ namespace CrossDefense.Core
             MaxSummonSlotCapacity);
         public DamageFloatingTextService DamageFloatingText => _damageFloatingText;
         public bool IsGameplayPaused => _gameplayPauseReasons != GameplayPauseReason.None;
+        public bool IsWaveProgressionHeld => _tutorialWaveHold;
         public GameplayPauseReason GameplayPauseReasons => _gameplayPauseReasons;
         public float GameplaySpeed => _gameplaySpeed;
         public float DirectRankOneChance => Mathf.Min(0.25f,
@@ -236,9 +202,22 @@ namespace CrossDefense.Core
         public CombatProjectileService Projectiles => _summonedUnitManager?.Projectiles;
         public MonsterProjectileService MonsterProjectiles => _monsterProjectiles;
         public bool IsRunOver => _phase == RunPhase.Victory || _phase == RunPhase.Defeat;
+        public bool HasNextStage
+        {
+            get
+            {
+                string nextScene = stageTimeline?.NextSceneName;
+                if (!string.IsNullOrWhiteSpace(nextScene))
+                    return Application.CanStreamedLevelBeLoaded(nextScene);
+                Scene scene = SceneManager.GetActiveScene();
+                return scene.buildIndex >= 0 &&
+                       scene.buildIndex + 1 < SceneManager.sceneCountInBuildSettings;
+            }
+        }
         public int CurrentWave => _waveManager == null ? 0 : _waveManager.CurrentWaveIndex + 1;
         public int TotalWaves => _waveManager == null ? 0 : _waveManager.TotalWaves;
         public int LivingMonsterCount => _waveManager == null ? 0 : _waveManager.LivingMonsterCount;
+        public int RunEventSeed => _runEventSeed;
         public SpriteRenderer GameplayBackground => gameplayBackground;
         public float MonsterSpawnMinOutsideDistance => monsterSpawnMinOutsideDistance;
         public float MonsterSpawnMaxOutsideDistance => monsterSpawnMaxOutsideDistance;
@@ -254,6 +233,7 @@ namespace CrossDefense.Core
         public event Action<MonsterController> MonsterResolved;
         public event Action<bool> GameplayPauseChanged;
         public event Action<float> GameplaySpeedChanged;
+        public event Action<GoldenGoblinSnapshot> GoldenGoblinStateChanged;
 
         void OnValidate()
         {
@@ -264,7 +244,6 @@ namespace CrossDefense.Core
                 monsterSpawnMinOutsideDistance,
                 monsterSpawnMaxOutsideDistance);
             summonedUnitTargetSearchRange = Mathf.Max(0.1f, summonedUnitTargetSearchRange);
-            runtimePrototypePunchMoveFps = Mathf.Max(1f, runtimePrototypePunchMoveFps);
         }
 
         void OnDrawGizmosSelected()
@@ -317,6 +296,13 @@ namespace CrossDefense.Core
             _timeScaleBeforeGameplayPause = _gameplaySpeed;
             Time.timeScale = _gameplaySpeed;
 
+            _sfxSource = gameObject.AddComponent<AudioSource>();
+            _sfxSource.playOnAwake = false;
+            _sfxSource.loop = false;
+            _sfxSource.spatialBlend = 0f;
+            _sfxSource.volume = GameAudioSettings.EffectsVolume;
+            GameAudioSettings.ApplyStoredSettings();
+
             if (PersistentProgressReset.ConsumePendingReset())
                 Debug.Log("[CrossDefense] 예약된 영구 진행 초기화를 적용했습니다. Lv.1부터 시작합니다.", this);
 
@@ -348,8 +334,13 @@ namespace CrossDefense.Core
             }
             _summonerProgression = SummonerProgression.CreatePersistent(growthBalance);
             _summonerProgression.Changed += OnSummonerProgressionChanged;
+            if (skillCatalog == null)
+                Debug.LogError("[CrossDefense] SkillCatalog is not assigned.", this);
+            else if (!skillCatalog.Validate(out string skillCatalogError))
+                Debug.LogError($"[CrossDefense] Invalid SkillCatalog: {skillCatalogError}", this);
             _summonerSkillLoadout = SummonerSkillLoadout.CreatePersistent(
-                () => _summonerProgression.Snapshot.Level);
+                () => _summonerProgression.Snapshot.Level,
+                skillCatalog);
             _summonerBuffLoadout = SummonerBuffLoadout.CreatePersistent(
                 () => _summonerProgression.Snapshot.Level);
             if (monsterCatalog == null)
@@ -410,6 +401,9 @@ namespace CrossDefense.Core
             bool checkpointWasDefeated = hasHealthCheckpoint && checkpoint.coreHpRatio <= 0f;
             if (checkpointWasDefeated)
                 _resumeWaveIndex = 0;
+            _runEventSeed = checkpoint?.runEventSeed ?? 0;
+            if (_runEventSeed == 0 || checkpointWasDefeated)
+                _runEventSeed = CreateRunEventSeed();
             _runTraits.Restore(checkpoint?.runTraits);
             _runRelics.Restore(checkpoint?.runRelicIds, merchantCatalog.FindRelic);
             _runRelics.Changed += OnRunRelicsChanged;
@@ -475,13 +469,17 @@ namespace CrossDefense.Core
                 checkpointWasDefeated ? null : checkpoint?.summonedUnits,
                 hasHealthCheckpoint);
 
+            SummonerAttackController summonerAttack =
+                summoner != null ? summoner.GetComponent<SummonerAttackController>() : null;
+            summonerAttack?.ConfigureSkillCatalog(skillCatalog);
             _summonerSkillController = GetComponent<SummonerSkillController>();
             if (_summonerSkillController == null)
                 _summonerSkillController = gameObject.AddComponent<SummonerSkillController>();
             _summonerSkillController.Initialize(
                 this,
-                summoner != null ? summoner.GetComponent<SummonerAttackController>() : null,
+                summonerAttack,
                 _relics,
+                skillCatalog,
                 runtimeMeteorProjectileSprite,
                 runtimeMeteorEffectFrames,
                 runtimeIceWallEffectFrames,
@@ -539,6 +537,13 @@ namespace CrossDefense.Core
 
         IEnumerable<SummonUnitData> BuildSummonPool()
         {
+            if (summonUnitCatalog != null && summonUnitCatalog.Units.Count > 0)
+            {
+                foreach (SummonUnitData unit in summonUnitCatalog.Units)
+                    if (unit != null) yield return unit;
+                yield break;
+            }
+
             bool hasConfiguredUnit = false;
             foreach (var unit in summonPool)
             {
@@ -547,147 +552,9 @@ namespace CrossDefense.Core
                 yield return unit;
             }
 
-            if (hasConfiguredUnit) yield break;
-
-            var punch = SummonUnitData.CreatePrototype(
-                "punch-slime", "주먹 슬라임", SummonUnitRarity.Common, 100,
-                ResolvePrototypeSprite(runtimePrototypePunchSprite), MonsterAttribute.None, SummonAttackStyle.Melee,
-                10f, 1.15f, 0.85f, 2.8f,
-                ResolvePrototypeTint(runtimePrototypePunchSprite, new Color(0.82f, 0.9f, 1f)));
-            punch.ConfigurePrototypeRankSprites(
-                runtimePrototypePunchStar2Sprite,
-                runtimePrototypePunchStar3Sprite);
-            punch.ConfigurePrototypeAnimation(runtimePrototypePunchMoveFrames, runtimePrototypePunchMoveFps);
-            punch.ConfigurePrototypeStar3Skill(
-                "대지 강타", Star3SkillMode.SelfArea, 9f, 2.2f, 1.35f,
-                0f, 1f, 1, runtimeStar3NeutralEffectSprite, 1.25f);
-            punch.ConfigurePrototypeUnlockLevel(1);
-            yield return punch;
-
-            var watergun = SummonUnitData.CreatePrototype(
-                "watergun-slime", "물총 슬라임", SummonUnitRarity.Common, 90,
-                ResolvePrototypeSprite(runtimePrototypeWatergunSprite), MonsterAttribute.None, SummonAttackStyle.Projectile,
-                7f, 1.35f, 4.5f, 2.35f,
-                ResolvePrototypeTint(runtimePrototypeWatergunSprite, new Color(0.45f, 0.8f, 1f)));
-            watergun.ConfigurePrototypeRankSprites(
-                runtimePrototypeWatergunStar2Sprite,
-                runtimePrototypeWatergunStar3Sprite);
-            watergun.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 0f, 0f, 1);
-            watergun.ConfigurePrototypeRankProjectiles(runtimePrototypeWatergunProjectiles);
-            watergun.ConfigurePrototypeStar3Skill(
-                "초압축 수포", Star3SkillMode.PiercingProjectile, 8f, 2.3f, 0f,
-                0f, 1f, 3, runtimeStar3NeutralEffectSprite, 1.4f);
-            watergun.ConfigurePrototypeUnlockLevel(2);
-            yield return watergun;
-
-            var flame = SummonUnitData.CreatePrototype(
-                "flame-slime", "불꽃 슬라임", SummonUnitRarity.Common, 72,
-                ResolvePrototypeSprite(runtimePrototypeFlameSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
-                8f, 0.85f, 2.1f, 2.2f,
-                ResolvePrototypeTint(runtimePrototypeFlameSprite, new Color(1f, 0.42f, 0.22f)));
-            flame.ConfigurePrototypeRankSprites(
-                runtimePrototypeFlameStar2Sprite,
-                runtimePrototypeFlameStar3Sprite);
-            flame.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.15f, 0f, 0f, 0f, 0f, 1);
-            flame.ConfigurePrototypeRankProjectiles(runtimePrototypeFlameProjectiles);
-            flame.ConfigurePrototypeStar3Skill(
-                "작열핵", Star3SkillMode.TargetArea, 10f, 2f, 1.6f,
-                0f, 1f, 1, runtimeStar3FireEffectSprite, 1.45f,
-                skillDotMultiplier: 0.22f, skillDotDuration: 4f);
-            flame.ConfigurePrototypeUnlockLevel(6);
-            yield return flame;
-
-            var ice = SummonUnitData.CreatePrototype(
-                "ice-slime", "얼음 슬라임", SummonUnitRarity.Rare, 52,
-                ResolvePrototypeSprite(runtimePrototypeIceSprite), MonsterAttribute.Ice, SummonAttackStyle.Projectile,
-                5.5f, 1f, 4.2f, 2.2f,
-                ResolvePrototypeTint(runtimePrototypeIceSprite, new Color(0.55f, 0.9f, 1f)));
-            ice.ConfigurePrototypeRankSprites(
-                runtimePrototypeIceStar2Sprite,
-                runtimePrototypeIceStar3Sprite);
-            ice.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.32f, 2f, 0f, 0f, 1);
-            ice.ConfigurePrototypeRankProjectiles(runtimePrototypeIceProjectiles);
-            ice.ConfigurePrototypeStar3Skill(
-                "빙하 파동", Star3SkillMode.TargetArea, 11f, 1.6f, 1.45f,
-                0f, 1f, 1, runtimeStar3IceEffectSprite, 1.35f,
-                skillSlowPercent: 0.55f, skillSlowDuration: 3f);
-            ice.ConfigurePrototypeUnlockLevel(8);
-            yield return ice;
-
-            var green = SummonUnitData.CreatePrototype(
-                "green-slime", "초록 슬라임", SummonUnitRarity.Rare, 45,
-                ResolvePrototypeSprite(runtimePrototypeGreenSprite), MonsterAttribute.Nature, SummonAttackStyle.Projectile,
-                4.5f, 1f, 4f, 2.2f,
-                ResolvePrototypeTint(runtimePrototypeGreenSprite, new Color(0.5f, 1f, 0.48f)));
-            green.ConfigurePrototypeRankSprites(
-                runtimePrototypeGreenStar2Sprite,
-                runtimePrototypeGreenStar3Sprite);
-            green.ConfigurePrototypeEffects(runtimePrototypeNeutralProjectileSprite, 0f, 0f, 0f, 3f, 2.5f, 1);
-            green.ConfigurePrototypeRankProjectiles(runtimePrototypeGreenProjectiles);
-            green.ConfigurePrototypeStar3Skill(
-                "맹독 개화", Star3SkillMode.TargetArea, 10f, 1.2f, 1.5f,
-                0f, 1f, 1, runtimeStar3NatureEffectSprite, 1.4f,
-                skillDotMultiplier: 0.35f, skillDotDuration: 5f);
-            green.ConfigurePrototypeUnlockLevel(12);
-            yield return green;
-
-            var buff = SummonUnitData.CreatePrototype(
-                "buff-slime", "버프 슬라임", SummonUnitRarity.Rare, 38,
-                ResolvePrototypeSprite(runtimePrototypeBuffSprite), MonsterAttribute.None, SummonAttackStyle.Support,
-                0.1f, 1f, 0.8f, 2f,
-                ResolvePrototypeTint(runtimePrototypeBuffSprite, new Color(0.78f, 0.55f, 1f)));
-            buff.ConfigurePrototypeRankSprites(
-                runtimePrototypeBuffStar2Sprite,
-                runtimePrototypeBuffStar3Sprite);
-            buff.ConfigurePrototypeEffects(
-                null, 0f, 0f, 0f, 0f, 0f, 1, 0.16f, 2.8f, 2f,
-                new[] { 0.03f, 0.04f, 0.05f });
-            buff.ConfigurePrototypeStar3Skill(
-                "과충전 공명", Star3SkillMode.AuraOverdrive, 12f, 0f, 0f,
-                5f, 2f, 1, runtimeStar3NatureEffectSprite, 1.35f);
-            buff.ConfigurePrototypeUnlockLevel(16);
-            yield return buff;
-
-            var explosion = SummonUnitData.CreatePrototype(
-                "explosion-slime", "폭발 슬라임", SummonUnitRarity.Rare, 32,
-                ResolvePrototypeSprite(runtimePrototypeExplosionSprite), MonsterAttribute.Fire, SummonAttackStyle.Area,
-                15f, 0.55f, 1.1f, 2.7f,
-                ResolvePrototypeTint(runtimePrototypeExplosionSprite, new Color(1f, 0.62f, 0.3f)));
-            explosion.ConfigurePrototypeRankSprites(
-                runtimePrototypeExplosionStar2Sprite,
-                runtimePrototypeExplosionStar3Sprite);
-            explosion.ConfigurePrototypeEffects(runtimePrototypeFireProjectileSprite, 1.45f, 0f, 0f, 0f, 0f, 1);
-            explosion.ConfigurePrototypeRankProjectiles(runtimePrototypeExplosionProjectiles);
-            explosion.ConfigurePrototypeStar3Skill(
-                "대폭발", Star3SkillMode.SelfArea, 13f, 3.2f, 1.9f,
-                0f, 1f, 1, runtimeStar3FireEffectSprite, 1.75f);
-            explosion.ConfigurePrototypeStar3SkillFrames(runtimeExplosionStar3EffectFrames);
-            explosion.ConfigurePrototypeUnlockLevel(20);
-            yield return explosion;
-
-            var freeze = SummonUnitData.CreatePrototype(
-                "freeze-slime", "빙결 슬라임", SummonUnitRarity.Legendary, 18,
-                ResolvePrototypeSprite(runtimePrototypeFreezeSprite), MonsterAttribute.Ice, SummonAttackStyle.Piercing,
-                13f, 0.65f, 6f, 1.9f,
-                ResolvePrototypeTint(runtimePrototypeFreezeSprite, new Color(0.65f, 0.72f, 1f)));
-            freeze.ConfigurePrototypeRankSprites(
-                runtimePrototypeFreezeStar2Sprite,
-                runtimePrototypeFreezeStar3Sprite);
-            freeze.ConfigurePrototypeEffects(runtimePrototypeIceProjectileSprite, 0f, 0.15f, 1f, 0f, 0f, 3);
-            freeze.ConfigurePrototypeRankProjectiles(runtimePrototypeFreezeProjectiles);
-            freeze.ConfigurePrototypeStar3Skill(
-                "절대관통창", Star3SkillMode.PiercingProjectile, 14f, 2.8f, 0f,
-                0f, 1f, 6, runtimeStar3IceEffectSprite, 1.55f,
-                skillSlowPercent: 0.3f, skillSlowDuration: 2f);
-            freeze.ConfigurePrototypeUnlockLevel(24);
-            yield return freeze;
+            if (!hasConfiguredUnit)
+                Debug.LogError("SummonUnitCatalog과 임시 summonPool이 모두 비어 있습니다.", this);
         }
-
-        Sprite ResolvePrototypeSprite(Sprite configuredSprite) =>
-            configuredSprite != null ? configuredSprite : runtimePrototypeSummonSprite;
-
-        static Color ResolvePrototypeTint(Sprite configuredSprite, Color fallbackTint) =>
-            configuredSprite != null ? Color.white : fallbackTint;
 
         void Start()
         {
@@ -697,10 +564,23 @@ namespace CrossDefense.Core
 
         void Update()
         {
-            if (Time.unscaledTime < _nextRunHealthCheckpointTime)
-                return;
-            _nextRunHealthCheckpointTime = Time.unscaledTime + 1f;
-            SaveRunSession(true);
+            if (_activeGoldenGoblin != null &&
+                !_activeGoldenGoblin.IsResolved &&
+                Time.unscaledTime >= _nextGoldenGoblinUiTime)
+            {
+                _nextGoldenGoblinUiTime = Time.unscaledTime + 0.1f;
+                GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                    GoldenGoblinState.Active,
+                    _activeGoldenGoblin.GoldenEscapeTimeRemaining,
+                    _activeGoldenGoblin.GoldenEscapeDuration,
+                    stageTimeline?.GoldenGoblin?.TotalGoldReward ?? 0));
+            }
+
+            if (Time.unscaledTime >= _nextRunHealthCheckpointTime)
+            {
+                _nextRunHealthCheckpointTime = Time.unscaledTime + 1f;
+                SaveRunSession(true);
+            }
         }
 
         public void StartRun()
@@ -733,8 +613,6 @@ namespace CrossDefense.Core
             {
                 SetPhase(RunPhase.Defeat);
                 Debug.Log("[CrossDefense] 소환사 HP가 0이 되어 런이 종료되었습니다.", this);
-                if (restartStageOnDefeat && _defeatRestartRoutine == null)
-                    _defeatRestartRoutine = StartCoroutine(RestartStageAfterDefeat());
             }
         }
 
@@ -758,11 +636,62 @@ namespace CrossDefense.Core
             _monsterCodex?.Flush();
             _equipment?.Flush();
             _relics?.Flush();
+            RestoreGameplayTimeScale();
             Scene scene = SceneManager.GetActiveScene();
             if (scene.buildIndex >= 0)
                 SceneManager.LoadScene(scene.buildIndex);
             else if (!string.IsNullOrWhiteSpace(scene.name))
                 SceneManager.LoadScene(scene.name);
+        }
+
+        public void ReplayCurrentStage()
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            PrepareFreshStageTransition();
+            if (scene.buildIndex >= 0)
+                SceneManager.LoadScene(scene.buildIndex);
+            else if (!string.IsNullOrWhiteSpace(scene.name))
+                SceneManager.LoadScene(scene.name);
+        }
+
+        public bool ContinueToNextStage()
+        {
+            string nextScene = stageTimeline?.NextSceneName;
+            if (!string.IsNullOrWhiteSpace(nextScene) &&
+                Application.CanStreamedLevelBeLoaded(nextScene))
+            {
+                PrepareFreshStageTransition();
+                SceneManager.LoadScene(nextScene);
+                return true;
+            }
+
+            Scene scene = SceneManager.GetActiveScene();
+            int nextBuildIndex = scene.buildIndex + 1;
+            if (scene.buildIndex < 0 ||
+                nextBuildIndex >= SceneManager.sceneCountInBuildSettings)
+                return false;
+
+            PrepareFreshStageTransition();
+            SceneManager.LoadScene(nextBuildIndex);
+            return true;
+        }
+
+        void PrepareFreshStageTransition()
+        {
+            _runSessionActive = false;
+            _suppressRunSessionSave = true;
+            _runRelics?.Clear();
+            _runSession?.Clear(true);
+            _wallet?.Flush();
+            _summonerProgression?.Flush();
+            _permanentTraits?.Flush();
+            _summonerSkillLoadout?.Flush();
+            _summonerBuffLoadout?.Flush();
+            _growthManager?.Flush();
+            _monsterCodex?.Flush();
+            _equipment?.Flush();
+            _relics?.Flush();
+            RestoreGameplayTimeScale();
         }
 
         public void ResetAllProgressAndRestart()
@@ -1089,6 +1018,8 @@ namespace CrossDefense.Core
             }
             else
                 SaveRunSession(false);
+            if (phase == RunPhase.InWave && waveStartSfx != null && _sfxSource != null)
+                _sfxSource.PlayOneShot(waveStartSfx, waveStartSfxVolume);
             PhaseChanged?.Invoke(phase);
             Debug.Log($"[CrossDefense] Phase: {phase}", this);
         }
@@ -1118,6 +1049,15 @@ namespace CrossDefense.Core
 
             Time.timeScale = _timeScaleBeforeGameplayPause;
             GameplayPauseChanged?.Invoke(false);
+        }
+
+        public void SetTutorialWaveHold(bool held) => _tutorialWaveHold = held;
+
+        public void SetEffectsVolume(float volume)
+        {
+            GameAudioSettings.SetEffectsVolume(volume);
+            if (_sfxSource != null)
+                _sfxSource.volume = GameAudioSettings.EffectsVolume;
         }
 
         public void ToggleGameplaySpeed()
@@ -1171,9 +1111,64 @@ namespace CrossDefense.Core
             LivingMonsterCountChanged?.Invoke(livingCount);
         }
 
+        public void NotifyGoldenGoblinWarning(float warningLeadTime)
+        {
+            GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                GoldenGoblinState.Warning,
+                warningLeadTime,
+                warningLeadTime,
+                stageTimeline?.GoldenGoblin?.TotalGoldReward ?? 0));
+        }
+
+        public void NotifyGoldenGoblinSpawned(MonsterController monster)
+        {
+            _activeGoldenGoblin = monster;
+            _nextGoldenGoblinUiTime = 0f;
+            GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                GoldenGoblinState.Active,
+                monster?.GoldenEscapeTimeRemaining ?? 0f,
+                monster?.GoldenEscapeDuration ?? 0f,
+                stageTimeline?.GoldenGoblin?.TotalGoldReward ?? 0));
+        }
+
+        public void NotifyGoldenGoblinSpawnFailed()
+        {
+            _activeGoldenGoblin = null;
+            GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                GoldenGoblinState.Hidden,
+                0f,
+                0f,
+                0));
+        }
+
+        public void NotifyGoldenGoblinEscaped(MonsterController monster)
+        {
+            if (monster == null || _waveManager == null)
+                return;
+            _waveManager.NotifyMonsterResolved(monster);
+            _monsterSpawner.Release(monster);
+            MonsterResolved?.Invoke(monster);
+            if (_activeGoldenGoblin == monster)
+                _activeGoldenGoblin = null;
+            GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                GoldenGoblinState.Escaped,
+                0f,
+                0f,
+                0));
+            LivingMonsterCountChanged?.Invoke(_waveManager.LivingMonsterCount);
+        }
+
         public void NotifyMonsterDefeated(MonsterController monster, int rewardGold)
         {
             if (_waveManager == null) return;
+            bool goldenGoblin = monster != null && monster.IsGoldenRunner;
+            bool grantsRewards = monster == null || monster.GrantsDefeatRewards;
+            AudioClip deathSfx = goblinDeathSfx;
+            if (goblinDeathKiekSfx != null &&
+                (deathSfx == null || UnityEngine.Random.value < 0.5f))
+                deathSfx = goblinDeathKiekSfx;
+            if (deathSfx != null && _sfxSource != null)
+                _sfxSource.PlayOneShot(deathSfx, goblinDeathSfxVolume);
             Vector3 rewardOrigin = monster != null ? monster.transform.position : Vector3.zero;
             float deathEffectScale = monster != null
                 ? Mathf.Clamp(monster.CombatRadius * 2.4f, 0.65f, 2.4f)
@@ -1184,23 +1179,46 @@ namespace CrossDefense.Core
                 Color.white,
                 deathEffectScale,
                 18f);
-            int experienceReward = growthBalance.SummonerExperienceReward(rewardGold);
             int previousSummonerLevel = _summonerProgression?.Snapshot.Level ?? 1;
-            _summonerProgression?.AddExperience(experienceReward);
+            if (grantsRewards)
+            {
+                int experienceReward = growthBalance.SummonerExperienceReward(rewardGold);
+                _summonerProgression?.AddExperience(experienceReward);
+                _monsterCodex?.RecordKill(monster?.Data);
+                _dopamineController?.NotifyMonsterDefeated();
+            }
             int currentSummonerLevel = _summonerProgression?.Snapshot.Level ?? previousSummonerLevel;
             _combatBuild?.NotifySummonerLevelChanged(
                 previousSummonerLevel,
                 currentSummonerLevel);
-            _monsterCodex?.RecordKill(monster?.Data);
             _waveManager.NotifyMonsterDefeated(monster);
-            _dopamineController?.NotifyMonsterDefeated();
             _monsterSpawner.Release(monster);
             MonsterResolved?.Invoke(monster);
-            int goldAward = Mathf.Max(0, Mathf.RoundToInt(rewardGold * (_runRelics?.GoldMultiplier ?? 1f)));
-            if (_goldRewardFlow != null)
-                _goldRewardFlow.Present(rewardOrigin, goldAward);
-            else
-                AddGold(goldAward);
+            int baseGold = grantsRewards
+                ? goldenGoblin
+                    ? stageTimeline?.GoldenGoblin?.TotalGoldReward ?? rewardGold
+                    : rewardGold
+                : 0;
+            int goldAward = Mathf.Max(
+                0,
+                Mathf.RoundToInt(baseGold * (_runRelics?.GoldMultiplier ?? 1f)));
+            if (goldAward > 0)
+            {
+                if (_goldRewardFlow != null)
+                    _goldRewardFlow.Present(rewardOrigin, goldAward);
+                else
+                    AddGold(goldAward);
+            }
+            if (goldenGoblin)
+            {
+                if (_activeGoldenGoblin == monster)
+                    _activeGoldenGoblin = null;
+                GoldenGoblinStateChanged?.Invoke(new GoldenGoblinSnapshot(
+                    GoldenGoblinState.Defeated,
+                    0f,
+                    0f,
+                    goldAward));
+            }
             LivingMonsterCountChanged?.Invoke(_waveManager.LivingMonsterCount);
         }
 
@@ -1239,6 +1257,7 @@ namespace CrossDefense.Core
             _runSession.Save(new RunSessionSaveData
             {
                 healthCheckpointVersion = 1,
+                runEventSeed = _runEventSeed,
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = Mathf.Max(0, _resumeWaveIndex),
                 gold = Mathf.Max(0, _gold),
@@ -1259,9 +1278,11 @@ namespace CrossDefense.Core
                 return;
 
             _resumeWaveIndex = 0;
+            _runEventSeed = CreateRunEventSeed();
             _runSession.Save(new RunSessionSaveData
             {
                 healthCheckpointVersion = 1,
+                runEventSeed = _runEventSeed,
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = 0,
                 gold = Mathf.Max(0, _gold),
@@ -1390,6 +1411,12 @@ namespace CrossDefense.Core
             CoreHpChanged?.Invoke(_coreHp, nextMax);
         }
 
+        static int CreateRunEventSeed()
+        {
+            int seed = Guid.NewGuid().GetHashCode() & int.MaxValue;
+            return seed == 0 ? 1 : seed;
+        }
+
         void OnDestroy()
         {
             RestoreGameplayTimeScale();
@@ -1433,12 +1460,6 @@ namespace CrossDefense.Core
                 Destroy(_runtimeRelicCatalog);
             if (_runtimeMerchantCatalog != null)
                 Destroy(_runtimeMerchantCatalog);
-        }
-
-        IEnumerator RestartStageAfterDefeat()
-        {
-            yield return new WaitForSecondsRealtime(Mathf.Max(0f, defeatRestartDelay));
-            RestartCurrentStage();
         }
 
         void OnApplicationPause(bool paused)

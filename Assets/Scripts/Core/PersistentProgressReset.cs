@@ -20,6 +20,7 @@ namespace CrossDefense.Core
             RelicProgression.DefaultPlayerPrefsKey,
             RunSessionProgression.DefaultPlayerPrefsKey,
             WalletProgression.DefaultPlayerPrefsKey,
+            TutorialProgress.DefaultPlayerPrefsKey,
         };
 
         public static IReadOnlyList<string> PersistentKeys => Keys;

@@ -26,6 +26,10 @@ namespace CrossDefense.UI
         IReadOnlyList<SummonResult> _runRewardSummonResults;
         int _runRewardSummonResultIndex;
         int _lastUnlockLevel;
+        string _pendingPlacementUnitName;
+        int _pendingNoSpaceCount;
+        bool _pendingSpawnFailure;
+        FirstRunTutorial _tutorial;
 
         public TopHUDController TopHUD { get; private set; }
         public FieldOverlayController FieldOverlay { get; private set; }
@@ -35,6 +39,9 @@ namespace CrossDefense.UI
         public SlimeCodexModalController SlimeCodexModal { get; private set; }
         public MonsterCodexModalController MonsterCodexModal { get; private set; }
         public MerchantModalController MerchantModal { get; private set; }
+        public RunResultModalController RunResultModal { get; private set; }
+        public SettingsModalController SettingsModal { get; private set; }
+        public TutorialOverlayController TutorialOverlay { get; private set; }
 
         void OnEnable()
         {
@@ -48,11 +55,22 @@ namespace CrossDefense.UI
             SlimeCodexModal = new SlimeCodexModalController(_root);
             MonsterCodexModal = new MonsterCodexModalController(_root);
             MerchantModal = new MerchantModalController(_root);
+            RunResultModal = new RunResultModalController(_root);
+            SettingsModal = new SettingsModalController(_root);
+            TutorialOverlay = new TutorialOverlayController(_root);
+            FieldOverlay.SettingsRequested += OnSettingsRequested;
+            SettingsModal.CloseRequested += OnSettingsCloseRequested;
+            SettingsModal.EffectsVolumeChanged += OnEffectsVolumeChanged;
+            SettingsModal.TutorialReplayRequested += OnTutorialReplayRequested;
+            TutorialOverlay.ContinueRequested += OnTutorialContinueRequested;
+            TutorialOverlay.SkipRequested += OnTutorialSkipRequested;
             SummonUnitDetail.LevelUpRequested += OnSlimeLevelUpRequested;
             SlimeCodexModal.CloseRequested += OnSlimeCodexCloseRequested;
             MonsterCodexModal.CloseRequested += OnCodexCloseRequested;
             MerchantModal.CloseRequested += OnMerchantCloseRequested;
             MerchantModal.PurchaseRequested += OnMerchantPurchaseRequested;
+            RunResultModal.RestartRequested += OnRunResultRestartRequested;
+            RunResultModal.ContinueRequested += OnRunResultContinueRequested;
             _gameManager = FindFirstObjectByType<GameManager>();
             if (_gameManager == null)
                 ApplyScaffoldDemoState();
@@ -71,6 +89,12 @@ namespace CrossDefense.UI
         {
             _runRewardSummonResults = null;
             _runRewardSummonResultIndex = 0;
+            _pendingPlacementUnitName = null;
+            _pendingNoSpaceCount = 0;
+            _pendingSpawnFailure = false;
+            TutorialOverlay?.Unbind();
+            _tutorial?.Dispose();
+            _tutorial = null;
             SummonRoulette?.Dispose();
             if (_gameManager != null)
             {
@@ -79,13 +103,18 @@ namespace CrossDefense.UI
                 _gameManager.SummonContractsChanged -= OnSummonContractsChanged;
                 _gameManager.CoreHpChanged -= OnCoreHpChanged;
                 _gameManager.LivingMonsterCountChanged -= OnLivingMonsterCountChanged;
+                _gameManager.GoldenGoblinStateChanged -= OnGoldenGoblinStateChanged;
+                _gameManager.PhaseChanged -= OnPhaseChanged;
                 if (_gameManager.SummonManager != null)
                 {
                     _gameManager.SummonManager.BenchChanged -= OnBenchChanged;
                     _gameManager.SummonManager.UnitUpgradeChanged -= OnUnitUpgradeChanged;
                 }
                 if (_gameManager.SummonedUnitManager != null)
+                {
                     _gameManager.SummonedUnitManager.UnitsChanged -= OnUnitsChanged;
+                    _gameManager.SummonedUnitManager.AutoDeployFailed -= OnAutoDeployFailed;
+                }
                 if (_gameManager.Growth != null)
                     _gameManager.Growth.Changed -= OnGrowthChanged;
                 if (_gameManager.SummonerProgression != null)
@@ -118,6 +147,8 @@ namespace CrossDefense.UI
                 _gameManager.SetGameplayPause(GameplayPauseReason.SlimeCodex, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.MonsterCodex, false);
                 _gameManager.SetGameplayPause(GameplayPauseReason.Merchant, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.RunResult, false);
+                _gameManager.SetGameplayPause(GameplayPauseReason.Settings, false);
             }
             if (BottomPanel != null)
             {
@@ -137,6 +168,7 @@ namespace CrossDefense.UI
                 FieldOverlay.SkillRequested -= OnSkillRequested;
                 FieldOverlay.BuffSkillRequested -= OnBuffSkillRequested;
                 FieldOverlay.SpeedToggleRequested -= OnSpeedToggleRequested;
+                FieldOverlay.SettingsRequested -= OnSettingsRequested;
                 FieldOverlay.SlimeCodexRequested -= OnSlimeCodexRequested;
                 FieldOverlay.MonsterCodexRequested -= OnCodexRequested;
             }
@@ -165,6 +197,25 @@ namespace CrossDefense.UI
                 MerchantModal.PurchaseRequested -= OnMerchantPurchaseRequested;
                 MerchantModal.Dispose();
             }
+            if (RunResultModal != null)
+            {
+                RunResultModal.RestartRequested -= OnRunResultRestartRequested;
+                RunResultModal.ContinueRequested -= OnRunResultContinueRequested;
+                RunResultModal.Dispose();
+            }
+            if (SettingsModal != null)
+            {
+                SettingsModal.CloseRequested -= OnSettingsCloseRequested;
+                SettingsModal.EffectsVolumeChanged -= OnEffectsVolumeChanged;
+                SettingsModal.TutorialReplayRequested -= OnTutorialReplayRequested;
+                SettingsModal.Dispose();
+            }
+            if (TutorialOverlay != null)
+            {
+                TutorialOverlay.ContinueRequested -= OnTutorialContinueRequested;
+                TutorialOverlay.SkipRequested -= OnTutorialSkipRequested;
+                TutorialOverlay.Dispose();
+            }
         }
 
         void BindGameManager()
@@ -174,13 +225,18 @@ namespace CrossDefense.UI
             _gameManager.SummonContractsChanged += OnSummonContractsChanged;
             _gameManager.CoreHpChanged += OnCoreHpChanged;
             _gameManager.LivingMonsterCountChanged += OnLivingMonsterCountChanged;
+            _gameManager.GoldenGoblinStateChanged += OnGoldenGoblinStateChanged;
+            _gameManager.PhaseChanged += OnPhaseChanged;
             if (_gameManager.SummonManager != null)
             {
                 _gameManager.SummonManager.BenchChanged += OnBenchChanged;
                 _gameManager.SummonManager.UnitUpgradeChanged += OnUnitUpgradeChanged;
             }
             if (_gameManager.SummonedUnitManager != null)
+            {
                 _gameManager.SummonedUnitManager.UnitsChanged += OnUnitsChanged;
+                _gameManager.SummonedUnitManager.AutoDeployFailed += OnAutoDeployFailed;
+            }
             if (_gameManager.Growth != null)
                 _gameManager.Growth.Changed += OnGrowthChanged;
             if (_gameManager.SummonerProgression != null)
@@ -239,9 +295,12 @@ namespace CrossDefense.UI
             RefreshSkillUI();
             RefreshDopamineUI();
             FieldOverlay.SetGameplaySpeed(_gameManager.GameplaySpeed);
+            OnPhaseChanged(_gameManager.Phase);
             if (_gameManager.CombatBuild != null)
                 OnCombatBuildChanged(_gameManager.CombatBuild.Snapshot);
             TryShowTraitChoice();
+            _tutorial = new FirstRunTutorial(_gameManager);
+            TutorialOverlay?.Bind(_tutorial);
         }
 
         void OnWaveChanged(int current, int total)
@@ -250,8 +309,94 @@ namespace CrossDefense.UI
             FieldOverlay.SetWave(current, _gameManager.LivingMonsterCount);
         }
         void OnLivingMonsterCountChanged(int count) => FieldOverlay.SetWave(_gameManager.CurrentWave, count);
+        void OnAutoDeployFailed(
+            SummonUnitInstance instance,
+            AutoDeployFailureReason reason)
+        {
+            string unitName = instance?.Unit?.DisplayName;
+            if (reason == AutoDeployFailureReason.NoValidPosition)
+            {
+                _pendingNoSpaceCount++;
+                _pendingPlacementUnitName = unitName;
+            }
+            else if (reason == AutoDeployFailureReason.SpawnFailed)
+            {
+                _pendingSpawnFailure = true;
+                _pendingPlacementUnitName = unitName;
+            }
+            TryShowPendingPlacementNotice();
+        }
+
+        void TryShowPendingPlacementNotice()
+        {
+            if (BottomPanel?.IsSummonAnimating == true ||
+                SummonRoulette?.IsPlaying == true)
+                return;
+
+            if (_pendingNoSpaceCount > 0)
+            {
+                FieldOverlay?.ShowToast(
+                    SummonPlacementFeedback.BuildNoSpaceMessage(
+                        _pendingPlacementUnitName,
+                        _pendingNoSpaceCount));
+            }
+            else if (_pendingSpawnFailure)
+            {
+                FieldOverlay?.ShowToast(
+                    SummonPlacementFeedback.BuildSpawnFailureMessage(
+                        _pendingPlacementUnitName));
+            }
+
+            _pendingPlacementUnitName = null;
+            _pendingNoSpaceCount = 0;
+            _pendingSpawnFailure = false;
+        }
+        void OnGoldenGoblinStateChanged(GoldenGoblinSnapshot snapshot) =>
+            FieldOverlay?.SetGoldenGoblinState(snapshot);
         void OnSpeedToggleRequested() => _gameManager?.ToggleGameplaySpeed();
         void OnGameplaySpeedChanged(float speed) => FieldOverlay?.SetGameplaySpeed(speed);
+
+        void OnPhaseChanged(RunPhase phase)
+        {
+            bool showResult = phase is RunPhase.Victory or RunPhase.Defeat;
+            _gameManager?.SetGameplayPause(GameplayPauseReason.RunResult, showResult);
+            if (!showResult)
+            {
+                RunResultModal?.Hide();
+                return;
+            }
+
+            RunResultModal?.Show(
+                phase,
+                _gameManager?.StageTimeline?.DisplayName ?? "스테이지",
+                _gameManager?.CurrentWave ?? 1,
+                _gameManager?.TotalWaves ?? 1,
+                _gameManager?.Gold ?? 0,
+                _gameManager?.HasNextStage ?? false);
+        }
+
+        void OnRunResultRestartRequested()
+        {
+            if (_gameManager == null)
+                return;
+            RunPhase phase = _gameManager.Phase;
+            RunResultModal?.Hide();
+            _gameManager.SetGameplayPause(GameplayPauseReason.RunResult, false);
+            if (phase == RunPhase.Defeat)
+                _gameManager.RestartCurrentStage();
+            else
+                _gameManager.ReplayCurrentStage();
+        }
+
+        void OnRunResultContinueRequested()
+        {
+            if (_gameManager == null)
+                return;
+            RunResultModal?.Hide();
+            _gameManager.SetGameplayPause(GameplayPauseReason.RunResult, false);
+            if (!_gameManager.ContinueToNextStage())
+                OnPhaseChanged(_gameManager.Phase);
+        }
         void OnComboCashedOut(int combo, float damage, int gold) =>
             FieldOverlay?.ShowUnlockToast(
                 $"{combo:N0} COMBO 정산!\n전체 피해 {damage:N0} · 골드 +{gold:N0}");
@@ -307,6 +452,30 @@ namespace CrossDefense.UI
         void OnSkillRequested() => _gameManager?.SummonerSkills?.PressSkillButton();
         void OnBuffSkillRequested(int slotIndex) =>
             _gameManager?.SummonerBuffs?.PressSkillButton(slotIndex);
+
+        void OnSettingsRequested()
+        {
+            SettingsModal?.Show();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.Settings, true);
+        }
+
+        void OnSettingsCloseRequested()
+        {
+            SettingsModal?.Hide();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.Settings, false);
+        }
+
+        void OnEffectsVolumeChanged(float volume) =>
+            _gameManager?.SetEffectsVolume(volume);
+
+        void OnTutorialContinueRequested() => _tutorial?.Continue();
+        void OnTutorialSkipRequested() => _tutorial?.Skip();
+
+        void OnTutorialReplayRequested()
+        {
+            TutorialProgress.RequestReplay();
+            FieldOverlay?.ShowToast("다음 도전에서 첫 런 튜토리얼을 다시 시작합니다.");
+        }
 
         void OnSlimeCodexRequested()
         {
@@ -732,6 +901,7 @@ namespace CrossDefense.UI
             _runRewardSummonResultIndex = 0;
             BottomPanel?.SetSummonAnimationState(false);
             _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+            TryShowPendingPlacementNotice();
             if (isActiveAndEnabled)
                 StartCoroutine(ShowNextTraitChoiceNextFrame());
         }
@@ -833,6 +1003,7 @@ namespace CrossDefense.UI
                     {
                         BottomPanel?.SetSummonAnimationState(false);
                         _gameManager?.SetGameplayPause(GameplayPauseReason.SummonRoulette, false);
+                        TryShowPendingPlacementNotice();
                     }
                 });
         }
@@ -865,6 +1036,8 @@ namespace CrossDefense.UI
             // extend through the unsafe top and bottom screen regions.
             ExtendModalBackdrop(root.Q<VisualElement>("summon-modal-backdrop"), topInset, bottomInset);
             ExtendModalBackdrop(root.Q<VisualElement>("merchant-modal-backdrop"), topInset, bottomInset);
+            ExtendModalBackdrop(root.Q<VisualElement>("run-result-backdrop"), topInset, bottomInset);
+            ExtendModalBackdrop(root.Q<VisualElement>("settings-backdrop"), topInset, bottomInset);
         }
 
         static void ExtendModalBackdrop(VisualElement backdrop, float topInset, float bottomInset)
@@ -877,7 +1050,9 @@ namespace CrossDefense.UI
         void Update()
         {
             if (Keyboard.current?.escapeKey.wasPressedThisFrame != true) return;
-            if (SlimeCodexModal?.IsVisible == true)
+            if (SettingsModal?.IsVisible == true)
+                OnSettingsCloseRequested();
+            else if (SlimeCodexModal?.IsVisible == true)
                 OnSlimeCodexCloseRequested();
             else if (MonsterCodexModal?.IsVisible == true)
                 OnCodexCloseRequested();

@@ -7,6 +7,9 @@
     <Template name="SlimeCodexModal" src="/Assets/UI/UXML/SlimeCodexModal.uxml" />
     <Template name="MonsterCodexModal" src="/Assets/UI/UXML/MonsterCodexModal.uxml" />
     <Template name="MerchantModal" src="/Assets/UI/UXML/MerchantModal.uxml" />
+    <Template name="RunResultModal" src="/Assets/UI/UXML/RunResultModal.uxml" />
+    <Template name="SettingsModal" src="/Assets/UI/UXML/SettingsModal.uxml" />
+    <Template name="TutorialOverlay" src="/Assets/UI/UXML/TutorialOverlay.uxml" />
     <VisualElement name="root" class="root" picking-mode="Ignore">
         <VisualElement name="zone-field" class="zone-field" picking-mode="Ignore">
             <Instance template="FieldOverlay" name="field-overlay" picking-mode="Ignore" />
@@ -72,5 +75,8 @@
         <Instance template="SlimeCodexModal" name="slime-codex-modal" class="modal-host" picking-mode="Ignore" />
         <Instance template="MonsterCodexModal" name="monster-codex-modal" class="modal-host" picking-mode="Ignore" />
         <Instance template="MerchantModal" name="merchant-modal" class="modal-host" picking-mode="Ignore" />
+        <Instance template="RunResultModal" name="run-result-modal" class="modal-host" picking-mode="Ignore" />
+        <Instance template="SettingsModal" name="settings-modal" class="modal-host" picking-mode="Ignore" />
+        <Instance template="TutorialOverlay" name="tutorial-overlay-host" class="modal-host" picking-mode="Ignore" />
     </VisualElement>
 </UXML>

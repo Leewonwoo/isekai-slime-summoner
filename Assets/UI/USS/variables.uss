@@ -127,6 +127,11 @@
     --unit-detail-stat-row-height: 72px;
     --unit-detail-content-inset: 72px;
     --unit-detail-upgrade-button-width: 220px;
+    --tutorial-card-width: 900px;
+    --tutorial-card-min-height: 300px;
+    --tutorial-card-inset: 48px;
+    --tutorial-card-top: 220px;
+    --tutorial-card-bottom: 80px;
     --summon-modal-width: 84%;
     --summon-modal-height: 52%;
     --summon-modal-content-inset: 72px;

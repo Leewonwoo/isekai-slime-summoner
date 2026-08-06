@@ -62,9 +62,67 @@
     padding-bottom: 64px;
 }
 
-.merchant-subtitle {
-    color: var(--color-text-dim);
+.merchant-intro {
+    height: 250px;
+    min-height: 250px;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    margin-top: -8px;
+    margin-bottom: var(--gap-md);
+    padding-left: var(--gap-md);
+    padding-right: var(--gap-lg);
+}
+
+.merchant-character {
+    width: 210px;
+    height: 250px;
+    flex-shrink: 0;
+    margin-right: var(--gap-lg);
+    background-image: url("project://database/Assets/Art/UICharacters/merchant_wandering_pixel.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: top;
+}
+
+.merchant-speech {
+    position: relative;
+    min-width: 0;
+    min-height: 132px;
+    flex-grow: 1;
+    justify-content: center;
+    background-color: rgb(224, 207, 165);
+    border-left-width: 4px;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+    border-color: rgb(93, 61, 36);
+    border-radius: var(--radius-md);
+    padding-left: var(--gap-xl);
+    padding-right: var(--gap-lg);
+    padding-top: var(--gap-md);
+    padding-bottom: var(--gap-md);
+}
+
+.merchant-speech__tail {
+    position: absolute;
+    left: -16px;
+    top: 48px;
+    width: 28px;
+    height: 28px;
+    rotate: 45deg;
+    background-color: rgb(224, 207, 165);
+    border-left-width: 4px;
+    border-bottom-width: 4px;
+    border-color: rgb(93, 61, 36);
+}
+
+.merchant-speech__text {
+    color: var(--color-ink);
     font-size: var(--font-caption);
+    -unity-font-style: bold;
+    white-space: normal;
 }
 
 .merchant-cards {

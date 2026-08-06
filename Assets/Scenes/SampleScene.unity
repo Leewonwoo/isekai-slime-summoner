@@ -378,6 +378,139 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &541672597
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 100010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_Name
+      value: MasterAudio
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400010, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: persistBetweenScenes
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].isExpanded
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].playlistName
+      value: Misty Goblin Grove BGM
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].crossFadeTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].songTransitionType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].newMetadataPropName
+      value: PropertyName
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].newMetadataPropType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].newMetadataPropRequired
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].clip
+      value:
+      objectReference: {fileID: 8300000, guid: feb3ad97692a61e44ab8f448e82185eb, type: 3}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].alias
+      value: Misty Goblin Grove
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].pitch
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].isLoop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].volume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].songName
+      value: Misty Goblin Grove
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].isChecked
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].isExpanded
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
+      propertyPath: musicPlaylists.Array.data[0].MusicSettings.Array.data[0].metadataExpanded
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 22734cefa1ebd4708a3a96afe4eb03ba, type: 3}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -567,21 +700,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71dce296217d4246aaeb91e4a43d8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrossDefense.Units.SummonerAttackController
-  energyBoltSprite: {fileID: 21300000, guid: 8ac37c39a193ddf5aa93239e788a0b80, type: 3}
-  fireballSprite: {fileID: 21300000, guid: 05fe82a7604717789a0fc6b6cba6d228, type: 3}
-  iceballSprite: {fileID: 21300000, guid: 3bf397a35a02c10c805a2aa1143a2745, type: 3}
-  lightningOrbSprite: {fileID: 21300000, guid: 0fd81a6db1870bba0a73c068aa6d0857, type: 3}
-  attackDamage: 12
-  attacksPerSecond: 1.25
-  attackRange: 4.5
-  projectileSpeed: 10
-  clickAttackDamage: 18
-  clickAttacksPerSecond: 2
-  clickHitRadius: 0.65
   firePosition: {fileID: 115237141}
   spawnOffset: 0.4
-  projectileScale: 0.65
-  volleyShotDelay: 0.09
   idleFrames:
   - {fileID: 3707358749038027266, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
   - {fileID: -1558088450625946277, guid: 6fa6437dea2cfd24885d336cf6810560, type: 3}
@@ -604,6 +724,75 @@ MonoBehaviour:
   - {fileID: -1077825658140382148, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
   - {fileID: -4816822272668904797, guid: e43696a0e87d4654a8660e0ad450df08, type: 3}
   attackAnimationFps: 18
+--- !u!1001 &1169747514
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 100000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_Name
+      value: PlaylistController_BGM
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8200000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8200002, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
+      propertyPath: startPlaylistName
+      value: Misty Goblin Grove BGM
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8d628ddcfa7a21e49a762de30fc7e9dd, type: 3}
 --- !u!1 &1477278019
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,85 +1083,11 @@ MonoBehaviour:
   equipmentCatalog: {fileID: 11400000, guid: 160b1295ceedced46a7672a1ad4980c5, type: 2}
   relicCatalog: {fileID: 11400000, guid: d50ab39155c097a4f98a325200709b62, type: 2}
   merchantCatalog: {fileID: 11400000, guid: 42c51469fd318ea4e8a95aabc9f681bf, type: 2}
+  summonUnitCatalog: {fileID: 11400000, guid: c43ba56b29a501a48bff332e16075dbe, type: 2}
+  skillCatalog: {fileID: 11400000, guid: f434b9cf99fe845478c51031a5106c58, type: 2}
   dopamineBalance: {fileID: 11400000, guid: f2cdf33cafc6413db89b0df4a54698f6, type: 2}
   summonPool: []
-  runtimePrototypeSummonSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
-  runtimePrototypePunchSprite: {fileID: 2544755494224504812, guid: 079bcaf64da69474c8f0882b9d6652da, type: 3}
-  runtimePrototypeWatergunSprite: {fileID: 3013684235858901341, guid: 6bf5318b12187c1408a1167138587ddc, type: 3}
-  runtimePrototypeFlameSprite: {fileID: -691601476373139064, guid: 6a402657aa9940a48a134550381faf69, type: 3}
-  runtimePrototypeIceSprite: {fileID: -8070034397944155849, guid: 8c5dab60b85281346a2c232e0f27447f, type: 3}
-  runtimePrototypeGreenSprite: {fileID: 4378471494569808391, guid: 7bb910d4497f35c4d8b1864e16c2efae, type: 3}
-  runtimePrototypeBuffSprite: {fileID: -5001199551054921638, guid: cc2a80b8cf1735f428110cfa16a39960, type: 3}
-  runtimePrototypeExplosionSprite: {fileID: 2972943333547804390, guid: 36ba449a61b5a0e4fa345b09a419e5b5, type: 3}
-  runtimePrototypeFreezeSprite: {fileID: -1717748923568280147, guid: cb054c90c6825fa4fbc44be9e9829bd5, type: 3}
-  runtimePrototypePunchStar2Sprite: {fileID: -8471300686470700153, guid: 174f9dc2cdcc16a4780224618481b994, type: 3}
-  runtimePrototypePunchStar3Sprite: {fileID: 4348971295642622103, guid: effdbb44b3e945d438dbc3cf9de7bb1c, type: 3}
-  runtimePrototypeWatergunStar2Sprite: {fileID: 1277703799920675386, guid: 4fe0142ee72ef5e4593974846c93aa03, type: 3}
-  runtimePrototypeWatergunStar3Sprite: {fileID: -5821185378810581525, guid: b0a931a00f8411c468619c1146743beb, type: 3}
-  runtimePrototypeFlameStar2Sprite: {fileID: -7953014075361521522, guid: ad2d5d3e7223ec24287998322330e581, type: 3}
-  runtimePrototypeFlameStar3Sprite: {fileID: -7953014075361521522, guid: 078c4e89a3f64dd9bbe4dd12af22819f, type: 3}
-  runtimePrototypeIceStar2Sprite: {fileID: 489473718398621151, guid: bcf77db6e0aa3bd47840ff0d48f4f4fa, type: 3}
-  runtimePrototypeIceStar3Sprite: {fileID: 489473718398621151, guid: 854b09c6699b4f4b9e4c37360d6b707f, type: 3}
-  runtimePrototypeGreenStar2Sprite: {fileID: 2661672210690482365, guid: c7c6d9f0244982c46bab9b76d733e41e, type: 3}
-  runtimePrototypeGreenStar3Sprite: {fileID: 2661672210690482365, guid: 035d341ab0e644d290fafc851221beae, type: 3}
-  runtimePrototypeBuffStar2Sprite: {fileID: 3674041893574434095, guid: 48f8cc14b52ccb04ab72f9596f06e4a4, type: 3}
-  runtimePrototypeBuffStar3Sprite: {fileID: 3674041893574434095, guid: 703ad444ab8841e1bd412b8e45466119, type: 3}
-  runtimePrototypeExplosionStar2Sprite: {fileID: -7498299652913170685, guid: e822669d3e304db429e22d6f79691ec1, type: 3}
-  runtimePrototypeExplosionStar3Sprite: {fileID: -7498299652913170685, guid: 51154109195b418589014b71b5c0ab9e, type: 3}
-  runtimePrototypeFreezeStar2Sprite: {fileID: -3175882626414296443, guid: 93f2ba2bf76b93b43b6b77c13039cf8c, type: 3}
-  runtimePrototypeFreezeStar3Sprite: {fileID: -3175882626414296443, guid: 4cf4fe03e40b45d183fb10a1dd1621ae, type: 3}
-  runtimePrototypePunchMoveFrames:
-  - {fileID: 7078453641938519378, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -199204680781642534, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -8373758754401639871, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -7717853021907792319, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -4450605685356787060, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -1192736157123674389, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -5395799091464134987, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: 4678997526071849050, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  - {fileID: -2618907496058387109, guid: a3de95caf05672846b02d8fb27eadfc2, type: 3}
-  runtimePrototypePunchMoveFps: 9
-  runtimePrototypeNeutralProjectileSprite: {fileID: 21300000, guid: ff37767346c8ea1459355e522a28a9e6, type: 3}
-  runtimePrototypeFireProjectileSprite: {fileID: 21300000, guid: 9b10f9039114ed04887effab2e3c8366, type: 3}
-  runtimePrototypeIceProjectileSprite: {fileID: 21300000, guid: 29957a0c4873f94419ca165de9f1ceae, type: 3}
-  runtimePrototypeWatergunProjectiles:
-  - {fileID: 21300000, guid: 3c93c79d277f5b07b67fa9847a24660c, type: 3}
-  - {fileID: 21300000, guid: 274a9a85825e403915de4f5490e54fd7, type: 3}
-  - {fileID: 21300000, guid: 446276dd91cb2f170d4946f749aaadac, type: 3}
-  runtimePrototypeFlameProjectiles:
-  - {fileID: 21300000, guid: a07307dd32275e536f0014c3d2b5ead1, type: 3}
-  - {fileID: 21300000, guid: 537597e69b45d3773bd7794bf7004fac, type: 3}
-  - {fileID: 21300000, guid: 6690388f7dd943011ca4ac87d049b1e6, type: 3}
-  runtimePrototypeIceProjectiles:
-  - {fileID: 21300000, guid: a2e290196d89a8be4190e015e8a3acad, type: 3}
-  - {fileID: 21300000, guid: 0a76c5efbfd4e5b9705ac05df661abf7, type: 3}
-  - {fileID: 21300000, guid: f2eecc840c1d5bce26248b9350cd8b63, type: 3}
-  runtimePrototypeGreenProjectiles:
-  - {fileID: 21300000, guid: abe27db89f281fec9e4a438416f4a04d, type: 3}
-  - {fileID: 21300000, guid: efbed0d60e7559d1e787f73e04f5c498, type: 3}
-  - {fileID: 21300000, guid: 46827fd31b8e4c354515f67a4718fa99, type: 3}
-  runtimePrototypeExplosionProjectiles:
-  - {fileID: 21300000, guid: be0be3f2f8c401f24d6411b536ea50ba, type: 3}
-  - {fileID: 21300000, guid: c43ef934d8db8cc06d66eaee51eed938, type: 3}
-  - {fileID: 21300000, guid: e818c6b4199269fd2e69ef549ef4f7ac, type: 3}
-  runtimePrototypeFreezeProjectiles:
-  - {fileID: 21300000, guid: 014d9d8edfc9ed9d1d54e6bdc56233db, type: 3}
-  - {fileID: 21300000, guid: f5f1f08568cfc52242bd6728ff38a7ab, type: 3}
-  - {fileID: 21300000, guid: d38ed3b8e2c064fb0441bfff15ceb7f5, type: 3}
   runtimeStar3NeutralEffectSprite: {fileID: 21300000, guid: 75c327f500c92db4896b34b6e87ea26e, type: 3}
-  runtimeStar3FireEffectSprite: {fileID: 21300000, guid: 005bf71e05b73234aac7628c33170fb7, type: 3}
-  runtimeStar3IceEffectSprite: {fileID: 21300000, guid: 03938096e57292747a2d79a981f20927, type: 3}
-  runtimeStar3NatureEffectSprite: {fileID: 21300000, guid: 2bb778f6eaa37a3468357c863f80bff1, type: 3}
-  runtimeExplosionStar3EffectFrames:
-  - {fileID: 286354783571157652, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: -8372516123535416995, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: 4032882372213062139, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: -2520915888631964272, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: -3042429207339010407, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: 4439341176720341408, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: 7069292609803652604, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: -8856983450250083333, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
-  - {fileID: -7659473598035362436, guid: af0e94057f4e0ce4da9a6a964de2b927, type: 3}
   runtimeMeteorProjectileSprite: {fileID: 21300000, guid: 1826d8076d6cd2647a8d737154360b6c, type: 3}
   runtimeMeteorEffectFrames:
   - {fileID: 3341097193763820795, guid: cf57b7682107e184e9bf5bfb91fd2c25, type: 3}
@@ -1005,6 +1120,11 @@ MonoBehaviour:
   - {fileID: -8090327015114928730, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
   - {fileID: 5998035425806528506, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
   - {fileID: -3289128554310958305, guid: c3c7a84d921db0a4b82653f4d3f4048a, type: 3}
+  waveStartSfx: {fileID: 8300000, guid: b56f9451e8bd3f64a806632c8508680b, type: 3}
+  waveStartSfxVolume: 0.8
+  goblinDeathSfx: {fileID: 8300000, guid: d2d3ac100c98713468a29119bbdee629, type: 3}
+  goblinDeathKiekSfx: {fileID: 8300000, guid: 462710e2d71ccef418f6c3bf7bd3bd2d, type: 3}
+  goblinDeathSfxVolume: 0.72
   autoDeploySummonedUnits: 1
   currencyResultChance: 0.18
   directRankOneChance: 0.05
@@ -1019,3 +1139,5 @@ SceneRoots:
   - {fileID: 1836915222}
   - {fileID: 1477278022}
   - {fileID: 1839978296}
+  - {fileID: 541672597}
+  - {fileID: 1169747514}

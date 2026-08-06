@@ -101,6 +101,7 @@ namespace CrossDefense.Editor
             VisualElement slimeCodexHost = uiRoot.Q<VisualElement>("slime-codex-modal");
             VisualElement codexHost = uiRoot.Q<VisualElement>("monster-codex-modal");
             VisualElement merchantHost = uiRoot.Q<VisualElement>("merchant-modal");
+            VisualElement runResultHost = uiRoot.Q<VisualElement>("run-result-modal");
             VisualElement slimeCodexOverlay = uiRoot.Q<VisualElement>("slime-codex-overlay");
             VisualElement codexOverlay = uiRoot.Q<VisualElement>("codex-overlay");
             VisualElement merchantOverlay = uiRoot.Q<VisualElement>("merchant-overlay");
@@ -111,9 +112,12 @@ namespace CrossDefense.Editor
                 throw new InvalidOperationException("Codex modal host does not cover the screen.");
             if (merchantHost == null || merchantHost.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Merchant modal host does not cover the screen.");
+            if (runResultHost == null || runResultHost.resolvedStyle.height < rootHeight * 0.9f)
+                throw new InvalidOperationException("Run result modal host does not cover the screen.");
             if (slimeCodexHost.pickingMode != PickingMode.Ignore ||
                 codexHost.pickingMode != PickingMode.Ignore ||
-                merchantHost.pickingMode != PickingMode.Ignore)
+                merchantHost.pickingMode != PickingMode.Ignore ||
+                runResultHost.pickingMode != PickingMode.Ignore)
                 throw new InvalidOperationException("A closed modal host is blocking screen input.");
             if (slimeCodexOverlay == null || slimeCodexOverlay.resolvedStyle.height < rootHeight * 0.9f)
                 throw new InvalidOperationException("Closed slime codex overlay lost its screen layout.");

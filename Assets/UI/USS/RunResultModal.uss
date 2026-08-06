@@ -1,0 +1,101 @@
+.run-result {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.run-result__backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-modal-scrim);
+}
+
+.run-result__panel {
+    width: 820px;
+    min-height: 720px;
+    align-items: center;
+    justify-content: center;
+    padding-left: 72px;
+    padding-right: 72px;
+    padding-top: 64px;
+    padding-bottom: 64px;
+    background-color: var(--color-panel-deep);
+    border-width: 6px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.run-result__panel--victory {
+    border-color: var(--color-gold);
+}
+
+.run-result__panel--defeat {
+    border-color: var(--color-danger);
+}
+
+.run-result__eyebrow {
+    color: var(--color-text-dim);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.run-result__title {
+    margin-top: var(--gap-md);
+    color: var(--color-text);
+    font-size: var(--font-display);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.run-result__panel--victory .run-result__title {
+    color: var(--color-gold);
+}
+
+.run-result__panel--defeat .run-result__title {
+    color: var(--color-danger);
+}
+
+.run-result__divider {
+    width: 72%;
+    height: 4px;
+    margin-top: var(--gap-xl);
+    margin-bottom: var(--gap-xl);
+    background-color: var(--color-border);
+}
+
+.run-result__summary {
+    min-height: 120px;
+    color: var(--color-text);
+    font-size: var(--font-body);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.run-result__gold {
+    margin-top: var(--gap-lg);
+    color: var(--color-gold);
+    font-size: var(--font-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.run-result__actions {
+    width: 100%;
+    margin-top: 56px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.run-result__button {
+    min-width: 300px;
+    margin-left: var(--gap-sm);
+    margin-right: var(--gap-sm);
+}

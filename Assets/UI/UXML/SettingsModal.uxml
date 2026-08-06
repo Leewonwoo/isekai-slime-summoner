@@ -1,0 +1,37 @@
+<UXML xmlns="UnityEngine.UIElements">
+    <Style src="/Assets/UI/USS/SettingsModal.uss" />
+    <VisualElement name="settings-overlay" class="settings-modal hidden">
+        <VisualElement name="settings-backdrop" class="settings-modal__backdrop" picking-mode="Ignore" />
+        <VisualElement name="settings-panel" class="settings-modal__panel">
+            <Button name="settings-close-button" class="settings-modal__close" text="×" tooltip="닫기" />
+            <Label class="settings-modal__eyebrow" text="GAME OPTIONS" picking-mode="Ignore" />
+            <Label class="settings-modal__title" text="설정" picking-mode="Ignore" />
+            <VisualElement class="settings-modal__divider" picking-mode="Ignore" />
+            <Label class="settings-modal__section-title" text="사운드" picking-mode="Ignore" />
+            <VisualElement class="settings-modal__audio-list">
+                <VisualElement class="settings-modal__audio-row">
+                    <VisualElement class="settings-modal__audio-copy" picking-mode="Ignore">
+                        <Label class="settings-modal__audio-name" text="배경 음악" />
+                        <Label class="settings-modal__audio-description" text="게임 음악 크기" />
+                    </VisualElement>
+                    <Slider name="settings-music-slider" class="settings-modal__slider" low-value="0" high-value="100" value="80" show-input-field="false" />
+                    <Label name="settings-music-value" class="settings-modal__value" text="80%" picking-mode="Ignore" />
+                </VisualElement>
+                <VisualElement class="settings-modal__audio-row">
+                    <VisualElement class="settings-modal__audio-copy" picking-mode="Ignore">
+                        <Label class="settings-modal__audio-name" text="효과음" />
+                        <Label class="settings-modal__audio-description" text="전투 및 버튼 효과음" />
+                    </VisualElement>
+                    <Slider name="settings-effects-slider" class="settings-modal__slider" low-value="0" high-value="100" value="80" show-input-field="false" />
+                    <Label name="settings-effects-value" class="settings-modal__value" text="80%" picking-mode="Ignore" />
+                </VisualElement>
+            </VisualElement>
+            <Label class="settings-modal__hint" text="음량은 변경 즉시 적용됩니다." picking-mode="Ignore" />
+            <Button name="settings-tutorial-button" class="btn settings-modal__tutorial-button" text="다음 도전에서 튜토리얼 다시 보기" />
+            <VisualElement class="settings-modal__actions">
+                <Button name="settings-reset-button" class="btn settings-modal__button settings-modal__button--reset" text="기본값" />
+                <Button name="settings-continue-button" class="btn btn--primary settings-modal__button" text="계속하기" />
+            </VisualElement>
+        </VisualElement>
+    </VisualElement>
+</UXML>

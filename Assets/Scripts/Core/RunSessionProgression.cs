@@ -18,6 +18,7 @@ namespace CrossDefense.Core
     {
         public int version = 1;
         public int healthCheckpointVersion;
+        public int runEventSeed;
         public string stageId;
         public int waveIndex;
         public int gold;

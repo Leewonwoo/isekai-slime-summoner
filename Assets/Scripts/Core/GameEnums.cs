@@ -52,5 +52,8 @@ namespace CrossDefense
         MonsterCodex = 1 << 2,
         Merchant = 1 << 3,
         SlimeCodex = 1 << 4,
+        RunResult = 1 << 5,
+        Settings = 1 << 6,
+        Tutorial = 1 << 7,
     }
 }
