@@ -8,6 +8,8 @@ NAN 2026 (NHN Game × AI Hackathon) 사전 과제를 위해 개발 중인 1인 U
 
 ![Isekai Slime Summoner 플레이 화면](Assets/Screenshots/dopamine_hud_playmode.png)
 
+웹 플레이: <https://leewonwoo.github.io/isekai-slime-summoner/>
+
 ## 핵심 플레이
 
 - 용병 계약서를 사용해 해금된 8종의 슬라임 중 하나를 무작위로 소환합니다.

@@ -7,6 +7,7 @@
 
 | 날짜 | 무엇을 | 프롬프트/지시 요지 | 결과물 |
 |---|---|---|---|
+| 2026-08-06 | Codex | GitHub Pages용 Unity WebGL 빌드·배포 구축 | Android 기본 타깃을 유지한 채 명령줄에서만 WebGL로 전환해 Gzip + Decompression Fallback 정적 빌드를 생성하고, `main`의 산출물 변경 시 공식 GitHub Pages Actions가 배포하도록 구성했다. 플레이어 빌드에 섞이던 레거시 NUnit 테스트 2개도 에디터 전용으로 격리했으며 로컬 WebGL 빌드 성공을 확인했다. | Assets/Editor/GitHubPagesBuild.cs; Assets/Tests/EditMode/GameplayIconLibraryTests.cs; Assets/Tests/EditMode/SummonerCombatBuildTests.cs; PagesBuild/; .github/workflows/deploy-pages.yml; docs/github-pages.md; README.md |
 | 07-21 | TopHUD 스테이지 정보 정중앙 고정 | "HUD의 STAGE가 닉네임과 겹치니 가운데 배치" — 스테이지 영역을 프로필 다음 Flex 흐름에서 분리하고 HUD 가로 50%에 절대 배치해 닉네임·재화 폭과 무관하게 중앙을 유지. 제목과 스테이지명을 중앙 정렬하고 MCP 플레이 화면으로 겹침 해소 확인 | Assets/UI/USS/TopHUD.uss; docs/ui-guidelines.md; Assets/Screenshots/top_hud_stage_centered.png |
 | 07-20 | 강화 버튼 비활성 비용 라벨 가독성 수정 | "필요 골드는 나오되 비활성화 처리만" — 골드 부족·최대 레벨에서 `SetEnabled(false)`와 비활성 회색 상태는 유지하고, 강화 행 버튼에 UI Toolkit 기본 비활성 투명도가 중첩되지 않도록 전용 규칙을 추가해 비용/MAX 라벨을 항상 표시 | Assets/UI/USS/UpgradeRow.uss; Assets/Screenshots/upgrade_disabled_cost_visible.png |
 | 07-20 | 하단 탭 ScrollView 디자인 통합 | "소환 섹션에 있는 스크롤 느낌으로 통합" — 소환 탭의 전용 스크롤바 규칙을 공용 `.panel-scroll`로 승격하고 강화·스킬·소환사 ScrollView에도 같은 16px 트랙·목재 드래거·숨김 화살표를 적용. MCP 플레이 화면에서 강화·소환사 탭을 확인 | Assets/UI/USS/BottomPanel.uss, variables.uss; Assets/UI/UXML/tabs/SummonTab.uxml, UpgradeTab.uxml, SkillTab.uxml, SummonerTab.uxml; Assets/Screenshots/scroll_style_upgrade.png, scroll_style_summoner.png; docs/ui-guidelines.md |
