@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Linq;
 using CrossDefense.Core;
 using CrossDefense.Data;
@@ -153,3 +154,4 @@ namespace CrossDefense.Tests.EditMode
         }
     }
 }
+#endif
