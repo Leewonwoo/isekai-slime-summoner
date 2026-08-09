@@ -222,6 +222,39 @@ namespace CrossDefense.Tests.EditMode
                 Object.DestroyImmediate(targetObject);
             }
         }
+
+        [Test]
+        public void MonsterAttackViewport_RejectsOffscreenAndBehindCameraPositions()
+        {
+            var cameraObject = new GameObject("Monster Attack Viewport Camera");
+            Camera camera = cameraObject.AddComponent<Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 5f;
+            camera.aspect = 1f;
+            camera.transform.position = new Vector3(0f, 0f, -10f);
+            try
+            {
+                Assert.That(
+                    MonsterController.IsWorldPointInsideViewport(
+                        camera,
+                        new Vector3(4.9f, 0f, 0f)),
+                    Is.True);
+                Assert.That(
+                    MonsterController.IsWorldPointInsideViewport(
+                        camera,
+                        new Vector3(5.1f, 0f, 0f)),
+                    Is.False);
+                Assert.That(
+                    MonsterController.IsWorldPointInsideViewport(
+                        camera,
+                        new Vector3(0f, 0f, -11f)),
+                    Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(cameraObject);
+            }
+        }
     }
 }
 #endif

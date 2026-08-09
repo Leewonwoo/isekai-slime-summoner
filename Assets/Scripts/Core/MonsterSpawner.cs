@@ -87,7 +87,8 @@ namespace CrossDefense.Core
                 rewardMultiplier,
                 sizeMultiplier,
                 allowDefeatSplit,
-                grantsDefeatRewards);
+                grantsDefeatRewards,
+                _camera);
             return monster;
         }
 
@@ -119,7 +120,8 @@ namespace CrossDefense.Core
                 Mathf.Max(0.01f, waveHpMultiplier * settings.HpMultiplier),
                 Mathf.Max(0.01f, waveSpeedMultiplier * settings.SpeedMultiplier),
                 1f,
-                settings.SizeMultiplier);
+                settings.SizeMultiplier,
+                attackCamera: _camera);
             monster.ConfigureGoldenRunner(
                 GetOppositeExitPosition(zone, spawnPosition),
                 settings.EscapeDuration);

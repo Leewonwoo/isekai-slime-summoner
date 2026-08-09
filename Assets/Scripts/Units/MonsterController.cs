@@ -12,6 +12,7 @@ namespace CrossDefense.Units
         MonsterData _data;
         GameManager _gameManager;
         Transform _coreTarget;
+        Camera _attackCamera;
         SummonedUnitController _unitTarget;
         float _hp;
         float _speed;
@@ -56,6 +57,8 @@ namespace CrossDefense.Units
         public SummonedUnitController UnitTarget => _unitTarget;
         public bool IsTargetingCore => _unitTarget == null;
         public bool IsAttackAnimating => _isAttackAnimating;
+        public bool IsInsideAttackViewport =>
+            IsWorldPointInsideViewport(_attackCamera, transform.position);
         public float AttackRange => _attackRange;
         public bool IsGoldenRunner => _data?.Behavior == MonsterBehavior.GoldenRunner;
         public bool IsStunned => !_resolved && Time.time < _stunUntil;
@@ -83,7 +86,7 @@ namespace CrossDefense.Units
         public void Initialize(GameManager gameManager, Transform target, MonsterData data,
             float hpMultiplier, float speedMultiplier, float rewardMultiplier,
             float sizeMultiplier = 1f, bool allowDefeatSplit = true,
-            bool grantsDefeatRewards = true)
+            bool grantsDefeatRewards = true, Camera attackCamera = null)
         {
             unchecked
             {
@@ -91,6 +94,7 @@ namespace CrossDefense.Units
             }
             _gameManager = gameManager;
             _coreTarget = target;
+            _attackCamera = attackCamera != null ? attackCamera : Camera.main;
             _unitTarget = null;
             _data = data;
             MaxHp = Mathf.Max(1f, data.BaseHp * hpMultiplier);
@@ -162,7 +166,8 @@ namespace CrossDefense.Units
             Vector3 targetPosition = target.position;
             Vector3 offset = targetPosition - transform.position;
             float arrivalDistance = _attackRange;
-            if (offset.sqrMagnitude <= arrivalDistance * arrivalDistance)
+            if (offset.sqrMagnitude <= arrivalDistance * arrivalDistance &&
+                IsInsideAttackViewport)
             {
                 if (_unitTarget != null)
                     AttackUnitTarget();
@@ -229,6 +234,7 @@ namespace CrossDefense.Units
             _data = null;
             _gameManager = null;
             _coreTarget = null;
+            _attackCamera = null;
             _unitTarget = null;
             _hp = 0f;
             MaxHp = 0f;
@@ -415,6 +421,16 @@ namespace CrossDefense.Units
 
         static bool IsValidUnitTarget(SummonedUnitController unit) =>
             unit != null && unit.gameObject.activeInHierarchy && !unit.IsDefeated && unit.CurrentHp > 0f;
+
+        public static bool IsWorldPointInsideViewport(Camera camera, Vector3 worldPosition)
+        {
+            if (camera == null)
+                return true;
+            Vector3 viewport = camera.WorldToViewportPoint(worldPosition);
+            return viewport.z > 0f &&
+                   viewport.x >= 0f && viewport.x <= 1f &&
+                   viewport.y >= 0f && viewport.y <= 1f;
+        }
 
         Vector3 GetDamageNumberAnchor()
         {
