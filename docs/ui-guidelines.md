@@ -131,6 +131,10 @@ Assets/Scripts/UI/
     --top-hud-profile-width: 264px;
     --top-hud-stage-width: 180px;
     --wave-status-width: 200px;
+    --field-menu-width: 256px;
+    --field-settings-size: 96px;
+    --field-settings-icon-size: 66px;
+    --field-speed-width: 144px;
     --top-hud-settings-width: 104px;
     --top-hud-settings-icon-size: 64px;
     --currency-icon-size: 44px;
@@ -139,17 +143,18 @@ Assets/Scripts/UI/
     --summoner-portrait-size: 104px;
     --summoner-portrait-radius: 52px;
     --portrait-ring-inset: 12px;
-    --skill-button-size: 128px;
-    --skill-button-radius: 64px;
-    --skill-button-icon-size: 56px;
-    --skill-button-label-size: 24px;
-    --skill-button-cooldown-size: 30px;
-    --buff-skill-button-size: 96px;
-    --buff-skill-button-radius: 48px;
-    --buff-skill-icon-size: 40px;
+    --skill-button-size: 160px;
+    --skill-button-radius: 80px;
+    --skill-button-icon-size: 72px;
+    --skill-button-label-size: 28px;
+    --skill-button-cooldown-size: 36px;
+    --buff-skill-button-size: 120px;
+    --buff-skill-button-radius: 60px;
+    --buff-skill-icon-size: 52px;
     --buff-skill-cluster-right: 24px;
-    --buff-skill-cluster-bottom: 168px;
+    --buff-skill-cluster-bottom: 200px;
     --codex-button-size: 96px;
+    --codex-button-icon-size: 90px;
     --codex-button-width: 200px;
     --codex-slot-size: 188px;
     --codex-slot-image-size: 72%;
@@ -164,7 +169,7 @@ Assets/Scripts/UI/
     --overdrive-status-height: 32px;
     --overdrive-gauge-width: 48px;
     --overdrive-gauge-height: 128px;
-    --overdrive-gauge-right: 168px;
+    --overdrive-gauge-right: 200px;
     --overdrive-gauge-bottom: 24px;
     --overdrive-gauge-tick-height: 2px;
     --combo-label-height: 52px;
@@ -329,8 +334,8 @@ public class TopHUDController
 - **합성 가능 벤치 슬롯**: `--color-positive` 테두리 + "합성" 뱃지.
 - **강화 탭**: 전체 공격력·전체 공격속도·소환사 HP 회복·치명타 저장 강화 4행만 표시한다. 각 행은 현재→다음 수치와 골드 비용을 함께 표시하며, 골드 부족·최대 레벨·HP 회복이 불필요한 상태에서는 버튼을 회색 비활성화한다. 강화 버튼은 짧게 누르면 1회, 0.4초 이상 누르면 0.08초 간격으로 반복 시도한다.
 - **스킬 탭**: `UpgradeRow` 템플릿으로 소환사 보호막·군단 지휘·생명의 가호·정령 공명·시간 가속 5행을 표시한다. 상단에 현재 `N/3 장착`을 표시하고, 이름 아래에는 효과·쿨다운 또는 `Lv.N 해금`을 표시한다. 해금된 행은 `장착`/`해제`, 잠긴 행은 `잠김`, 세 슬롯이 찬 상태의 미장착 행은 `3/3`으로 비활성화한다. 별도 스킬 레벨업 버튼은 두지 않는다.
-- **필드 스킬 버튼**: 우하단 128px 링은 장착 공격 신물의 스킬 이름·아이콘·남은 쿨다운과 대상 지정 상태를 표시한다. 그 왼쪽에는 `--buff-skill-button-size` 96px 소환사 버프 버튼 3개를 가로 배치하며 각 버튼은 아이콘·남은 쿨다운·활성 상태를 표시한다. 비어 있는 슬롯은 비활성화한다. 대상 범위와 얼음벽 방향 미리보기는 UI Toolkit이 아니라 월드 `SpriteRenderer`로 그린다.
-- **콤보/오버드라이브**: FieldOverlay에서 콤보 라벨과 오버드라이브 게이지를 소유한다. 콤보는 2부터 노출하고 10/20/30 진입 때만 강조한다. 게이지는 스킬 버튼 왼쪽의 48×128px 세로 연료 탱크이며 아래에서 위로 충전되고 25% 구획선을 표시한다. 충전 중 수치 텍스트를 숨기고, 가득 차면 탱크 위에 `READY`, 활성 중에는 `OVERDRIVE N.Ns`를 표시한다. 오버드라이브 색은 `--color-overdrive*`만 사용하며 골드 재화/행동 색과 섞지 않는다.
+- **필드 스킬 버튼**: 우하단 160px 링은 장착 공격 신물의 스킬 이름·72px 아이콘·남은 쿨다운과 대상 지정 상태를 표시한다. 그 위에는 `--buff-skill-button-size` 120px 소환사 버프 버튼 3개를 가로 배치하며 각 버튼은 52px 아이콘·남은 쿨다운·활성 상태를 표시한다. 비어 있는 슬롯은 비활성화한다. 대상 범위와 얼음벽 방향 미리보기는 UI Toolkit이 아니라 월드 `SpriteRenderer`로 그린다.
+- **콤보/오버드라이브**: FieldOverlay에서 콤보 라벨과 오버드라이브 게이지를 소유한다. 콤보는 2부터 노출하고 10/20/30 진입 때만 강조한다. 게이지는 160px 스킬 버튼 왼쪽에 16px 간격을 둔 48×128px 세로 연료 탱크이며 아래에서 위로 충전되고 25% 구획선을 표시한다. 충전 중 수치 텍스트를 숨기고, 가득 차면 탱크 위에 `READY`, 활성 중에는 `OVERDRIVE N.Ns`를 표시한다. 오버드라이브 색은 `--color-overdrive*`만 사용하며 골드 재화/행동 색과 섞지 않는다.
 - **도감 버튼 스택**: FieldOverlay의 TopHUD 아래 우상단에 **200×96px** 버튼 2개를 세로 배치한다. 위는 `슬라임 도감`, 아래는 `몬스터 도감`이며 버튼 간격은 `--gap-md`를 사용한다.
 - **슬라임 도감**: 전체화면 스크림 안의 920×1450 패널에 소환 풀 8종을 4열 슬롯으로 배치한다. 잠긴 슬롯은 `?`와 `Lv.N 해금`, 해금 슬롯은 ★1 이미지·이름을 표시한다. 상세 영역은 속성·희귀도·공격 방식, ★1 HP·공격력·공속·사거리·이동속도와 ★3 스킬명·쿨다운을 보여준다. 팝업 동안 `GameplayPauseReason.SlimeCodex`로 게임플레이를 정지한다.
 - **몬스터 도감**: `몬스터 도감` 버튼에서 연다. 전체화면 스크림 안의 920×1450 패널에 4×4 슬롯 그리드와 상세 영역을 배치한다. 미조우 슬롯은 `?`만 표시하고 팝업 동안 게임플레이를 정지한다.
@@ -365,5 +370,5 @@ public class TopHUDController
 - `capsule__icon`은 `--currency-icon-size`로 크기를 제어하며, 아이콘 PNG의 투명 배경을 그대로 표시한다.
 - 용병 계약서는 소환 탭 전용 런 재화이므로 TopHUD에 추가하지 않는다. 계약서 아이콘 에셋 제작 전에는 소환 탭의 텍스트 캡슐로 보유량을 표시한다.
 - 강화 스탯 아이콘은 `Assets/Art/UIIcons/icon_atk.png`, `icon_aspd.png`, `icon_crit.png`, `icon_hp.png`, `icon_range.png`, `icon_income.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 UpgradeRow의 88px 아이콘 영역에 `background-size: 100% 100%`로 표시한다.
-- 액티브 스킬 아이콘은 `icon_skill_meteor.png`, `icon_skill_ice_wall.png`, `icon_skill_aegis.png`를 사용한다. 모두 **128×128px** 투명 PNG·Point 필터·무압축으로 임포트하고, `SkillTab`의 88px 공용 행 아이콘과 FieldOverlay 스킬 버튼의 `--skill-button-icon-size` **56px** 영역에 같은 에셋을 재사용한다.
+- 액티브 스킬 아이콘은 `icon_skill_meteor.png`, `icon_skill_ice_wall.png`, `icon_skill_aegis.png`를 사용한다. 모두 **128×128px** 투명 PNG·Point 필터·무압축으로 임포트하고, `SkillTab`의 88px 공용 행 아이콘과 FieldOverlay 스킬 버튼의 `--skill-button-icon-size` **72px** 영역에 같은 에셋을 재사용한다.
 - 하단 5개 탭은 `icon_tab_summon.png`, `icon_tab_upgrade.png`, `icon_tab_skill.png`, `icon_tab_gear.png`, `icon_tab_summoner.png`을 사용한다. 모두 **128×128px** 투명 PNG이며 **44px**로 표시하고, 탭 텍스트는 기능명 확인을 위해 유지한다.
