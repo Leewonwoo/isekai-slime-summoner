@@ -166,7 +166,7 @@
     position: absolute;
     right: var(--gap-lg);
     top: var(--gap-lg);
-    width: 168px;
+    width: var(--field-menu-width);
     flex-direction: column;
     align-items: flex-end;
 }
@@ -203,7 +203,7 @@
 }
 
 .speed-toggle-button {
-    width: var(--touch-min);
+    width: var(--field-speed-width);
     height: var(--field-settings-size);
     color: var(--color-text);
     background-color: var(--color-panel-deep);
@@ -228,7 +228,7 @@
     width: var(--codex-button-size);
     height: var(--codex-button-size);
     background-color: var(--color-transparent);
-    background-size: 60px 60px;
+    background-size: var(--codex-button-icon-size) var(--codex-button-icon-size);
     background-repeat: no-repeat;
     background-position-x: center;
     background-position-y: center;

@@ -21,6 +21,8 @@ namespace CrossDefense.Core
         RelicAcquired = 13,
         RelicEquip = 14,
         RelicSkillUse = 15,
+        FieldMenuIcons = 16,
+        GameplaySpeed = 17,
     }
 
     public enum FeatureTutorialKind
@@ -30,6 +32,8 @@ namespace CrossDefense.Core
         RelicAcquired,
         RelicEquip,
         RelicSkillUse,
+        FieldMenuIcons,
+        GameplaySpeed,
     }
 
     [Serializable]
@@ -272,6 +276,26 @@ namespace CrossDefense.Core
                     "RELIC SKILL",
                     "신물 스킬 사용",
                     "장착한 신물에 따라 오른쪽 스킬이 바뀝니다.\n버튼을 누르고 전장에 사용해 보세요.",
+                    null,
+                    false,
+                    true,
+                    false,
+                    TutorialCardPlacement.Top),
+                FeatureTutorialKind.FieldMenuIcons => State(
+                    TutorialStep.FieldMenuIcons,
+                    "FIELD MENU",
+                    "우측 상단 메뉴",
+                    "×1.0은 전투 속도, 톱니바퀴는 설정입니다.\n슬라임과 고블린 아이콘에서는 각 도감을 열 수 있어요.",
+                    "속도 바꿔 보기",
+                    true,
+                    true,
+                    true,
+                    TutorialCardPlacement.Center),
+                FeatureTutorialKind.GameplaySpeed => State(
+                    TutorialStep.GameplaySpeed,
+                    "BATTLE SPEED",
+                    "전투 속도 변경",
+                    "우측 상단 ×1.0 버튼을 눌러 ×1.5로 바꿔 보세요.\n언제든 다시 눌러 원래 속도로 돌아올 수 있습니다.",
                     null,
                     false,
                     true,

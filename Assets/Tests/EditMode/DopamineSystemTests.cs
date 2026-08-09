@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.IO;
 using System.Reflection;
 using CrossDefense.Core;
 using CrossDefense.Data;
@@ -202,6 +203,36 @@ namespace CrossDefense.Tests.EditMode
                 speedButton.ClassListContains("speed-toggle-button--fast"),
                 Is.True);
             controller.Dispose();
+        }
+
+        [Test]
+        public void FieldOverlay_RightMenuUsesOnePointFiveScaleControls()
+        {
+            string variables = File.ReadAllText("Assets/UI/USS/variables.uss");
+            string overlay = File.ReadAllText("Assets/UI/USS/FieldOverlay.uss");
+
+            StringAssert.Contains("--field-settings-size: 96px", variables);
+            StringAssert.Contains("--field-settings-icon-size: 66px", variables);
+            StringAssert.Contains("--field-speed-width: 144px", variables);
+            StringAssert.Contains("--codex-button-size: 96px", variables);
+            StringAssert.Contains("--codex-button-icon-size: 90px", variables);
+            StringAssert.Contains("width: var(--field-menu-width)", overlay);
+            StringAssert.Contains("width: var(--field-speed-width)", overlay);
+        }
+
+        [Test]
+        public void FieldOverlay_RightSkillControlsUseReadableScaleAndSpacing()
+        {
+            string variables = File.ReadAllText("Assets/UI/USS/variables.uss");
+
+            StringAssert.Contains("--skill-button-size: 160px", variables);
+            StringAssert.Contains("--skill-button-icon-size: 72px", variables);
+            StringAssert.Contains("--skill-button-label-size: 28px", variables);
+            StringAssert.Contains("--skill-button-cooldown-size: 36px", variables);
+            StringAssert.Contains("--buff-skill-button-size: 120px", variables);
+            StringAssert.Contains("--buff-skill-icon-size: 52px", variables);
+            StringAssert.Contains("--buff-skill-cluster-bottom: 200px", variables);
+            StringAssert.Contains("--overdrive-gauge-right: 200px", variables);
         }
 
         [Test]

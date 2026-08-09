@@ -338,6 +338,8 @@ namespace CrossDefense.UI
             TryShowTraitChoice();
             _tutorial = new FirstRunTutorial(_gameManager);
             TutorialOverlay?.Bind(_tutorial);
+            QueueFeatureTutorial(FeatureTutorialKind.FieldMenuIcons);
+            QueueFeatureTutorial(FeatureTutorialKind.GameplaySpeed);
             QueueFeatureTutorial(FeatureTutorialKind.SkillUse);
             QueueExistingRelicTutorial();
             TryPresentFeatureTutorial();
@@ -393,7 +395,18 @@ namespace CrossDefense.UI
         }
         void OnGoldenGoblinStateChanged(GoldenGoblinSnapshot snapshot) =>
             FieldOverlay?.SetGoldenGoblinState(snapshot);
-        void OnSpeedToggleRequested() => _gameManager?.ToggleGameplaySpeed();
+        void OnSpeedToggleRequested()
+        {
+            if (_gameManager == null)
+                return;
+            float previousSpeed = _gameManager.GameplaySpeed;
+            _gameManager.ToggleGameplaySpeed();
+            if (Mathf.Approximately(previousSpeed, _gameManager.GameplaySpeed))
+                return;
+            FeatureTutorialProgress.Complete(FeatureTutorialKind.GameplaySpeed);
+            HideFeatureTutorial(FeatureTutorialKind.GameplaySpeed);
+            TryPresentFeatureTutorial();
+        }
         void OnGameplaySpeedChanged(float speed) => FieldOverlay?.SetGameplaySpeed(speed);
 
         void OnPhaseChanged(RunPhase phase)

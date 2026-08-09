@@ -147,6 +147,24 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(equip.BlocksInput, Is.False);
             Assert.That(use.BlocksInput, Is.False);
         }
+
+        [Test]
+        public void FieldMenuTutorial_ExplainsIconsThenWaitsForSpeedToggle()
+        {
+            TutorialViewState menu = FeatureTutorialViewStates.Build(
+                FeatureTutorialKind.FieldMenuIcons);
+            TutorialViewState speed = FeatureTutorialViewStates.Build(
+                FeatureTutorialKind.GameplaySpeed);
+
+            StringAssert.Contains("×1.0", menu.Body);
+            StringAssert.Contains("설정", menu.Body);
+            StringAssert.Contains("도감", menu.Body);
+            Assert.That(menu.ShowNext, Is.True);
+            Assert.That(menu.BlocksInput, Is.True);
+            StringAssert.Contains("×1.5", speed.Body);
+            Assert.That(speed.ShowNext, Is.False);
+            Assert.That(speed.BlocksInput, Is.False);
+        }
     }
 }
 #endif
