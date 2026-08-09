@@ -30,6 +30,25 @@ namespace CrossDefense.UI
         int _pendingNoSpaceCount;
         bool _pendingSpawnFailure;
         FirstRunTutorial _tutorial;
+        readonly Queue<FeatureTutorialRequest> _featureTutorialQueue = new();
+        FeatureTutorialRequest? _activeFeatureTutorial;
+
+        readonly struct FeatureTutorialRequest
+        {
+            public FeatureTutorialKind Kind { get; }
+            public string Detail { get; }
+            public RelicFamily RelicFamily { get; }
+
+            public FeatureTutorialRequest(
+                FeatureTutorialKind kind,
+                string detail = null,
+                RelicFamily relicFamily = RelicFamily.None)
+            {
+                Kind = kind;
+                Detail = detail;
+                RelicFamily = relicFamily;
+            }
+        }
 
         public TopHUDController TopHUD { get; private set; }
         public FieldOverlayController FieldOverlay { get; private set; }
@@ -92,6 +111,8 @@ namespace CrossDefense.UI
             _pendingPlacementUnitName = null;
             _pendingNoSpaceCount = 0;
             _pendingSpawnFailure = false;
+            _featureTutorialQueue.Clear();
+            _activeFeatureTutorial = null;
             TutorialOverlay?.Unbind();
             _tutorial?.Dispose();
             _tutorial = null;
@@ -126,7 +147,10 @@ namespace CrossDefense.UI
                 if (_gameManager.CombatBuild != null)
                     _gameManager.CombatBuild.Changed -= OnCombatBuildChanged;
                 if (_gameManager.SummonerSkills != null)
+                {
                     _gameManager.SummonerSkills.StateChanged -= RefreshSkillUI;
+                    _gameManager.SummonerSkills.SkillCast -= OnSummonerSkillCast;
+                }
                 if (_gameManager.SummonerBuffs != null)
                     _gameManager.SummonerBuffs.StateChanged -= RefreshSkillUI;
                 if (_gameManager.Dopamine != null)
@@ -139,7 +163,11 @@ namespace CrossDefense.UI
                 if (_gameManager.RunRelics != null)
                     _gameManager.RunRelics.Changed -= OnRunRelicsChanged;
                 if (_gameManager.Relics != null)
+                {
                     _gameManager.Relics.Changed -= RefreshSkillUI;
+                    _gameManager.Relics.Acquired -= OnRelicAcquired;
+                    _gameManager.Relics.Equipped -= OnRelicEquipped;
+                }
                 _gameManager.GameplaySpeedChanged -= OnGameplaySpeedChanged;
                 _gameManager.RegisterGoldScreenPositionProvider(null);
                 _gameManager.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
@@ -248,7 +276,10 @@ namespace CrossDefense.UI
             if (_gameManager.CombatBuild != null)
                 _gameManager.CombatBuild.Changed += OnCombatBuildChanged;
             if (_gameManager.SummonerSkills != null)
+            {
                 _gameManager.SummonerSkills.StateChanged += RefreshSkillUI;
+                _gameManager.SummonerSkills.SkillCast += OnSummonerSkillCast;
+            }
             if (_gameManager.SummonerBuffs != null)
                 _gameManager.SummonerBuffs.StateChanged += RefreshSkillUI;
             if (_gameManager.Dopamine != null)
@@ -261,7 +292,11 @@ namespace CrossDefense.UI
             if (_gameManager.RunRelics != null)
                 _gameManager.RunRelics.Changed += OnRunRelicsChanged;
             if (_gameManager.Relics != null)
+            {
                 _gameManager.Relics.Changed += RefreshSkillUI;
+                _gameManager.Relics.Acquired += OnRelicAcquired;
+                _gameManager.Relics.Equipped += OnRelicEquipped;
+            }
             _gameManager.GameplaySpeedChanged += OnGameplaySpeedChanged;
             FieldOverlay.SkillRequested += OnSkillRequested;
             FieldOverlay.BuffSkillRequested += OnBuffSkillRequested;
@@ -301,6 +336,9 @@ namespace CrossDefense.UI
             TryShowTraitChoice();
             _tutorial = new FirstRunTutorial(_gameManager);
             TutorialOverlay?.Bind(_tutorial);
+            QueueFeatureTutorial(FeatureTutorialKind.SkillUse);
+            QueueExistingRelicTutorial();
+            TryPresentFeatureTutorial();
         }
 
         void OnWaveChanged(int current, int total)
@@ -363,6 +401,7 @@ namespace CrossDefense.UI
             if (!showResult)
             {
                 RunResultModal?.Hide();
+                TryPresentFeatureTutorial();
                 return;
             }
 
@@ -440,7 +479,12 @@ namespace CrossDefense.UI
                     if (unit != null && unit.UnlockLevel > _lastUnlockLevel && unit.UnlockLevel <= snapshot.Level)
                         unlocked.Add(unit.DisplayName);
                 if (unlocked.Count > 0)
+                {
                     FieldOverlay.ShowUnlockToast($"새 슬라임 해금!\n{string.Join(" · ", unlocked)}");
+                    QueueFeatureTutorial(
+                        FeatureTutorialKind.SlimeUnlocked,
+                        string.Join(" · ", unlocked));
+                }
             }
             _lastUnlockLevel = snapshot.Level;
             BottomPanel.SetDirectRankOneChance(_gameManager.DirectRankOneChance);
@@ -468,12 +512,54 @@ namespace CrossDefense.UI
         void OnEffectsVolumeChanged(float volume) =>
             _gameManager?.SetEffectsVolume(volume);
 
-        void OnTutorialContinueRequested() => _tutorial?.Continue();
-        void OnTutorialSkipRequested() => _tutorial?.Skip();
+        void OnTutorialContinueRequested()
+        {
+            if (_tutorial?.IsActive == true)
+            {
+                _tutorial.Continue();
+                TryPresentFeatureTutorial();
+                return;
+            }
+
+            if (!_activeFeatureTutorial.HasValue)
+                return;
+            FeatureTutorialRequest request = _activeFeatureTutorial.Value;
+            CompleteFeatureTutorial(request.Kind);
+            if (request.Kind != FeatureTutorialKind.RelicAcquired)
+                return;
+
+            BottomPanel?.SelectTab("skill");
+            if (_gameManager?.Relics?.EquippedFamily == request.RelicFamily)
+            {
+                FeatureTutorialProgress.Complete(FeatureTutorialKind.RelicEquip);
+                QueueFeatureTutorial(
+                    FeatureTutorialKind.RelicSkillUse,
+                    relicFamily: request.RelicFamily);
+            }
+            else
+            {
+                QueueFeatureTutorial(
+                    FeatureTutorialKind.RelicEquip,
+                    relicFamily: request.RelicFamily);
+            }
+        }
+
+        void OnTutorialSkipRequested()
+        {
+            if (_tutorial?.IsActive == true)
+            {
+                _tutorial.Skip();
+                TryPresentFeatureTutorial();
+                return;
+            }
+            if (_activeFeatureTutorial.HasValue)
+                CompleteFeatureTutorial(_activeFeatureTutorial.Value.Kind);
+        }
 
         void OnTutorialReplayRequested()
         {
             TutorialProgress.RequestReplay();
+            FeatureTutorialProgress.Reset();
             FieldOverlay?.ShowToast("다음 도전에서 첫 런 튜토리얼을 다시 시작합니다.");
         }
 
@@ -544,6 +630,114 @@ namespace CrossDefense.UI
         {
             if (_gameManager?.Relics?.TryEquip(family) == true)
                 RefreshSkillUI();
+        }
+
+        void OnRelicAcquired(RelicFamily family, int rank)
+        {
+            if (rank != 1)
+                return;
+            RelicDefinition definition = _gameManager?.Relics?.Catalog?.Find(family);
+            QueueFeatureTutorial(
+                FeatureTutorialKind.RelicAcquired,
+                definition?.Rank(rank)?.DisplayName,
+                family);
+        }
+
+        void OnRelicEquipped(RelicFamily family)
+        {
+            FeatureTutorialProgress.Complete(FeatureTutorialKind.RelicEquip);
+            HideFeatureTutorial(FeatureTutorialKind.RelicEquip);
+            QueueFeatureTutorial(
+                FeatureTutorialKind.RelicSkillUse,
+                relicFamily: family);
+        }
+
+        void OnSummonerSkillCast(SummonerSkillId _)
+        {
+            FeatureTutorialProgress.Complete(FeatureTutorialKind.SkillUse);
+            HideFeatureTutorial(FeatureTutorialKind.SkillUse);
+            if (_gameManager?.Relics?.EquippedFamily != RelicFamily.None)
+            {
+                FeatureTutorialProgress.Complete(FeatureTutorialKind.RelicSkillUse);
+                HideFeatureTutorial(FeatureTutorialKind.RelicSkillUse);
+            }
+            TryPresentFeatureTutorial();
+        }
+
+        void QueueExistingRelicTutorial()
+        {
+            RelicProgression relics = _gameManager?.Relics;
+            if (relics?.Catalog?.Relics == null ||
+                FeatureTutorialProgress.IsCompleted(FeatureTutorialKind.RelicAcquired))
+                return;
+            foreach (RelicDefinition definition in relics.Catalog.Relics)
+            {
+                if (definition == null || !relics.IsOwned(definition.Family))
+                    continue;
+                QueueFeatureTutorial(
+                    FeatureTutorialKind.RelicAcquired,
+                    definition.Rank(relics.Rank(definition.Family))?.DisplayName,
+                    definition.Family);
+                return;
+            }
+        }
+
+        void QueueFeatureTutorial(
+            FeatureTutorialKind kind,
+            string detail = null,
+            RelicFamily relicFamily = RelicFamily.None)
+        {
+            if (FeatureTutorialProgress.IsCompleted(kind) ||
+                (_activeFeatureTutorial.HasValue &&
+                 _activeFeatureTutorial.Value.Kind == kind) ||
+                _featureTutorialQueue.Any(request => request.Kind == kind))
+                return;
+            _featureTutorialQueue.Enqueue(
+                new FeatureTutorialRequest(kind, detail, relicFamily));
+            TryPresentFeatureTutorial();
+        }
+
+        void TryPresentFeatureTutorial()
+        {
+            while (_featureTutorialQueue.Count > 0 &&
+                   FeatureTutorialProgress.IsCompleted(_featureTutorialQueue.Peek().Kind))
+                _featureTutorialQueue.Dequeue();
+            if (_tutorial?.IsActive == true || _activeFeatureTutorial.HasValue ||
+                _featureTutorialQueue.Count == 0 || _traitChoicePopupOpen ||
+                _gameManager == null)
+                return;
+
+            FeatureTutorialRequest next = _featureTutorialQueue.Peek();
+            if ((next.Kind is FeatureTutorialKind.SkillUse or FeatureTutorialKind.RelicSkillUse) &&
+                (_gameManager.Phase != RunPhase.InWave || _gameManager.IsGameplayPaused))
+                return;
+            if (_gameManager.Phase is RunPhase.Merchant or RunPhase.Victory or RunPhase.Defeat)
+                return;
+
+            _activeFeatureTutorial = _featureTutorialQueue.Dequeue();
+            TutorialViewState state = FeatureTutorialViewStates.Build(
+                _activeFeatureTutorial.Value.Kind,
+                _activeFeatureTutorial.Value.Detail);
+            TutorialOverlay?.ShowStandalone(state);
+            if (state.BlocksInput)
+                _gameManager.SetGameplayPause(GameplayPauseReason.Tutorial, true);
+        }
+
+        void CompleteFeatureTutorial(FeatureTutorialKind kind)
+        {
+            FeatureTutorialProgress.Complete(kind);
+            HideFeatureTutorial(kind);
+            TryPresentFeatureTutorial();
+        }
+
+        void HideFeatureTutorial(FeatureTutorialKind kind)
+        {
+            if (!_activeFeatureTutorial.HasValue ||
+                _activeFeatureTutorial.Value.Kind != kind)
+                return;
+            _activeFeatureTutorial = null;
+            TutorialOverlay?.HideStandalone();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.Tutorial, false);
         }
 
         void RefreshSkillUI()
@@ -912,7 +1106,10 @@ namespace CrossDefense.UI
             if (!isActiveAndEnabled)
                 yield break;
             if (!TryShowTraitChoice())
+            {
                 _gameManager?.SetGameplayPause(GameplayPauseReason.TraitChoice, false);
+                TryPresentFeatureTutorial();
+            }
         }
 
         void OnBenchSlotSelected(SummonUnitInstance instance, int quantity)

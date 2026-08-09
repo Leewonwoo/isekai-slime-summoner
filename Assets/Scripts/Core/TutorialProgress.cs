@@ -16,6 +16,20 @@ namespace CrossDefense.Core
         Elements = 8,
         IndependentWave = 9,
         Completed = 10,
+        SlimeUnlocked = 11,
+        SkillUse = 12,
+        RelicAcquired = 13,
+        RelicEquip = 14,
+        RelicSkillUse = 15,
+    }
+
+    public enum FeatureTutorialKind
+    {
+        SlimeUnlocked,
+        SkillUse,
+        RelicAcquired,
+        RelicEquip,
+        RelicSkillUse,
     }
 
     [Serializable]
@@ -155,5 +169,134 @@ namespace CrossDefense.Core
             string suffix = string.IsNullOrWhiteSpace(detail) ? string.Empty : $", detail={detail}";
             Debug.Log($"[TutorialAnalytics] event={eventName}, version={TutorialProgress.CurrentVersion}, step={step}{suffix}");
         }
+    }
+
+    [Serializable]
+    sealed class FeatureTutorialSaveData
+    {
+        public int version = FeatureTutorialProgress.CurrentVersion;
+        public int completedMask;
+    }
+
+    public static class FeatureTutorialProgress
+    {
+        public const int CurrentVersion = 1;
+        public const string DefaultPlayerPrefsKey = "CrossDefense.FeatureTutorials.v1";
+
+        public static bool IsCompleted(FeatureTutorialKind kind) =>
+            (LoadMask() & Bit(kind)) != 0;
+
+        public static void Complete(FeatureTutorialKind kind)
+        {
+            int mask = LoadMask() | Bit(kind);
+            PlayerPrefs.SetString(
+                DefaultPlayerPrefsKey,
+                JsonUtility.ToJson(new FeatureTutorialSaveData { completedMask = mask }));
+            PlayerPrefs.Save();
+        }
+
+        public static void Reset()
+        {
+            PlayerPrefs.DeleteKey(DefaultPlayerPrefsKey);
+            PlayerPrefs.Save();
+        }
+
+        static int LoadMask()
+        {
+            if (!PlayerPrefs.HasKey(DefaultPlayerPrefsKey))
+                return 0;
+            try
+            {
+                FeatureTutorialSaveData data = JsonUtility.FromJson<FeatureTutorialSaveData>(
+                    PlayerPrefs.GetString(DefaultPlayerPrefsKey));
+                return data != null && data.version == CurrentVersion
+                    ? data.completedMask
+                    : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        static int Bit(FeatureTutorialKind kind) => 1 << (int)kind;
+    }
+
+    public static class FeatureTutorialViewStates
+    {
+        public static TutorialViewState Build(FeatureTutorialKind kind, string detail = null) =>
+            kind switch
+            {
+                FeatureTutorialKind.SlimeUnlocked => State(
+                    TutorialStep.SlimeUnlocked,
+                    "NEW SLIME",
+                    "새 슬라임 해금!",
+                    $"소환 가능한 슬라임이 늘어났어요.{DetailLine(detail)}\n도감에서 능력과 속성을 확인할 수 있습니다.",
+                    "확인",
+                    true,
+                    false,
+                    true,
+                    TutorialCardPlacement.Center),
+                FeatureTutorialKind.SkillUse => State(
+                    TutorialStep.SkillUse,
+                    "BATTLE SKILL",
+                    "소환사 스킬 사용",
+                    "전투 중 오른쪽의 스킬 버튼을 누른 뒤\n필드의 목표 지점을 선택해 보세요.",
+                    null,
+                    false,
+                    true,
+                    false,
+                    TutorialCardPlacement.Top),
+                FeatureTutorialKind.RelicAcquired => State(
+                    TutorialStep.RelicAcquired,
+                    "NEW RELIC",
+                    "첫 신물 획득!",
+                    $"{Fallback(detail, "새로운 신물")}을 획득했어요.\n신물은 장착해야 전용 스킬을 사용할 수 있습니다.",
+                    "장착하러 가기",
+                    true,
+                    true,
+                    true,
+                    TutorialCardPlacement.Center),
+                FeatureTutorialKind.RelicEquip => State(
+                    TutorialStep.RelicEquip,
+                    "RELIC EQUIP",
+                    "신물 스킬 장착",
+                    "아래 스킬 탭의 신물 목록에서\n방금 얻은 신물의 ‘장착’ 버튼을 눌러 보세요.",
+                    null,
+                    false,
+                    true,
+                    false,
+                    TutorialCardPlacement.Top),
+                FeatureTutorialKind.RelicSkillUse => State(
+                    TutorialStep.RelicSkillUse,
+                    "RELIC SKILL",
+                    "신물 스킬 사용",
+                    "장착한 신물에 따라 오른쪽 스킬이 바뀝니다.\n버튼을 누르고 전장에 사용해 보세요.",
+                    null,
+                    false,
+                    true,
+                    false,
+                    TutorialCardPlacement.Top),
+                _ => default,
+            };
+
+        static TutorialViewState State(
+            TutorialStep step,
+            string eyebrow,
+            string title,
+            string body,
+            string nextLabel,
+            bool showNext,
+            bool showSkip,
+            bool blocksInput,
+            TutorialCardPlacement placement) =>
+            new(true, blocksInput, step, eyebrow, title, body, "TIP", nextLabel,
+                showNext, showSkip, placement);
+
+        static string DetailLine(string detail) =>
+            string.IsNullOrWhiteSpace(detail) ? string.Empty : $"\n{detail}";
+
+        static string Fallback(string value, string fallback) =>
+            string.IsNullOrWhiteSpace(value) ? fallback : value;
     }
 }

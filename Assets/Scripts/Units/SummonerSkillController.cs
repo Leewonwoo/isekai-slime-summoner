@@ -75,6 +75,7 @@ namespace CrossDefense.Units
         public bool IsReady => RemainingCooldown <= 0f;
 
         public event Action StateChanged;
+        public event Action<SummonerSkillId> SkillCast;
 
         public void Initialize(
             GameManager gameManager,
@@ -164,7 +165,14 @@ namespace CrossDefense.Units
             if (skill == null)
                 return false;
             if (definition.Targeting == SummonerSkillTargeting.Instant)
-                return CastAegis(definition, skill.RankProfile(_relics?.EquippedRank ?? 1));
+            {
+                bool cast = CastAegis(
+                    definition,
+                    skill.RankProfile(_relics?.EquippedRank ?? 1));
+                if (cast)
+                    SkillCast?.Invoke(definition.Id);
+                return cast;
+            }
             if (_targeting)
             {
                 CancelTargeting();
@@ -230,6 +238,7 @@ namespace CrossDefense.Units
             _targeting = false;
             SetPreviewVisible(false);
             StartCooldown(definition);
+            SkillCast?.Invoke(definition.Id);
             return true;
         }
 

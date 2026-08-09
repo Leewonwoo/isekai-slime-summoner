@@ -34,6 +34,8 @@ namespace CrossDefense.Core
         public RelicDefinition EquippedDefinition => _catalog.Find(EquippedFamily);
         public int EquippedRank => Rank(EquippedFamily);
         public event Action Changed;
+        public event Action<RelicFamily, int> Acquired;
+        public event Action<RelicFamily> Equipped;
 
         public RelicProgression(
             RelicCatalog catalog,
@@ -81,6 +83,7 @@ namespace CrossDefense.Core
             _ranks[family] = Rank(family) + 1;
             Persist(true);
             Changed?.Invoke();
+            Acquired?.Invoke(family, Rank(family));
             return true;
         }
 
@@ -93,6 +96,7 @@ namespace CrossDefense.Core
             EquippedFamily = family;
             Persist(true);
             Changed?.Invoke();
+            Equipped?.Invoke(family);
             return true;
         }
 

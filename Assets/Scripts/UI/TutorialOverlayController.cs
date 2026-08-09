@@ -58,6 +58,10 @@ namespace CrossDefense.UI
             _tutorial = null;
         }
 
+        public void ShowStandalone(TutorialViewState state) => Apply(state);
+
+        public void HideStandalone() => Apply(default);
+
         public void Dispose()
         {
             Unbind();

@@ -10,6 +10,8 @@ namespace CrossDefense.Tests.EditMode
     {
         bool _hadValue;
         string _savedValue;
+        bool _hadFeatureValue;
+        string _savedFeatureValue;
 
         [SetUp]
         public void SetUp()
@@ -18,15 +20,25 @@ namespace CrossDefense.Tests.EditMode
             _savedValue = _hadValue
                 ? PlayerPrefs.GetString(TutorialProgress.DefaultPlayerPrefsKey)
                 : null;
+            _hadFeatureValue = PlayerPrefs.HasKey(FeatureTutorialProgress.DefaultPlayerPrefsKey);
+            _savedFeatureValue = _hadFeatureValue
+                ? PlayerPrefs.GetString(FeatureTutorialProgress.DefaultPlayerPrefsKey)
+                : null;
             TutorialProgress.Reset();
+            FeatureTutorialProgress.Reset();
         }
 
         [TearDown]
         public void TearDown()
         {
             TutorialProgress.Reset();
+            FeatureTutorialProgress.Reset();
             if (_hadValue)
                 PlayerPrefs.SetString(TutorialProgress.DefaultPlayerPrefsKey, _savedValue);
+            if (_hadFeatureValue)
+                PlayerPrefs.SetString(
+                    FeatureTutorialProgress.DefaultPlayerPrefsKey,
+                    _savedFeatureValue);
             PlayerPrefs.Save();
         }
 
@@ -86,6 +98,54 @@ namespace CrossDefense.Tests.EditMode
 
             Assert.That(state.Visible, Is.True);
             Assert.That(state.BlocksInput, Is.False);
+        }
+
+        [Test]
+        public void MergeStep_ExplainsTwoMatchingSlimes()
+        {
+            MethodInfo buildViewState = typeof(FirstRunTutorial).GetMethod(
+                "BuildViewState",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+            var state = (TutorialViewState)buildViewState.Invoke(
+                null,
+                new object[] { TutorialStep.Merge });
+
+            StringAssert.Contains("같은 종류·같은 성급", state.Body);
+            StringAssert.Contains("겹치면", state.Body);
+        }
+
+        [Test]
+        public void FeatureTutorialProgress_CompletesKindsIndependently()
+        {
+            FeatureTutorialProgress.Complete(FeatureTutorialKind.SkillUse);
+
+            Assert.That(
+                FeatureTutorialProgress.IsCompleted(FeatureTutorialKind.SkillUse),
+                Is.True);
+            Assert.That(
+                FeatureTutorialProgress.IsCompleted(FeatureTutorialKind.RelicEquip),
+                Is.False);
+        }
+
+        [Test]
+        public void RelicTutorial_ConnectsAcquireEquipAndUseInstructions()
+        {
+            TutorialViewState acquired = FeatureTutorialViewStates.Build(
+                FeatureTutorialKind.RelicAcquired,
+                "붉은 지팡이");
+            TutorialViewState equip = FeatureTutorialViewStates.Build(
+                FeatureTutorialKind.RelicEquip);
+            TutorialViewState use = FeatureTutorialViewStates.Build(
+                FeatureTutorialKind.RelicSkillUse);
+
+            StringAssert.Contains("붉은 지팡이", acquired.Body);
+            StringAssert.Contains("장착", acquired.Body);
+            StringAssert.Contains("스킬 탭", equip.Body);
+            StringAssert.Contains("사용", use.Title);
+            Assert.That(acquired.BlocksInput, Is.True);
+            Assert.That(equip.BlocksInput, Is.False);
+            Assert.That(use.BlocksInput, Is.False);
         }
     }
 }

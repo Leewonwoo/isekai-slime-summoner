@@ -67,6 +67,7 @@ namespace CrossDefense.Tests.EditMode
                     RunSessionProgression.DefaultPlayerPrefsKey,
                     WalletProgression.DefaultPlayerPrefsKey,
                     TutorialProgress.DefaultPlayerPrefsKey,
+                    FeatureTutorialProgress.DefaultPlayerPrefsKey,
                 },
                 PersistentProgressReset.PersistentKeys);
         }

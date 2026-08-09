@@ -21,6 +21,7 @@ namespace CrossDefense.Core
             RunSessionProgression.DefaultPlayerPrefsKey,
             WalletProgression.DefaultPlayerPrefsKey,
             TutorialProgress.DefaultPlayerPrefsKey,
+            FeatureTutorialProgress.DefaultPlayerPrefsKey,
         };
 
         public static IReadOnlyList<string> PersistentKeys => Keys;
