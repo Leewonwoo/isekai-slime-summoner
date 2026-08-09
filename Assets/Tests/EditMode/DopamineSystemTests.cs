@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Reflection;
 using CrossDefense.Core;
 using CrossDefense.Data;
 using CrossDefense.UI;
@@ -200,6 +201,32 @@ namespace CrossDefense.Tests.EditMode
             Assert.That(
                 speedButton.ClassListContains("speed-toggle-button--fast"),
                 Is.True);
+            controller.Dispose();
+        }
+
+        [Test]
+        public void FieldOverlayController_ToastDoesNotCancelGoldenGoblinHide()
+        {
+            var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/UI/UXML/FieldOverlay.uxml");
+            TemplateContainer root = tree.CloneTree();
+            var controller = new FieldOverlayController(root);
+
+            controller.SetGoldenGoblinState(new GoldenGoblinSnapshot(
+                GoldenGoblinState.Defeated,
+                0f,
+                0f,
+                50));
+            FieldInfo resetField = typeof(FieldOverlayController).GetField(
+                "_goldenGoblinReset",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            var reset = (IVisualElementScheduledItem)resetField?.GetValue(controller);
+
+            Assert.That(reset, Is.Not.Null);
+            Assert.That(reset.isActive, Is.True);
+            controller.ShowToast("새 슬라임 해금!");
+            Assert.That(reset.isActive, Is.True);
+
             controller.Dispose();
         }
 

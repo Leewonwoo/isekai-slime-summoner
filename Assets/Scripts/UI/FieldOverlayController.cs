@@ -111,7 +111,6 @@ namespace CrossDefense.UI
         public void ShowToast(string message)
         {
             _unlockToastReset?.Pause();
-            _goldenGoblinReset?.Pause();
             _unlockToast.text = message;
             _unlockToast.RemoveFromClassList("hidden");
             _unlockToastReset = _unlockToast.schedule.Execute(
@@ -128,6 +127,7 @@ namespace CrossDefense.UI
         {
             _comboMilestoneReset?.Pause();
             _unlockToastReset?.Pause();
+            _goldenGoblinReset?.Pause();
             _skillButton.clicked -= _skillClickHandler;
             for (int i = 0; i < _buffSkillButtons.Length; i++)
                 _buffSkillButtons[i].clicked -= _buffSkillClickHandlers[i];
