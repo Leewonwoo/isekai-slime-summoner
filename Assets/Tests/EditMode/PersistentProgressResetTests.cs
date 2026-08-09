@@ -1,8 +1,11 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using CrossDefense.Core;
+using CrossDefense.UI;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CrossDefense.Tests.EditMode
 {
@@ -70,6 +73,36 @@ namespace CrossDefense.Tests.EditMode
                     FeatureTutorialProgress.DefaultPlayerPrefsKey,
                 },
                 PersistentProgressReset.PersistentKeys);
+        }
+
+        [Test]
+        public void SettingsDataReset_RequiresTwoRequestsAndResetsConfirmationOnClose()
+        {
+            VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                "Assets/UI/UXML/SettingsModal.uxml");
+            Assert.That(tree, Is.Not.Null);
+            TemplateContainer root = tree.CloneTree();
+            var controller = new SettingsModalController(root);
+            int requestCount = 0;
+            controller.DataResetRequested += () => requestCount++;
+
+            controller.Show();
+            controller.RequestDataReset();
+
+            Button button = root.Q<Button>("settings-data-reset-button");
+            Label warning = root.Q<Label>("settings-data-reset-warning");
+            Assert.That(requestCount, Is.Zero);
+            Assert.That(button.text, Is.EqualTo("정말 초기화"));
+            Assert.That(warning.ClassListContains("hidden"), Is.False);
+
+            controller.RequestDataReset();
+            Assert.That(requestCount, Is.EqualTo(1));
+
+            controller.Hide();
+            controller.Show();
+            Assert.That(button.text, Is.EqualTo("데이터 초기화"));
+            Assert.That(warning.ClassListContains("hidden"), Is.True);
+            controller.Dispose();
         }
     }
 }

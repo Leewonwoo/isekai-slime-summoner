@@ -18,6 +18,9 @@ namespace CrossDefense.UI
         readonly Button _resetButton;
         readonly Button _continueButton;
         readonly Button _tutorialButton;
+        readonly Button _dataResetButton;
+        readonly Label _dataResetWarning;
+        bool _dataResetArmed;
 
         public bool IsVisible =>
             _overlay != null && !_overlay.ClassListContains("hidden");
@@ -25,6 +28,7 @@ namespace CrossDefense.UI
         public event Action CloseRequested;
         public event Action<float> EffectsVolumeChanged;
         public event Action TutorialReplayRequested;
+        public event Action DataResetRequested;
 
         public SettingsModalController(VisualElement root)
         {
@@ -37,6 +41,8 @@ namespace CrossDefense.UI
             _resetButton = root.Q<Button>("settings-reset-button");
             _continueButton = root.Q<Button>("settings-continue-button");
             _tutorialButton = root.Q<Button>("settings-tutorial-button");
+            _dataResetButton = root.Q<Button>("settings-data-reset-button");
+            _dataResetWarning = root.Q<Label>("settings-data-reset-warning");
 
             _musicSlider?.RegisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider?.RegisterValueChangedCallback(OnEffectsVolumeChanged);
@@ -48,6 +54,8 @@ namespace CrossDefense.UI
                 _continueButton.clicked += OnCloseClicked;
             if (_tutorialButton != null)
                 _tutorialButton.clicked += OnTutorialClicked;
+            if (_dataResetButton != null)
+                _dataResetButton.clicked += RequestDataReset;
 
             GameAudioSettings.ApplyStoredSettings();
             SyncControls();
@@ -56,6 +64,7 @@ namespace CrossDefense.UI
 
         public void Show()
         {
+            ResetDataResetConfirmation();
             SyncControls();
             if (_overlay == null)
                 return;
@@ -65,6 +74,7 @@ namespace CrossDefense.UI
 
         public void Hide()
         {
+            ResetDataResetConfirmation();
             if (_overlay == null)
                 return;
             _overlay.AddToClassList("hidden");
@@ -84,6 +94,8 @@ namespace CrossDefense.UI
                 _continueButton.clicked -= OnCloseClicked;
             if (_tutorialButton != null)
                 _tutorialButton.clicked -= OnTutorialClicked;
+            if (_dataResetButton != null)
+                _dataResetButton.clicked -= RequestDataReset;
         }
 
         void SyncControls()
@@ -119,6 +131,36 @@ namespace CrossDefense.UI
 
         void OnCloseClicked() => CloseRequested?.Invoke();
         void OnTutorialClicked() => TutorialReplayRequested?.Invoke();
+
+        public void RequestDataReset()
+        {
+            if (!_dataResetArmed)
+            {
+                _dataResetArmed = true;
+                if (_dataResetButton != null)
+                {
+                    _dataResetButton.text = "정말 초기화";
+                    _dataResetButton.AddToClassList(
+                        "settings-modal__data-reset-button--armed");
+                }
+                _dataResetWarning?.RemoveFromClassList("hidden");
+                return;
+            }
+
+            DataResetRequested?.Invoke();
+        }
+
+        void ResetDataResetConfirmation()
+        {
+            _dataResetArmed = false;
+            if (_dataResetButton != null)
+            {
+                _dataResetButton.text = "데이터 초기화";
+                _dataResetButton.RemoveFromClassList(
+                    "settings-modal__data-reset-button--armed");
+            }
+            _dataResetWarning?.AddToClassList("hidden");
+        }
 
         static void SetSliderWithoutNotify(Slider slider, float normalized)
         {

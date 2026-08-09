@@ -28,6 +28,14 @@
             </VisualElement>
             <Label class="settings-modal__hint" text="음량은 변경 즉시 적용됩니다." picking-mode="Ignore" />
             <Button name="settings-tutorial-button" class="btn settings-modal__tutorial-button" text="다음 도전에서 튜토리얼 다시 보기" />
+            <VisualElement class="settings-modal__data-reset">
+                <VisualElement class="settings-modal__data-reset-copy" picking-mode="Ignore">
+                    <Label class="settings-modal__data-reset-title" text="테스트 데이터" />
+                    <Label class="settings-modal__data-reset-description" text="레벨·골드·도감·장비·신물·튜토리얼과 현재 도전을 처음 상태로 되돌립니다." />
+                </VisualElement>
+                <Button name="settings-data-reset-button" class="btn settings-modal__data-reset-button" text="데이터 초기화" />
+            </VisualElement>
+            <Label name="settings-data-reset-warning" class="settings-modal__data-reset-warning hidden" text="삭제한 데이터는 복구할 수 없습니다. 한 번 더 누르면 즉시 초기화하고 다시 시작합니다." picking-mode="Ignore" />
             <VisualElement class="settings-modal__actions">
                 <Button name="settings-reset-button" class="btn settings-modal__button settings-modal__button--reset" text="기본값" />
                 <Button name="settings-continue-button" class="btn btn--primary settings-modal__button" text="계속하기" />

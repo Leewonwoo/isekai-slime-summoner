@@ -188,6 +188,64 @@
     margin-top: var(--gap-lg);
 }
 
+.settings-modal__data-reset {
+    width: 100%;
+    min-height: 132px;
+    margin-top: var(--gap-md);
+    padding-left: var(--gap-lg);
+    padding-right: var(--gap-md);
+    padding-top: var(--gap-md);
+    padding-bottom: var(--gap-md);
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(47, 17, 17, 0.72);
+    border-width: 2px;
+    border-color: rgba(255, 82, 82, 0.65);
+    border-radius: var(--radius-md);
+}
+
+.settings-modal__data-reset-copy {
+    flex-grow: 1;
+    min-width: 0;
+    margin-right: var(--gap-md);
+}
+
+.settings-modal__data-reset-title {
+    color: var(--color-danger);
+    font-size: var(--font-caption);
+    -unity-font-style: bold;
+}
+
+.settings-modal__data-reset-description {
+    margin-top: var(--gap-xs);
+    color: var(--color-text-dim);
+    font-size: var(--font-small);
+    white-space: normal;
+}
+
+.settings-modal__data-reset-button {
+    width: 190px;
+    min-height: var(--touch-min);
+    flex-shrink: 0;
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+.settings-modal__data-reset-button--armed {
+    color: var(--color-text);
+    background-color: rgb(132, 38, 38);
+}
+
+.settings-modal__data-reset-warning {
+    width: 100%;
+    margin-top: var(--gap-sm);
+    color: var(--color-danger);
+    font-size: var(--font-small);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
 .settings-modal__actions {
     width: 100%;
     margin-top: auto;

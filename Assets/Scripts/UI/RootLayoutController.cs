@@ -81,6 +81,7 @@ namespace CrossDefense.UI
             SettingsModal.CloseRequested += OnSettingsCloseRequested;
             SettingsModal.EffectsVolumeChanged += OnEffectsVolumeChanged;
             SettingsModal.TutorialReplayRequested += OnTutorialReplayRequested;
+            SettingsModal.DataResetRequested += OnDataResetRequested;
             TutorialOverlay.ContinueRequested += OnTutorialContinueRequested;
             TutorialOverlay.SkipRequested += OnTutorialSkipRequested;
             SummonUnitDetail.LevelUpRequested += OnSlimeLevelUpRequested;
@@ -236,6 +237,7 @@ namespace CrossDefense.UI
                 SettingsModal.CloseRequested -= OnSettingsCloseRequested;
                 SettingsModal.EffectsVolumeChanged -= OnEffectsVolumeChanged;
                 SettingsModal.TutorialReplayRequested -= OnTutorialReplayRequested;
+                SettingsModal.DataResetRequested -= OnDataResetRequested;
                 SettingsModal.Dispose();
             }
             if (TutorialOverlay != null)
@@ -511,6 +513,20 @@ namespace CrossDefense.UI
 
         void OnEffectsVolumeChanged(float volume) =>
             _gameManager?.SetEffectsVolume(volume);
+
+        void OnDataResetRequested()
+        {
+            SettingsModal?.Hide();
+            _gameManager?.SetGameplayPause(GameplayPauseReason.Settings, false);
+            if (_gameManager != null)
+            {
+                _gameManager.ResetAllProgressAndRestart();
+                return;
+            }
+
+            int deletedCount = PersistentProgressReset.ResetNow();
+            FieldOverlay?.ShowToast($"테스트 데이터 초기화 완료 ({deletedCount}개)");
+        }
 
         void OnTutorialContinueRequested()
         {
