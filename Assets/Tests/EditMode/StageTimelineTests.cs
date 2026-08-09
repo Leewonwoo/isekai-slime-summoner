@@ -22,6 +22,23 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void DefaultStageBalance_IncreasesEnemyPressure()
+        {
+            StageBalanceProfile profile = AssetDatabase.LoadAssetAtPath<StageBalanceProfile>(
+                "Assets/Data/StageBalance_Default.asset");
+            StageTimeline timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(
+                "Assets/Data/StageTimelines/Stage_01.asset");
+
+            Assert.That(profile, Is.Not.Null);
+            Assert.That(timeline, Is.Not.Null);
+            Assert.That(timeline.BalanceProfile, Is.SameAs(profile));
+            Assert.That(profile.HpMultiplier, Is.EqualTo(1.15f).Within(0.001f));
+            Assert.That(profile.SpeedMultiplier, Is.EqualTo(1.05f).Within(0.001f));
+            Assert.That(profile.SpawnIntervalMultiplier, Is.EqualTo(0.9f).Within(0.001f));
+            Assert.That(profile.RewardMultiplier, Is.EqualTo(1f).Within(0.001f));
+        }
+
+        [Test]
         public void PrototypeTimeline_ValidatesWithoutErrors()
         {
             var timeline = StageTimeline.CreatePrototype(3);

@@ -420,7 +420,9 @@ namespace CrossDefense.Core
                 : _effectiveMaxCoreHp;
             _wallet = WalletProgression.CreatePersistent(Mathf.Max(0, startingGold));
             _gold = _wallet.Gold;
-            _summonContracts = Mathf.Max(0, startingSummonContracts);
+            _summonContracts = ResolveStartingSummonContracts(
+                checkpoint,
+                startingSummonContracts);
             _phase = RunPhase.Prepare;
 
             if (summoner != null && summoner.TryGetComponent(out _summonerRenderer))
@@ -1286,7 +1288,7 @@ namespace CrossDefense.Core
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = 0,
                 gold = Mathf.Max(0, _gold),
-                summonContracts = Mathf.Max(0, startingSummonContracts),
+                summonContracts = Mathf.Max(0, _summonContracts),
                 coreHp = Mathf.Max(0f, _effectiveMaxCoreHp),
                 coreHpRatio = 1f,
                 runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
@@ -1297,6 +1299,15 @@ namespace CrossDefense.Core
             // Scene destruction must not overwrite the death checkpoint with the defeated roster.
             _suppressRunSessionSave = true;
         }
+
+        internal static int ResolveStartingSummonContracts(
+            RunSessionSaveData checkpoint,
+            int startingAmount) =>
+            Mathf.Max(
+                0,
+                checkpoint?.healthCheckpointVersion > 0
+                    ? checkpoint.summonContracts
+                    : startingAmount);
 
         void ClearRunSession()
         {

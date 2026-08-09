@@ -319,6 +319,54 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void RelicProgression_ReportsAcquireAndEquipForTutorials()
+        {
+            RelicCatalog catalog = Track(RelicCatalog.CreateRuntimeDefault());
+            var relics = new RelicProgression(catalog);
+            RelicFamily acquiredFamily = RelicFamily.None;
+            int acquiredRank = 0;
+            RelicFamily equippedFamily = RelicFamily.None;
+            relics.Acquired += (family, rank) =>
+            {
+                acquiredFamily = family;
+                acquiredRank = rank;
+            };
+            relics.Equipped += family => equippedFamily = family;
+
+            Assert.That(relics.TryAcquire(RelicFamily.Fire), Is.True);
+            Assert.That(relics.TryEquip(RelicFamily.Fire), Is.True);
+
+            Assert.That(acquiredFamily, Is.EqualTo(RelicFamily.Fire));
+            Assert.That(acquiredRank, Is.EqualTo(1));
+            Assert.That(equippedFamily, Is.EqualTo(RelicFamily.Fire));
+        }
+
+        [Test]
+        public void DeathRestart_PreservesAccumulatedSummonContracts()
+        {
+            var defeatedCheckpoint = new RunSessionSaveData
+            {
+                healthCheckpointVersion = 1,
+                coreHpRatio = 0f,
+                summonContracts = 13,
+            };
+
+            int restored = GameManager.ResolveStartingSummonContracts(
+                defeatedCheckpoint,
+                4);
+
+            Assert.That(restored, Is.EqualTo(13));
+            Assert.That(
+                GameManager.ResolveStartingSummonContracts(null, 4),
+                Is.EqualTo(4));
+            Assert.That(
+                GameManager.ResolveStartingSummonContracts(
+                    new RunSessionSaveData { summonContracts = 13 },
+                    4),
+                Is.EqualTo(4));
+        }
+
+        [Test]
         public void RushClearGold_IsGrantedExactlyOncePerWave()
         {
             GameObject host = Track(new GameObject("rush-bonus-test-host"));

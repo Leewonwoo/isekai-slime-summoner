@@ -33,21 +33,6 @@ namespace CrossDefense.Data
         public float SizeMultiplier => Mathf.Max(0.1f, sizeMultiplier);
     }
 
-    /// <summary>Reusable stage-wide balance knobs. Assign one profile to many stages to tune them together.</summary>
-    [CreateAssetMenu(fileName = "StageBalanceProfile", menuName = "Isekai Slime Summoner/Data/Stage Balance Profile", order = 11)]
-    public sealed class StageBalanceProfile : ScriptableObject
-    {
-        [Min(0.01f)] [SerializeField] float hpMultiplier = 1f;
-        [Min(0.01f)] [SerializeField] float speedMultiplier = 1f;
-        [Min(0.01f)] [SerializeField] float rewardMultiplier = 1f;
-        [Min(0.01f)] [SerializeField] float spawnIntervalMultiplier = 1f;
-
-        public float HpMultiplier => hpMultiplier;
-        public float SpeedMultiplier => speedMultiplier;
-        public float RewardMultiplier => rewardMultiplier;
-        public float SpawnIntervalMultiplier => spawnIntervalMultiplier;
-    }
-
     [Serializable]
     public sealed class DirectionWeightSet
     {
