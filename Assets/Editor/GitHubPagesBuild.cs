@@ -14,7 +14,7 @@ namespace CrossDefense.Editor
         const string OutputDirectoryName = "PagesBuild";
         const int WebWidth = 1080;
         const int WebHeight = 1920;
-        const string LayoutVersion = "9x16-1080x1920-v1";
+        const string LayoutVersion = "9x16-1080x1920-korean-v1";
 
         const string ResponsiveStyle = @"
 
@@ -134,6 +134,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
             index = index.Replace(
                 "href=\"TemplateData/style.css\"",
                 $"href=\"TemplateData/style.css?v={LayoutVersion}\"");
+            index = index.Replace(
+                "dataUrl: buildUrl + \"/PagesBuild.data.unityweb\"",
+                $"dataUrl: buildUrl + \"/PagesBuild.data.unityweb?v={LayoutVersion}\"");
             File.WriteAllText(indexPath, index);
 
             string stylePath = Path.Combine(outputDirectory, "TemplateData", "style.css");
