@@ -303,7 +303,10 @@ namespace CrossDefense.Data
 
         public float GetMonsterHpMultiplier(StageWave wave, MonsterSpawnEntry spawn)
         {
-            return GetProfileValue(profile => profile.HpMultiplier) * wave.HpMultiplier * spawn.HpMultiplier;
+            return GetProfileValue(profile => profile.HpMultiplier) *
+                   wave.HpMultiplier *
+                   spawn.HpMultiplier *
+                   GetLateWaveHpPressureMultiplier(wave);
         }
 
         public float GetMonsterSpeedMultiplier(StageWave wave, MonsterSpawnEntry spawn)
@@ -312,7 +315,9 @@ namespace CrossDefense.Data
         }
 
         public float GetGoldenGoblinHpMultiplier(StageWave wave) =>
-            GetProfileValue(profile => profile.HpMultiplier) * wave.HpMultiplier;
+            GetProfileValue(profile => profile.HpMultiplier) *
+            wave.HpMultiplier *
+            GetLateWaveHpPressureMultiplier(wave);
 
         public float GetGoldenGoblinSpeedMultiplier(StageWave wave) =>
             GetProfileValue(profile => profile.SpeedMultiplier) * wave.SpeedMultiplier;
@@ -320,6 +325,15 @@ namespace CrossDefense.Data
         public float GetSpawnInterval(StageWave wave, MonsterSpawnEntry spawn)
         {
             return spawn.SpawnInterval * GetProfileValue(profile => profile.SpawnIntervalMultiplier);
+        }
+
+        float GetLateWaveHpPressureMultiplier(StageWave wave)
+        {
+            int waveIndex = waves?.IndexOf(wave) ?? -1;
+            int wavesPastBeginnerSection = Mathf.Max(0, waveIndex + 1 - 10);
+            return 1f +
+                   wavesPastBeginnerSection * 0.02f +
+                   wavesPastBeginnerSection * wavesPastBeginnerSection * 0.001f;
         }
 
         public SpawnZone ChooseSpawnZone(StageWave wave, System.Random random)

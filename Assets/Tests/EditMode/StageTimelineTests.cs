@@ -57,6 +57,32 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void Stage01_AfterWaveTenHpPressureAcceleratesForPersistentBuilds()
+        {
+            StageTimeline timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(
+                "Assets/Data/StageTimelines/Stage_01.asset");
+
+            Assert.That(timeline, Is.Not.Null);
+            Assert.That(timeline.BalanceProfile, Is.Not.Null);
+
+            float PressureAt(int waveNumber)
+            {
+                StageWave wave = timeline.Waves[waveNumber - 1];
+                MonsterSpawnEntry spawn = wave.MonsterSpawns[0];
+                float baseMultiplier = timeline.BalanceProfile.HpMultiplier *
+                                       wave.HpMultiplier *
+                                       spawn.HpMultiplier;
+                return timeline.GetMonsterHpMultiplier(wave, spawn) / baseMultiplier;
+            }
+
+            Assert.That(PressureAt(10), Is.EqualTo(1f).Within(0.001f));
+            Assert.That(PressureAt(20), Is.EqualTo(1.3f).Within(0.001f));
+            Assert.That(PressureAt(30), Is.EqualTo(1.8f).Within(0.001f));
+            Assert.That(PressureAt(40), Is.EqualTo(2.5f).Within(0.001f));
+            Assert.That(PressureAt(50), Is.EqualTo(3.4f).Within(0.001f));
+        }
+
+        [Test]
         public void PrototypeTimeline_ValidatesWithoutErrors()
         {
             var timeline = StageTimeline.CreatePrototype(3);

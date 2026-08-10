@@ -14,7 +14,7 @@ namespace CrossDefense.Editor
         const string OutputDirectoryName = "PagesBuild";
         const int WebWidth = 1080;
         const int WebHeight = 1920;
-        const string LayoutVersion = "9x16-1080x1920-gameplay-v2";
+        const string LayoutVersion = "9x16-1080x1920-trait-korean-v2";
 
         const string ResponsiveStyle = @"
 
