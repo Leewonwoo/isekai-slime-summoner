@@ -12,22 +12,22 @@ namespace CrossDefense.Editor
     public static class GitHubPagesBuild
     {
         const string OutputDirectoryName = "PagesBuild";
-        const int WebWidth = 1280;
-        const int WebHeight = 720;
-        const string LayoutVersion = "16x9-v1";
+        const int WebWidth = 720;
+        const int WebHeight = 1280;
+        const string LayoutVersion = "9x16-v1";
 
         const string ResponsiveStyle = @"
 
-/* GitHub Pages: keep the game canvas centered at a responsive 16:9 ratio. */
+/* GitHub Pages: keep the game canvas centered at a responsive 9:16 ratio. */
 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 #unity-container.unity-desktop,
 #unity-container.unity-mobile {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: min(100vw, calc(100vh * 16 / 9));
+  width: min(100vw, calc(100vh * 9 / 16));
   height: auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16;
   transform: translate(-50%, -50%);
 }
 #unity-canvas,

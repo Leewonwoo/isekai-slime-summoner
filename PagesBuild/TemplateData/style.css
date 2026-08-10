@@ -16,16 +16,16 @@ body { padding: 0; margin: 0 }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
 
 
-/* GitHub Pages: keep the game canvas centered at a responsive 16:9 ratio. */
+/* GitHub Pages: keep the game canvas centered at a responsive 9:16 ratio. */
 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 #unity-container.unity-desktop,
 #unity-container.unity-mobile {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: min(100vw, calc(100vh * 16 / 9));
+  width: min(100vw, calc(100vh * 9 / 16));
   height: auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16;
   transform: translate(-50%, -50%);
 }
 #unity-canvas,
