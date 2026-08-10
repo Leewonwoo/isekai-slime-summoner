@@ -12,7 +12,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest/download/IsekaiSlimeSummoner.apk"><strong>⬇ Android APK 다운로드</strong></a>
+  <a href="https://leewonwoo.github.io/isekai-slime-summoner/"><strong>🎮 WebGL 게임 바로 실행</strong></a>
+  ·
+  <a href="https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest/download/IsekaiSlimeSummoner.apk">Android APK 다운로드</a>
   ·
   <a href="https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest">릴리스 정보</a>
 </p>
@@ -25,7 +27,13 @@ NAN 2026(NHN Game × AI Hackathon) 사전 과제를 위해 제작한 1인 Unity 
 
 장르는 **자유 배치 소환 디펜스 × 로그라이크 × 키우기**입니다. AI는 코드·에셋·밸런싱·문서 제작을 돕는 개발 도구로만 사용하며, 게임 실행 중 LLM API를 호출하지 않습니다.
 
-> 현재 주 빌드 타깃은 Android APK입니다. WebGL 정적 빌드도 `PagesBuild/`에 준비되어 있지만, 저장소가 비공개인 동안에는 GitHub Pages 공개 주소가 활성화되지 않습니다.
+## 게임 실행
+
+**설치 없이 플레이하려면 [GitHub Pages WebGL 버전](https://leewonwoo.github.io/isekai-slime-summoner/)을 이용하는 것을 권장합니다.** PC와 모바일 브라우저에서 링크를 열면 바로 실행할 수 있습니다.
+
+Android APK는 [GitHub Releases](https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest)에서도 받을 수 있지만, Google Play 외부에서 배포되는 APK 특성상 일부 기기에서는 Google Play Protect의 **앱 차단 또는 기기 보호 경고**가 표시되거나 설치가 완료되지 않을 수 있습니다. APK 다운로드·설치가 되지 않는 경우에는 기기 설정을 변경하지 말고 위 WebGL 링크로 접속해 주세요.
+
+> 권장 실행 경로: **WebGL 바로 실행** → APK 설치가 꼭 필요한 경우에만 Release APK 사용
 
 ## 게임 핵심 루프
 
@@ -68,8 +76,8 @@ NAN 2026(NHN Game × AI Hackathon) 사전 과제를 위해 제작한 1인 Unity 
 | 입력·UI | Unity Input System, UI Toolkit, 월드 `SpriteRenderer` |
 | 데이터 | ScriptableObject 기반 웨이브·유닛·성장·보상 카탈로그 |
 | 런타임 | 몬스터·소환수·투사체 오브젝트 풀링, 규칙 기반 전투 AI |
-| Android | Portrait, IL2CPP, APK |
-| Web | Unity WebGL, Gzip + Decompression Fallback |
+| Android | Portrait, IL2CPP, APK (기기에 따라 Play Protect 설치 제한 가능) |
+| Web | Unity WebGL, Gzip + Decompression Fallback, GitHub Pages 배포 |
 | 패키지 ID | `com.nenestudio.isekaislimesummoner` |
 
 ## 시작하기
@@ -185,6 +193,6 @@ tools/          # 이미지·오디오 가공 도구
 
 - 개발 기간: `2026-07-11` ~ `2026-08-10`
 - 개발 형태: 1인 개발
-- 주 배포물: Android APK
-- 보조 배포물: Unity WebGL 정적 빌드
+- 주 배포물: [GitHub Pages WebGL 버전](https://leewonwoo.github.io/isekai-slime-summoner/)
+- 보조 배포물: Android APK (GitHub Releases)
 - 현재 단계: 기능 동결 후 폴리싱·밸런싱·제출 문서 정리

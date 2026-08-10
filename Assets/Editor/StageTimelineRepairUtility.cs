@@ -86,7 +86,8 @@ namespace CrossDefense.EditorTools
             wave.FindPropertyRelative("label").stringValue = isBoss ? $"Wave {waveNumber} - BOSS" : $"Wave {waveNumber}";
             wave.FindPropertyRelative("isBoss").boolValue = isBoss;
             wave.FindPropertyRelative("preparationTime").floatValue = Mathf.Max(2.5f, 5f - index * 0.05f);
-            wave.FindPropertyRelative("hpMultiplier").floatValue = 1f + index * 0.085f;
+            wave.FindPropertyRelative("hpMultiplier").floatValue =
+                index < 10 ? 0.5f + index * 0.075f : 1f + index * 0.085f;
             wave.FindPropertyRelative("speedMultiplier").floatValue = 1f + index * 0.006f;
             wave.FindPropertyRelative("summonContractReward").intValue = waveNumber == 50 ? 0 : isBoss ? 2 : 1;
 
@@ -118,7 +119,17 @@ namespace CrossDefense.EditorTools
             for (int i = 0; i < normalSpawnCount; i++)
             {
                 var monster = PickMonster(index, i);
-                int count = Mathf.Clamp(6 + index / 2 + i, 6, 12);
+                int count;
+                if (index < 10)
+                {
+                    int[] earlyTotals = { 3, 4, 4, 5, 5, 6, 10, 24, 14, 16 };
+                    int total = earlyTotals[index];
+                    count = total / normalSpawnCount + (i < total % normalSpawnCount ? 1 : 0);
+                }
+                else
+                {
+                    count = Mathf.Clamp(6 + index / 2 + i, 6, 12);
+                }
                 float interval = Mathf.Max(0.34f, 0.52f - index * 0.0035f + i * 0.05f);
                 SetSpawn(spawns.GetArrayElementAtIndex(i), monster, count, interval, 1.5f, 1f, 1f);
             }
@@ -127,7 +138,9 @@ namespace CrossDefense.EditorTools
             {
                 int bossSlot = spawns.arraySize - 1;
                 var boss = LoadMonster(BossMonsters[(index / 5) % BossMonsters.Length]);
-                float hpMultiplier = 3f + (index / 5) * 0.3f;
+                float hpMultiplier = index < 10
+                    ? (index < 5 ? 2.25f : 2.5f)
+                    : 3f + (index / 5) * 0.3f;
                 SetSpawn(spawns.GetArrayElementAtIndex(bossSlot), boss, 1, 1.25f, 3f, hpMultiplier, 6f);
             }
         }

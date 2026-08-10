@@ -39,6 +39,24 @@ namespace CrossDefense.Tests.EditMode
         }
 
         [Test]
+        public void Stage01_FirstTenWavesUseBeginnerDifficultyCurve()
+        {
+            StageTimeline timeline = AssetDatabase.LoadAssetAtPath<StageTimeline>(
+                "Assets/Data/StageTimelines/Stage_01.asset");
+            int[] expectedMonsterCounts = { 3, 4, 4, 5, 6, 6, 10, 24, 14, 17 };
+
+            Assert.That(timeline, Is.Not.Null);
+            for (int index = 0; index < expectedMonsterCounts.Length; index++)
+            {
+                Assert.That(timeline.TryGetWave(index, out StageWave wave), Is.True);
+                Assert.That(wave.HpMultiplier, Is.LessThanOrEqualTo(1.2f));
+                Assert.That(wave.TotalMonsterCount, Is.EqualTo(expectedMonsterCounts[index]));
+            }
+
+            Assert.That(timeline.Waves[0].HpMultiplier, Is.EqualTo(0.5f).Within(0.001f));
+        }
+
+        [Test]
         public void PrototypeTimeline_ValidatesWithoutErrors()
         {
             var timeline = StageTimeline.CreatePrototype(3);

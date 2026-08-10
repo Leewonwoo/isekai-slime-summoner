@@ -1288,7 +1288,9 @@ namespace CrossDefense.Core
                 stageId = stageTimeline?.StageId ?? string.Empty,
                 waveIndex = 0,
                 gold = Mathf.Max(0, _gold),
-                summonContracts = Mathf.Max(0, _summonContracts),
+                summonContracts = ResolveRestartSummonContracts(
+                    _summonContracts,
+                    startingSummonContracts),
                 coreHp = Mathf.Max(0f, _effectiveMaxCoreHp),
                 coreHpRatio = 1f,
                 runRelicIds = _runRelics?.CaptureOwnedIds() ?? new List<string>(),
@@ -1308,6 +1310,11 @@ namespace CrossDefense.Core
                 checkpoint?.healthCheckpointVersion > 0
                     ? checkpoint.summonContracts
                     : startingAmount);
+
+        internal static int ResolveRestartSummonContracts(
+            int currentAmount,
+            int startingAmount) =>
+            Mathf.Max(0, Mathf.Max(currentAmount, startingAmount));
 
         void ClearRunSession()
         {

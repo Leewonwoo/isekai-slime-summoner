@@ -37,7 +37,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 5
-    hpMultiplier: 1
+    hpMultiplier: 0.5
     speedMultiplier: 1
     summonContractReward: 1
     clearGoldBonus: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
-      count: 6
+      count: 3
       spawnInterval: 0.52
       hpMultiplier: 1
       speedMultiplier: 1
@@ -65,7 +65,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.95
-    hpMultiplier: 1.085
+    hpMultiplier: 0.575
     speedMultiplier: 1.006
     summonContractReward: 1
     clearGoldBonus: 0
@@ -83,7 +83,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
-      count: 6
+      count: 4
       spawnInterval: 0.5165
       hpMultiplier: 1
       speedMultiplier: 1
@@ -93,7 +93,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.9
-    hpMultiplier: 1.17
+    hpMultiplier: 0.65
     speedMultiplier: 1.012
     summonContractReward: 1
     clearGoldBonus: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 6d47bd667a488fe409a1d9cb145da14a, type: 2}
-      count: 7
+      count: 4
       spawnInterval: 0.51299995
       hpMultiplier: 1
       speedMultiplier: 1
@@ -121,7 +121,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.85
-    hpMultiplier: 1.255
+    hpMultiplier: 0.725
     speedMultiplier: 1.018
     summonContractReward: 1
     clearGoldBonus: 0
@@ -139,7 +139,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
-      count: 7
+      count: 5
       spawnInterval: 0.50949997
       hpMultiplier: 1
       speedMultiplier: 1
@@ -149,7 +149,7 @@ MonoBehaviour:
     kind: 1
     isBoss: 1
     preparationTime: 4.8
-    hpMultiplier: 1.34
+    hpMultiplier: 0.8
     speedMultiplier: 1.024
     summonContractReward: 2
     clearGoldBonus: 0
@@ -167,7 +167,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
-      count: 8
+      count: 5
       spawnInterval: 0.506
       hpMultiplier: 1
       speedMultiplier: 1
@@ -176,7 +176,7 @@ MonoBehaviour:
     - monster: {fileID: 11400000, guid: ae19594e0fdae4a4fabc5c92f68cdb7b, type: 2}
       count: 1
       spawnInterval: 1.25
-      hpMultiplier: 3
+      hpMultiplier: 2.25
       speedMultiplier: 1
       rewardMultiplier: 6
       sizeMultiplier: 3
@@ -184,7 +184,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.75
-    hpMultiplier: 1.425
+    hpMultiplier: 0.875
     speedMultiplier: 1.03
     summonContractReward: 1
     clearGoldBonus: 0
@@ -202,7 +202,7 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
-      count: 8
+      count: 6
       spawnInterval: 0.5025
       hpMultiplier: 1
       speedMultiplier: 1
@@ -212,7 +212,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.7
-    hpMultiplier: 1.51
+    hpMultiplier: 0.95
     speedMultiplier: 1.036
     summonContractReward: 1
     clearGoldBonus: 0
@@ -230,14 +230,14 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 6d47bd667a488fe409a1d9cb145da14a, type: 2}
-      count: 9
+      count: 5
       spawnInterval: 0.49899998
       hpMultiplier: 1
       speedMultiplier: 1
       rewardMultiplier: 1
       sizeMultiplier: 1.5
     - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
-      count: 10
+      count: 5
       spawnInterval: 0.54899997
       hpMultiplier: 1
       speedMultiplier: 1
@@ -247,7 +247,7 @@ MonoBehaviour:
     kind: 2
     isBoss: 0
     preparationTime: 4.65
-    hpMultiplier: 1.595
+    hpMultiplier: 1.025
     speedMultiplier: 1.042
     summonContractReward: 1
     clearGoldBonus: 40
@@ -265,14 +265,14 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 39e17774d253dd44c9ea08878934a45d, type: 2}
-      count: 23
+      count: 12
       spawnInterval: 0.17342499
       hpMultiplier: 1
       speedMultiplier: 1
       rewardMultiplier: 1
       sizeMultiplier: 1.5
     - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
-      count: 25
+      count: 12
       spawnInterval: 0.19092499
       hpMultiplier: 1
       speedMultiplier: 1
@@ -282,7 +282,7 @@ MonoBehaviour:
     kind: 0
     isBoss: 0
     preparationTime: 4.6
-    hpMultiplier: 1.6800001
+    hpMultiplier: 1.1
     speedMultiplier: 1.048
     summonContractReward: 1
     clearGoldBonus: 0
@@ -300,14 +300,14 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: a2beec4bf57af7d45b54e2a179723620, type: 2}
-      count: 10
+      count: 7
       spawnInterval: 0.49199998
       hpMultiplier: 1
       speedMultiplier: 1
       rewardMultiplier: 1
       sizeMultiplier: 1.5
     - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
-      count: 11
+      count: 7
       spawnInterval: 0.542
       hpMultiplier: 1
       speedMultiplier: 1
@@ -317,7 +317,7 @@ MonoBehaviour:
     kind: 1
     isBoss: 1
     preparationTime: 4.55
-    hpMultiplier: 1.765
+    hpMultiplier: 1.175
     speedMultiplier: 1.054
     summonContractReward: 2
     clearGoldBonus: 0
@@ -335,14 +335,14 @@ MonoBehaviour:
       west: 0
     monsterSpawns:
     - monster: {fileID: 11400000, guid: 918ff8f25748d4446bd6326daf4784a2, type: 2}
-      count: 10
+      count: 8
       spawnInterval: 0.48849997
       hpMultiplier: 1
       speedMultiplier: 1
       rewardMultiplier: 1
       sizeMultiplier: 1.5
     - monster: {fileID: 11400000, guid: 6d47bd667a488fe409a1d9cb145da14a, type: 2}
-      count: 11
+      count: 8
       spawnInterval: 0.53849995
       hpMultiplier: 1
       speedMultiplier: 1
@@ -351,7 +351,7 @@ MonoBehaviour:
     - monster: {fileID: 11400000, guid: a39e18a2c4680924d937d4aaf86aa6f6, type: 2}
       count: 1
       spawnInterval: 1.25
-      hpMultiplier: 3.3
+      hpMultiplier: 2.5
       speedMultiplier: 1
       rewardMultiplier: 6
       sizeMultiplier: 3

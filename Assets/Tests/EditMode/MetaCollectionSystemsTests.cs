@@ -364,6 +364,9 @@ namespace CrossDefense.Tests.EditMode
                     new RunSessionSaveData { summonContracts = 13 },
                     4),
                 Is.EqualTo(4));
+            Assert.That(GameManager.ResolveRestartSummonContracts(0, 4), Is.EqualTo(4));
+            Assert.That(GameManager.ResolveRestartSummonContracts(3, 4), Is.EqualTo(4));
+            Assert.That(GameManager.ResolveRestartSummonContracts(13, 4), Is.EqualTo(13));
         }
 
         [Test]
