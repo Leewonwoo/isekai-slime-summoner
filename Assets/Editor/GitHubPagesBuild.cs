@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -11,6 +12,31 @@ namespace CrossDefense.Editor
     public static class GitHubPagesBuild
     {
         const string OutputDirectoryName = "PagesBuild";
+        const int WebWidth = 1280;
+        const int WebHeight = 720;
+
+        const string ResponsiveStyle = @"
+
+/* GitHub Pages: keep the game canvas centered at a responsive 16:9 ratio. */
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+#unity-container.unity-desktop,
+#unity-container.unity-mobile {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+  transform: translate(-50%, -50%);
+}
+#unity-canvas,
+#unity-canvas.unity-mobile {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+#unity-footer { display: none; }
+";
 
         public static void BuildFromCommandLine()
         {
@@ -74,6 +100,7 @@ namespace CrossDefense.Editor
                         $"GitHub Pages WebGL build failed: {report.summary.result}, " +
                         $"errors={report.summary.totalErrors}");
 
+                ApplyResponsiveLayout(outputDirectory);
                 File.WriteAllText(Path.Combine(outputDirectory, ".nojekyll"), string.Empty);
                 Debug.Log(
                     $"[CrossDefense] GitHub Pages build succeeded: " +
@@ -86,6 +113,24 @@ namespace CrossDefense.Editor
                 PlayerSettings.WebGL.dataCaching = previousCaching;
                 AssetDatabase.SaveAssets();
             }
+        }
+
+        static void ApplyResponsiveLayout(string outputDirectory)
+        {
+            string indexPath = Path.Combine(outputDirectory, "index.html");
+            string index = File.ReadAllText(indexPath);
+            index = Regex.Replace(
+                index,
+                @"<canvas id=""unity-canvas"" width=\d+ height=\d+",
+                $"<canvas id=\"unity-canvas\" width={WebWidth} height={WebHeight}");
+            index = Regex.Replace(
+                index,
+                @"canvas\.style\.width = ""\d+px"";\s*canvas\.style\.height = ""\d+px"";",
+                "canvas.style.width = \"100%\";\n        canvas.style.height = \"100%\";");
+            File.WriteAllText(indexPath, index);
+
+            string stylePath = Path.Combine(outputDirectory, "TemplateData", "style.css");
+            File.AppendAllText(stylePath, ResponsiveStyle);
         }
     }
 }
