@@ -12,9 +12,9 @@ namespace CrossDefense.Editor
     public static class GitHubPagesBuild
     {
         const string OutputDirectoryName = "PagesBuild";
-        const int WebWidth = 720;
-        const int WebHeight = 1280;
-        const string LayoutVersion = "9x16-v1";
+        const int WebWidth = 1080;
+        const int WebHeight = 1920;
+        const string LayoutVersion = "9x16-1080x1920-v1";
 
         const string ResponsiveStyle = @"
 
@@ -128,6 +128,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
                 index,
                 @"canvas\.style\.width = ""\d+px"";\s*canvas\.style\.height = ""\d+px"";",
                 "canvas.style.width = \"100%\";\n        canvas.style.height = \"100%\";");
+            index = index.Replace(
+                "// config.matchWebGLToCanvasSize = false;",
+                "config.matchWebGLToCanvasSize = false;");
             index = index.Replace(
                 "href=\"TemplateData/style.css\"",
                 $"href=\"TemplateData/style.css?v={LayoutVersion}\"");
