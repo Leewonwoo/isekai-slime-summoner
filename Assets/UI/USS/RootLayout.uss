@@ -3,6 +3,7 @@
     width: 100%;
     height: 100%;
     flex-direction: column;
+    -unity-font-definition: url("/Assets/UI/Fonts/Galmuri11.ttf");
 }
 
 /* Absolute modal children do not size their template wrapper. */
