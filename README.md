@@ -12,6 +12,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest/download/IsekaiSlimeSummoner.apk"><strong>⬇ Android APK 다운로드</strong></a>
+  ·
+  <a href="https://github.com/Leewonwoo/isekai-slime-summoner/releases/latest">릴리스 정보</a>
+</p>
+
+<p align="center">
   <img src="Assets/Screenshots/dopamine_hud_playmode.png" width="360" alt="Isekai Slime Summoner 전투 화면">
 </p>
 
