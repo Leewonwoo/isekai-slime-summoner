@@ -14,6 +14,7 @@ namespace CrossDefense.Editor
         const string OutputDirectoryName = "PagesBuild";
         const int WebWidth = 1280;
         const int WebHeight = 720;
+        const string LayoutVersion = "16x9-v1";
 
         const string ResponsiveStyle = @"
 
@@ -127,6 +128,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
                 index,
                 @"canvas\.style\.width = ""\d+px"";\s*canvas\.style\.height = ""\d+px"";",
                 "canvas.style.width = \"100%\";\n        canvas.style.height = \"100%\";");
+            index = index.Replace(
+                "href=\"TemplateData/style.css\"",
+                $"href=\"TemplateData/style.css?v={LayoutVersion}\"");
             File.WriteAllText(indexPath, index);
 
             string stylePath = Path.Combine(outputDirectory, "TemplateData", "style.css");
